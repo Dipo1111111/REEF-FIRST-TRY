@@ -51,7 +51,8 @@ Rules:
 - It remembers the previous request per session, not globally.
 - It reports the first part that differs, not every difference. Everything after the
   first break is already wasted.
-- It is off unless enabled by config, so it cannot cost anything in production use.
+- It is off unless enabled, so it cannot cost anything in production use. Phase 1 uses
+  `REEF_CACHE_MONITOR=<path>`; a config key replaces it before phase 5.
 
 This is the cheapest thing in the project and the one that finds every other bug.
 
@@ -127,12 +128,14 @@ budget, so the goal is a rare, deliberate, well-sized compaction, not zero compa
 `--format json` already emits `cost` and `tokens` per event
 (`cli/src/run/noninteractive.ts:508`). The meter is a thin layer that:
 
-- records one row per request: model, provider, input, cache read, cache write, output,
-  wall clock, tool calls, model calls;
-- writes rows as JSON lines to a path the rig reads;
+- records one row per completed step: model, provider, input, cache read, cache write,
+  output, wall clock;
+- writes rows as JSON lines to a path set by `REEF_METER`;
 - never changes behavior.
 
-The rig is the only consumer. If a number is not in the meter, it is an opinion.
+Internal calls that do not publish `Step.Ended` (titles, for example) are absent from
+both the meter and the stream; the gap is in the debt log. The rig is the only consumer.
+If a number is not in the meter, it is an opinion.
 
 ---
 

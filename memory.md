@@ -143,12 +143,19 @@ owner and is not the baseline. The rig now restores acceptance tests before scor
 records `testsModified`; five controls were rewritten to be contradictory. Those changes
 are committed but have not been re-run.
 
+Phase 1 is closed. The cache monitor and the step meter live in
+`code/packages/core/src/session/` and are enabled by `REEF_CACHE_MONITOR` and `REEF_METER`,
+each pointing at a JSONL file. Ten tests pass and the end-to-end mock run showed the meter
+matching the event stream exactly and request kinds compared separately. See
+`docs/05-phases/phase-1-instrumentation.md`.
+
 ## Next session starts with
 
-Phase 1, instrumentation and cache monitor, from the clean tree left by the cancel
-commit. Gate: the monitor attributes a deliberate cache break to the right part, and the
-meter matches the JSON event stream within 2%. The baseline stays deferred; the monitor
-gets built and tested against the mock provider, which costs nothing.
+Phase 2, the resident tool surface: two resident tools (`execute` and `question`), the
+rest reachable only through code mode, hard cap of four. Gate: tokens per passed task not
+worse and pass rate held. Read the phase 1 monitor before and after the change; the rig is
+frozen and its baseline is still deferred, so the comparison will be against a fresh
+measurement the owner approves.
 
 ## Open questions
 

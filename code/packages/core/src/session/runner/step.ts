@@ -21,6 +21,7 @@ import { QuestionTool } from "../../tool/plugin/question.js"
 import { StepFailedError } from "../error.js"
 import { SessionEvent } from "../event.js"
 import { SessionMessage } from "../message.js"
+import { SessionMeter } from "../meter.js"
 import { SessionModelRequest } from "../model-request.js"
 import { SessionSchema } from "../schema.js"
 import { toSessionError } from "../to-session-error.js"
@@ -74,6 +75,7 @@ export const make = Effect.gen(function* () {
     // The start snapshot only has to exist before local tools run, which cannot happen before Step.Started,
     // so it is captured while the provider request is in flight instead of delaying it.
     const pendingStartSnapshot = yield* snapshots.capture().pipe(Effect.forkScoped)
+    const startedAt = yield* Clock.currentTimeMillis
     const publisher = createLLMEventPublisher(bus, {
       sessionID: input.sessionID,
       assistantMessageID: input.assistantMessageID,
@@ -81,7 +83,7 @@ export const make = Effect.gen(function* () {
       model: input.model.ref,
       providerMetadataKey: input.model.model.route.providerMetadataKey ?? input.model.model.provider,
       pendingSnapshot: Fiber.join(pendingStartSnapshot),
-      started: yield* Clock.currentTimeMillis,
+      started: startedAt,
     })
     const toolRuns: Array<{
       readonly call: ToolCall
@@ -250,10 +252,11 @@ export const make = Effect.gen(function* () {
               : undefined
           const usage = record.finish ? SessionUsage.record(record.finish.usage, input.model.cost) : undefined
           if (record.failure) yield* publisher.publishStepFailure({ ...usage, snapshot, files })
-          if (record.finish && usage && !record.failure)
+          if (record.finish && usage && !record.failure) {
+            const assistantMessageID = yield* publisher.startAssistant()
             yield* bus.publish(SessionEvent.Step.Ended, {
               sessionID: input.sessionID,
-              assistantMessageID: yield* publisher.startAssistant(),
+              assistantMessageID,
               finish: record.finish.finish,
               rawFinish: record.finish.rawFinish,
               native: record.finish.native,
@@ -261,6 +264,17 @@ export const make = Effect.gen(function* () {
               snapshot,
               files,
             })
+            if (process.env.REEF_METER)
+              SessionMeter.record(process.env.REEF_METER, {
+                sessionID: input.sessionID,
+                messageID: assistantMessageID,
+                model: input.model.ref,
+                finish: record.finish.finish,
+                cost: usage.cost,
+                tokens: usage.tokens,
+                wallMs: (yield* Clock.currentTimeMillis) - startedAt,
+              })
+          }
         }
 
         if (

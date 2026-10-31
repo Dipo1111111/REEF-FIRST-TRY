@@ -34,6 +34,7 @@ import { PluginHooks } from "../plugin/hooks.js"
 import { QuestionTool } from "../tool/plugin/question.js"
 import { Tool } from "../tool.js"
 import { SessionAffinity } from "./affinity.js"
+import { SessionCacheMonitor } from "./cache-monitor.js"
 import { SessionModelTransport } from "./model-transport.js"
 import { SessionRunnerModel } from "./runner/model.js"
 import { SessionSchema } from "./schema.js"
@@ -331,6 +332,10 @@ export const layer = Layer.effect(
           headers: Object.keys(modelHook.headers).length === 0 ? undefined : modelHook.headers,
         }),
       })
+      // Read-only, off by default. It only records what the request looks like, so a
+      // cache break later in the run can be attributed to the part that moved.
+      if (process.env.REEF_CACHE_MONITOR)
+        yield* Effect.sync(() => SessionCacheMonitor.observeRequest(session.id, kind, request))
       const hasHttpHooks =
         (yield* hooks.has("session", "http.request", model.ref.providerID)) ||
         (yield* hooks.has("session", "http.response", model.ref.providerID))

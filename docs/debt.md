@@ -30,6 +30,15 @@ If this file grows without shrinking, the slices are too big.
   as contradictions, but none of that has been re-run · re-run only with owner approval
 - [ ] Rig `testsModified` guard and rewritten controls are unverified · the baseline was
   cancelled before a check run · dry-run the controls, then run 10 control sessions
+- [ ] Cache monitor and meter are enabled by environment variable, not config · phase 1
+  needed the gate, not a config migration · add `experimental.cache_monitor` and
+  `experimental.meter` before phase 5
+- [ ] Monitor state is per process · a continued session in a new CLI process starts a new
+  sequence, so cross-process breaks are not attributed · acceptable while the long sessions
+  that matter are single runs; persist the last snapshot if phase 4 needs it
+- [ ] Meter records completed steps only · title and other internal calls do not publish
+  `Step.Ended` and are absent from the stream too · provider-level accounting is the only
+  fix; note the gap in any cost figure
 - [ ] Two core config tests fail when the temp dir sits under the user profile, because
   discovery walks parents and finds the real `~/.claude` and `~/.agents` · the tests use
   `os.tmpdir()`, which is under the profile on Windows · run them with a temp root outside
