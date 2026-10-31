@@ -52,6 +52,10 @@ If this file grows without shrinking, the slices are too big.
   still the unverified rewrite · 10 paid control sessions when approved
 - [ ] Phase 3 nudge path has no live run · the model would not repeat a call on request ·
   unit-covered only · induce it through a scripted provider in a later measurement
+- [ ] Phase 4 long-session gate not measured · cache ratio at 95% and pass rate need a paid
+  long session · same measurement batch as phases 2 and 3
+- [ ] Compaction ledger is wired but only unit-tested · no live compaction has been logged ·
+  force one with a manual compaction in the measurement run
 - [ ] Two core config tests fail when the temp dir sits under the user profile, because
   discovery walks parents and finds the real `~/.claude` and `~/.agents` · the tests use
   `os.tmpdir()`, which is under the profile on Windows · run them with a temp root outside

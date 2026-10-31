@@ -163,11 +163,16 @@ tests pass, the stalling mock ends in 21 seconds instead of hanging, and three h
 real runs finished without a false stop. The only open item is the paid rig control sweep.
 See `docs/05-phases/phase-3-bounded-loop.md`.
 
+Phase 4 is code complete: automatic compaction is off by default, so compaction happens
+only on overflow or on request, and every completed compaction writes a row with its
+reason, tokens before and after, tokens dropped and usage when `REEF_COMPACTION_LOG` is
+set. The long-session cache ratio and pass rate wait for the measurement batch. See
+`docs/05-phases/phase-4-anchoring.md`.
+
 ## Next session starts with
 
-The phase 3 paid control sweep (10 sessions) when the owner approves, then tag the phase.
-The phase 2 paid A/B is still pending; the two can share one approved run. After that,
-phase 4, anchoring.
+The single paid measurement batch, when the owner approves: phase 2 A/B, phase 3 control
+sweep, phase 4 long session. Then tag phases 2, 3 and 4 and start phase 5, tuning.
 
 ## Open questions
 

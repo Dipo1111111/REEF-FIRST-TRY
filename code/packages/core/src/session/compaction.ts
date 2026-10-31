@@ -31,6 +31,7 @@ import { Token } from "../util/token.js"
 import type { SessionContext } from "./context.js"
 import { SessionEvent } from "./event.js"
 import { SessionHistory } from "./history.js"
+import { SessionCompactionLedger } from "./compaction-ledger.js"
 import type { SessionMessage } from "./message.js"
 import { SessionModelRequest } from "./model-request.js"
 import { SessionRunnerModel } from "./runner/model.js"
@@ -260,7 +261,7 @@ export const layer = Layer.effect(
 
     const state = State.create<Settings, Editor>({
       name: "session-compaction",
-      initial: () => ({ auto: true, keep: 15_000, precompute: false }),
+      initial: () => ({ auto: false, keep: 15_000, precompute: false }),
       editor: (settings) => ({
         configure: (update) => {
           Object.assign(settings, update)
@@ -919,6 +920,24 @@ export const layer = Layer.effect(
         },
         { metadata: outcome.metadata },
       )
+      const ledger = process.env.REEF_COMPACTION_LOG
+      if (ledger) {
+        const before = total(estimatePrompt(context))
+        const keepID = outcome.metadata?.keepID
+        const index =
+          typeof keepID === "string" ? context.messages.findIndex((message) => message.id === keepID) : -1
+        const after = Token.estimate(outcome.text) + (index >= 0 ? tailTokens(context, index) : 0)
+        SessionCompactionLedger.record(ledger, {
+          sessionID,
+          reason,
+          model: context.model.ref,
+          tokensBefore: before,
+          tokensAfter: after,
+          tokensDropped: Math.max(0, before - after),
+          native: outcome.native !== undefined,
+          usage,
+        })
+      }
       return { status: "completed" }
     })
 
