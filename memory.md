@@ -59,9 +59,15 @@ credential was copied into the release database so no env var is needed.
   tests pass.
 - Runner suite: 220 pass, 23 fail; the identical 23 fail on a stashed clean tree, all
   compaction tests, two timing out at 120 s. Pre-existing, recorded in `docs/debt.md`.
-- Live run after the fixes: "count lines in the markdown files" took 5 steps and 4 inline
-  shell calls. Before the sharper wording it took 9 steps, 8 calls, and wrote four `.ps1`
-  files to temp. One sample, not evidence.
+- Measured 2026-10-31 on the packaged 0.1.0 build, `opencode-go/deepseek-v4.1-flash`:
+  12/12 real tasks passed, 0/2 controls, 28,780 tokens per pass, 5.75 model calls per task.
+- Paired against the same six tasks and two runs from `ab-current.json`: 11/12 to 12/12,
+  464,537 to 353,023 tokens (−24.0%), mean 38,711 to 29,419, median 31,668 to 29,652 (−6.4%),
+  model calls 6.50 to 5.92. The whole win is `rename-refactor` (81,234 to 28,598 tokens,
+  10.5 to 6 calls). Four tasks are flat, `token-usage-total` got 12.5% worse.
+- The rig still records about one `execute` call per model call, so the script-first
+  instruction has not produced many-call scripts on these tasks.
+
 
 ## Decisions made
 
@@ -74,8 +80,19 @@ credential was copied into the release database so no env var is needed.
 ## Current state
 
 Packaging and the three engine fixes are done, committed, installed and running. Nothing is
-published to npm and no archive is hosted. No measurement has been run, so none of the
-engine changes has proven itself.
+published to npm and no archive is hosted. Measurement is back on with the owner's approval,
+free builds only.
+
+First measured result after the fixes (2026-10-31, packaged 0.1.0, DeepSeek V4.1 Flash,
+`rig/results/reef-v0.1.0-fixes.json` and `ab-after-fixes.json`): 12/12 real tasks, 0/2
+controls, 28,780 tokens per pass, 5.75 model calls. Against the old build on the same six
+tasks: −24% tokens overall but only −6.4% on the median, driven by one task that used to
+spiral. Ordinary tasks did not get cheaper or shorter in calls.
+
+Reef still has no Terminal-Bench number, so it cannot be placed beside Droid, OpenCode or
+Claude Code. Those published numbers, and the disagreement between boards, are in
+`docs/research-droid.md` section 7.
+
 
 ## Next session starts with
 
