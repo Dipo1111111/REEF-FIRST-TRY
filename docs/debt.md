@@ -26,4 +26,8 @@ If this file grows without shrinking, the slices are too big.
   and every test that sets them · phase 6, alongside the rest of the identity finish
 - [ ] Baseline not taken (ADR 0011) · 66 model sessions cost real money and the rig has no
   credential of its own · configure a provider key and run the one command in phase 0.5
+- [ ] Two core config tests fail when the temp dir sits under the user profile, because
+  discovery walks parents and finds the real `~/.claude` and `~/.agents` · the tests use
+  `os.tmpdir()`, which is under the profile on Windows · run them with a temp root outside
+  the profile, or make the test helper pick a neutral root
 - [ ] Cache monitor does not exist · nothing to diff requests with yet · phase 1
