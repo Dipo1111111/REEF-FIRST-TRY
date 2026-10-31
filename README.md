@@ -5,7 +5,18 @@ An open agent harness built for one thing: more work per token, faster.
 - Binary: `reef`
 - Package: `reefcode` (npm `reef` is taken by a dead 0.0.1 package)
 - Repo: `reefcode/reef`
-- Status: pre-code. Research and plan done, rig not built yet.
+- Status: engine phases 0-4 built and tested, packaging at 0.1.0, not published
+
+## Install
+
+Not published yet. The intended path, once `reefcode` is on npm:
+
+```sh
+npm install -g reefcode
+reef --version
+```
+
+Details, requirements, and the source build: [docs/install.md](docs/install.md).
 
 ## Start here
 
@@ -19,6 +30,7 @@ Read in this order. Do not skip 01.
 | [docs/research-code.md](docs/research-code.md) | What our fork already ships, file by file |
 | [docs/02-architecture.md](docs/02-architecture.md) | Target state and the four changes we make |
 | [docs/03-rig.md](docs/03-rig.md) | Measurement: task set, metrics, pass bars |
+| [docs/install.md](docs/install.md) | How Reef is installed and what it writes to disk |
 | [docs/04-decisions/](docs/04-decisions/) | ADRs. Append-only |
 | [docs/05-phases/](docs/05-phases/) | One file per phase, written when the phase starts |
 
@@ -39,11 +51,11 @@ that exits 0 or fails, it is a wish and it gets cut.
 | Phase | State |
 |---|---|
 | 0 Baseline | closed with deferral: rig verified, first request measured, 3-run baseline deferred (ADR 0011) |
-| 1 Instrumentation + cache monitor | not started |
-| 2 Resident tool surface | not started |
-| 3 Bounded loop | not started |
-| 4 Anchoring | not started |
-| 5 Tuning and finish | not started |
+| 1 Instrumentation + cache monitor | done |
+| 2 Resident tool surface | done |
+| 3 Bounded loop | done |
+| 4 Anchoring | done |
+| 5 Tuning and finish | in progress: packaging first, then the three engine fixes |
 | 6 Polish (post-v1) | deferred — TUI restyle, brand strings, theme |
 
 ## Known contradictions

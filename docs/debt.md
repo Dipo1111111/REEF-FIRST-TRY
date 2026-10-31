@@ -18,8 +18,8 @@ If this file grows without shrinking, the slices are too big.
 - [ ] Rig fixtures are extracted copies of the fork's modules, not the monorepo itself ·
   copying 141 MB per run is not a rig · swap in real package tests at a phase boundary
   with an ADR that says why the swap does not change the bar
-- [ ] Version string still prints `opencode vlocal` · presentation work is phase 6 · find
-  the CLI framework's name constant (or set it at build time) and print `reef`
+- [ ] Version string still prints `opencode vlocal` · ~~resolved by packaging: the build sets
+  `OPENCODE_CLI_NAME` to `reef` and takes a real version from `OPENCODE_VERSION`~~
 - [ ] Local database file is still named `opencode-local.db` · internal, not user-facing ·
   rename with the phase 6 polish, or when a migration for the data dir is written
 - [ ] `OPENCODE_*` environment variables are still read · an env rename touches start-up
@@ -85,3 +85,6 @@ If this file grows without shrinking, the slices are too big.
 - [ ] The real environment sent 12 tool definitions where the rig sent 13 · unexplained
   capability filtering · work it out before phase 2 sets the two-tool target
 - [ ] Cache monitor does not exist · nothing to diff requests with yet · phase 1
+
+- [ ] `reefcode` 0.1.0 is built and packed locally but not published � needs an npm account and a release job � publish, host the archives, then rewrite docs/install.md from intended to real
+- [ ] Frontmatter identity is only partly done: binary, package, config and data dir say reef, environment variables still say `OPENCODE_*` � the env rename touches startup and every test that sets them � do it as one change with a single accessor, not 33 inline reads

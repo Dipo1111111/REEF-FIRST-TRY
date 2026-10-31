@@ -17,11 +17,10 @@ await mkdir(archiveDir, { recursive: true })
 
 await packDistribution({
   root,
-  name: pkg.name,
-  command: "opencode",
-  legacyCommand: "opencode2",
-  binary: "opencode",
-  packagePrefix: "@opencode/cli-",
+  name: "reefcode",
+  command: "reef",
+  binary: "reef",
+  packagePrefix: "reefcode-",
   archive: (target) => target.startsWith("linux-"),
 })
 if (existsSync(path.join(root, "node"))) {
@@ -45,10 +44,13 @@ async function packDistribution(input: {
   archive: (target: string) => boolean
 }) {
   const binaries: Record<string, string> = {}
+  const directories = new Map<string, string>()
   for (const filepath of new Bun.Glob("*/package.json").scanSync({ cwd: input.root })) {
     const item = await Bun.file(`${input.root}/${filepath}`).json()
     if (!item.name.startsWith(input.packagePrefix)) continue
     binaries[item.name] = item.version
+    // Published package names and build directories do not have to match, so resolve each one from its manifest.
+    directories.set(item.name, path.join(input.root, path.dirname(filepath)))
   }
   console.log(input.name, "binaries", binaries)
   const versions = new Set(Object.values(binaries))
@@ -81,7 +83,7 @@ async function packDistribution(input: {
         scripts: { postinstall: "node ./postinstall.mjs" },
         version,
         license: pkg.license,
-        repository: { type: "git", url: "git+https://github.com/anomalyco/opencode.git" },
+        repository: { type: "git", url: "git+https://github.com/reefcode/reef.git" },
         os: ["darwin", "linux", "win32"],
         cpu: ["arm64", "x64"],
         optionalDependencies: binaries,
@@ -91,19 +93,12 @@ async function packDistribution(input: {
     ),
   )
 
-  await Promise.all(Object.keys(binaries).map((name) => pack(`${input.root}/${name.replace("@opencode/", "")}`)))
+  await Promise.all(Object.keys(binaries).map((name) => pack(directories.get(name)!)))
   await pack(`${input.root}/${input.name}`)
   await Promise.all(
     Object.keys(binaries)
-      .map((name) => name.slice(input.packagePrefix.length))
-      .filter(input.archive)
-      .map((target) =>
-        archive(
-          path.join(input.root, `${input.packagePrefix.replace("@opencode/", "")}${target}`, "bin"),
-          target,
-          input.binary,
-        ),
-      ),
+      .filter((name) => input.archive(name.slice(input.packagePrefix.length)))
+      .map((name) => archive(path.join(directories.get(name)!, "bin"), name.slice(input.packagePrefix.length), input.binary)),
   )
 }
 
