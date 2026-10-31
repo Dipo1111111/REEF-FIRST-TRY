@@ -48,6 +48,21 @@ If this file grows without shrinking, the slices are too big.
 - [ ] Stream silence has no timeout · a provider that sends headers then nothing keeps a
   step open · ~~resolved in phase 3: `stall.ts` adds a per-pull timeout, two attempts, then
   a `provider.timeout` failure~~
+- [ ] Phase 2 paid gate is measured but ambiguous · A/B: median −30.5%, mean −3.7%, 11/12
+  against 12/12 · fix the `rename-refactor` prompt, then re-score that task · the mean is
+  dragged by two outliers on one task (125k fail, 287k pass) against a 25k-45k normal
+- [ ] Rig counts `toolCalls` as 0 on every run, both builds · the runner watches
+  `event.type === "tool"`, which the JSON stream never emits · count tool parts from
+  `step_finish` or the session db, then re-check the code-mode vs direct tool split
+- [ ] `rename-refactor` prompt is contradictory: "rename across every file" and "keep all
+  exports working" · the model kept `OldRun` as an alias, `accept.sh` forbids it · say the
+  old name must be gone, with no alias
+- [ ] Step-count outliers on small tasks: 14 and 18 model calls against a median of 6, no
+  identical calls to catch · phase 5 candidate: a soft nudge at 12 steps and a hard stop at
+  20, or a no-file-change rule
+- [ ] Code-mode exploration tax: one run spent six steps testing `write`/`edit` in temp
+  directories before touching the repo · a short call example in the catalog may cut it ·
+  measure in phase 5 before adding tokens
 - [ ] Phase 3 control sweep not run · zero false stops is unproven and the rig controls are
   still the unverified rewrite · 10 paid control sessions when approved
 - [ ] Phase 3 nudge path has no live run · the model would not repeat a call on request ·

@@ -1,6 +1,6 @@
 # Phase 3 — Bounded loop
 
-Status: all three signals built, control sweep pending · 2026-10-31
+Status: all three signals built, control sweep clean · 2026-10-31
 
 Gate: an injected stall, an empty turn, and an identical-call run each stop or nudge
 correctly, and the control set produces zero false stops.
@@ -55,15 +55,32 @@ run 3 exit 0, no loop error: ran a shell command and reported the path
 The nudge path itself still has no live run: the real model refused to make the same call
 three times on request. It is covered by unit tests and by the stored-history design.
 
+## Paid control sweep, 2026-10-31
+
+Ten controls, one real run each, after the rig guard and the rewritten contradictions.
+
+```
+0/10 passed (want 0), 828,900 tokens, about 14 minutes
+control-huge-scope: testsModified true
+```
+
+The model tried to edit the tests on `control-huge-scope`; the runner restored the
+pristine test tree before scoring and the task still failed. That is the guard working on a
+real attempt, not just on the dry check.
+
+No false stops: no control was ended by the watchdog. The sweep is the formal check, so
+the phase 3 gate is met.
+
 ## Gate status
 
 - Empty turn: built, unit-tested, wired.
 - Identical calls, nudge and stop: built, unit-tested, wired.
 - Injected stall: built, unit-tested, proven against a stalling mock.
-- Zero false stops on the control set: three healthy runs passed, but the rig control
-  sweep, which is the formal check, is still a paid run and has not been done.
+- Zero false stops on the control set: met. 0/10 controls passed, no loop stop fired.
 
-No tag yet. The only open item is the paid control sweep.
+The nudge path still has no live run. The A/B did expose a different loop shape the
+watchdog does not catch: 14 and 18 model calls on one small task, with different calls
+each time and no progress. That is a phase 5 tuning item, not a repeat loop.
 
 ## Files
 

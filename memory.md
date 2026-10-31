@@ -118,8 +118,9 @@ Our fork:
   image-generate. Droid sends 2. Phase 2's win is bounded, about 12 KB per early step.
 - Code mode on by default (`core/src/tool.ts:274`); catalog ships as instruction deltas.
 - Tool output: 2,000 lines / 50 KiB then spill to file (`core/src/tool-output.ts:13`).
-- Compaction: `auto: true`, `keep: 15_000` (`core/src/session/compaction.ts:263`), 15%
-  reserve min 16k (`:130`, `:136`). Rewrites the prefix on every fire.
+- Compaction: now `auto: false` by default (`core/src/session/compaction.ts`), compact only
+  on overflow or request; `keep: 15_000`, 15% reserve min 16k (`:130`, `:136`). A completed
+  compaction appends a cost row when `REEF_COMPACTION_LOG` is set.
 - Timeouts: 300 s headers, 900 s chunks (`packages/ai/src/schema/options.ts:56`, `:62`).
   No 4-minute silence rule, no empty-turn or identical-call detection anywhere.
 - Headless JSON events carry `cost` and `tokens.cache.read/write` on every `step_finish`
@@ -149,19 +150,27 @@ each pointing at a JSONL file. Ten tests pass and the end-to-end mock run showed
 matching the event stream exactly and request kinds compared separately. See
 `docs/05-phases/phase-1-instrumentation.md`.
 
-Phase 2 is code complete, gate partly met. The resident surface is `execute` and
-`question`; the other thirteen tools are code-mode catalog entries, with a cap of three
-direct definitions plus `execute` and overflow falling back into the catalog. The first
-request dropped from 24,205 to 14,232 bytes and from ~6,051 to ~3,558 estimated tokens.
-A live call created a file through `execute`, so dispatch works. The paid before-and-after
-for tokens per passed task and pass rate waits for the owner. See
-`docs/05-phases/phase-2-tool-surface.md`.
+Phase 2 is built and measured. The resident surface is `execute` and `question`; the other
+thirteen tools are code-mode catalog entries, with a cap of three direct definitions plus
+`execute` and overflow falling back into the catalog. The first request dropped from
+24,205 to 14,232 bytes and from ~6,051 to ~3,558 estimated tokens.
 
-Phase 3 has all three signals built: the stored-history watchdog (empty turns, identical
-calls), the per-pull stall timeout with a two-attempt cap, and the nudge. Thirteen unit
-tests pass, the stalling mock ends in 21 seconds instead of hanging, and three healthy
-real runs finished without a false stop. The only open item is the paid rig control sweep.
-See `docs/05-phases/phase-3-bounded-loop.md`.
+The paid A/B ran on 2026-10-31: six tasks, two runs each, current build against a
+`phase-1-ok` worktree. Current 11/12 passed, 464,537 tokens, 42,231 per pass. Old 12/12,
+526,280, 43,857 per pass. Median tokens per run 31,668 against 45,585 (−30.5%), median wall
+clock 42.7s against 46.6s. The mean is only −3.7% because two runs on one task blew up
+(125k fail, 287k pass) at 14 and 18 model calls against a median of 6.
+
+The one failure was `rename-refactor`: the model kept `export type OldRun = Run` as a
+compatibility alias because the prompt says both "rename across every file" and "keep all
+exports working", and `accept.sh` forbids `OldRun`. Three reruns passed 3/3. The fixture
+prompt is the defect. See `docs/05-phases/phase-2-tool-surface.md`.
+
+Phase 3 has all three signals built and the control sweep is clean: 10 controls, 0 passed,
+828,900 tokens, no false stops. One control had the model edit the tests; the guard
+restored them and it still failed. Thirteen unit tests pass and the stalling mock ends in
+21 seconds. The nudge path still has no live run. See
+`docs/05-phases/phase-3-bounded-loop.md`.
 
 Phase 4 is code complete: automatic compaction is off by default, so compaction happens
 only on overflow or on request, and every completed compaction writes a row with its
@@ -171,8 +180,19 @@ set. The long-session cache ratio and pass rate wait for the measurement batch. 
 
 ## Next session starts with
 
-The single paid measurement batch, when the owner approves: phase 2 A/B, phase 3 control
-sweep, phase 4 long session. Then tag phases 2, 3 and 4 and start phase 5, tuning.
+The measurement batch is done, 2,174,257 tokens total: controls 828,900, A/B 990,817,
+rename repro 354,540. Phases 2 and 3 have evidence, phase 4 still needs a long session.
+
+Next, in order:
+1. Fix the `rename-refactor` prompt (say `OldRun` must be gone, no alias) and re-score
+   that task. Then the pass-rate gate is defensible.
+2. Decide on a step budget for small tasks (soft nudge at 12 model calls, hard stop at 20,
+   or a no-file-change rule). The 125k and 287k runs are the reason the mean misses.
+3. Add a long-session rig task so phase 4 can be measured for the cache ratio.
+4. Tag phases 2 and 3 if step 1 is clean, then start phase 5 tuning.
+
+The rig also has a counting bug: `toolCalls` is 0 on every row because the runner watches
+`event.type === "tool"`, which the JSON stream never emits. Fix before the next analysis.
 
 ## Open questions
 
