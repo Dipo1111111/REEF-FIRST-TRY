@@ -271,7 +271,8 @@ async function runTask(task: Task, run: number) {
           tokens.cacheRead += t.cache?.read ?? 0
           tokens.cacheWrite += t.cache?.write ?? 0
         }
-        if (event.type === "tool") toolCalls += 1
+        // The JSON stream names tool events `tool_use`; `tool` never appears.
+        if (event.type === "tool_use") toolCalls += 1
         if (event.type === "error") error = event.error?.message ?? JSON.stringify(event.error)
       } catch {}
     }

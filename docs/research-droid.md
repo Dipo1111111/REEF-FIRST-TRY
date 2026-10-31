@@ -192,3 +192,63 @@ Can't verify:
    say "on Factory-managed Anthropic streams", which may be narrower than it sounds.
 3. Whether any of these numbers survive an independent replay on our tasks. That is what
    our rig is for.
+
+---
+
+## 7. Independent leaderboards (checked 2026-10-31)
+
+Everything in section 5 is Factory describing Factory. These are other people's numbers for
+the same benchmark, and they do not agree with each other. Read the harness column, not just
+the score.
+
+**Terminal-Bench public board** (`tbench.ai`, Terminal-Bench 4.0, 66 tasks, 5 trials per task,
+8-hour limit, each harness run by its own lab):
+
+| Harness | Model | Resolution rate |
+|---|---|---|
+| Claude Code | Opus 5.5 (max) | 64.8% ± 3.1 |
+| Claude Code | Sonnet 5.5 (max) | 61.8% ± 2.9 |
+| Codex | GPT-6 Astra (max) | 58.2% ± 2.8 |
+| Claude Code | Fable 5.1 (max) | 57.9% ± 3.8 |
+| Grok Build | Grok 4.7 (xhigh) | 37.6% ± 3.5 |
+
+**Vals AI** (its own harness around mini-swe-agent, three runs per task, Daytona sandboxes):
+Opus 5.5 65.2%, Sonnet 5.5 64.1% ± 1.01. Same benchmark, different harness, so Claude Code's
+64.8% and Vals' 65.2% are not the same measurement.
+
+**Artificial Analysis** re-ran the same 66 tasks inside mini-SWE-agent and reports Opus 5.5 at
+59.6% and Sonnet 5.5 at 63.6%. Opus 5.5 therefore appears as 64.8%, 65.2% and 59.6% on three
+boards. That spread is the size of the harness and methodology effect, and it is larger than
+most of the gaps the vendors advertise.
+
+Artificial Analysis also compares harnesses directly, but not on the same model: Claude Code
+63% on Opus 5.5 against OpenCode 40% on GLM-5.3. That is a model comparison wearing a harness
+label. The only same-model OpenCode figure we have is Factory's 62.1% on Opus 5.5.
+
+Factory's own same-model table, for reference again: Droid 65.2, Cursor 62.1, OpenCode 62.1,
+Devin 59.6, Claude Code 57.6 on Opus 5.5. Note how far Factory puts Claude Code (57.6) below
+the public board's 64.8 for the same model and harness. A vendor measuring a competitor is
+the least reliable row in any table, including this one.
+
+**Our model, DeepSeek V4.1 Flash**, on the same benchmark, from three sources:
+
+| Source | Terminal-Bench 4.0 |
+|---|---|
+| DeepSeek's own model card | 42.30% |
+| Vals AI | 19.70% ± 1.75 (cost $0.50 per task, 48m22s per task) |
+| Community aggregate | 26.8% |
+
+A 22-point spread on one model and one benchmark. DeepSeek's card is the highest and Vals,
+which publishes its harness and runs three trials, is the lowest. Treat the model card figure
+as marketing until it reproduces.
+
+### What this means for us
+
+Our rig is not Terminal-Bench 4.0 and our tasks are far smaller, so Reef's rig numbers cannot
+be inserted into any table above. What the tables do give us is the size of the gap Reef would
+have to close: on Opus 5.5 the harness spread runs 57.6% to 65.2%, roughly 8 points, and on
+DeepSeek V4.1 Flash the same benchmark reads anywhere from 19.7% to 42.3%. Any claim that a
+harness change moved scores by less than that is noise.
+
+The one comparison worth making later is Reef against mini-swe-agent or OpenCode on DeepSeek
+V4.1 Flash, on Terminal-Bench 4.0 itself. That is not this rig and not this phase.
