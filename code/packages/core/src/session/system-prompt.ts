@@ -11,6 +11,7 @@ export function render(prompt: string, tools: string[]) {
   if (tools.includes("execute")) {
     instructions.push(
       "- Prefer one `execute` script that makes many tool calls over many separate tool calls. A script can do dozens of calls in a single request; every separate call costs a full round trip. Search inside the script, then call the tools it found.",
+      "- Do not write helper scripts to disk and run them; put the code in the script body. Verify a result once, then report it.",
     )
   }
   if (tools.includes("shell")) {
