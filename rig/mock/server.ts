@@ -31,6 +31,19 @@ const server = Bun.serve({
     const stamp = `${Date.now()}-${String(counter.value).padStart(3, "0")}`
     const dir = `${out}/${stamp}`
     await Bun.write(`${dir}/request.json`, body)
+    await Bun.write(
+      `${dir}/headers.json`,
+      JSON.stringify(
+        Object.fromEntries(
+          Object.entries(request.headers.toJSON()).map(([key, value]) => [
+            key,
+            key.toLowerCase() === "authorization" ? (value ? "present" : "absent") : value,
+          ]),
+        ),
+        null,
+        2,
+      ),
+    )
     await Bun.write(`${dir}/path.txt`, url.pathname + (url.search ? url.search : ""))
 
     let model = "mock"

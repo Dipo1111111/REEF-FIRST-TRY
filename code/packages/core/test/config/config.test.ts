@@ -1,5 +1,8 @@
 import path from "path"
 import fs from "fs/promises"
+// These tests cover upstream compatibility semantics, so they opt back into the
+// global .claude/.agents roots that Reef drops by default (ADR 0012).
+process.env.REEF_COMPAT_SKILLS = "1"
 import { describe, expect, test } from "bun:test"
 import { Arbitrary, Effect, Fiber, Layer, Logger, Schema, Stream } from "effect"
 import { Config } from "@opencode/core/config"

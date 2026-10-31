@@ -30,4 +30,13 @@ If this file grows without shrinking, the slices are too big.
   discovery walks parents and finds the real `~/.claude` and `~/.agents` · the tests use
   `os.tmpdir()`, which is under the profile on Windows · run them with a temp root outside
   the profile, or make the test helper pick a neutral root
+- [ ] `reef auth list` fails under the rig's seeded data dir ("Location plugins did not
+  finish activating") while `reef run` works there · the rig db was copied whole from the
+  real store, carrying location state · create a fresh rig db and insert only the
+  credential row
+- [ ] OpenCode Go reports `cost: 0` on `step_finish` · the provider does not return a
+  price · treat cost as unknown for that provider and compare on tokens, or price the
+  run from published rates
+- [ ] The real environment sent 12 tool definitions where the rig sent 13 · unexplained
+  capability filtering · work it out before phase 2 sets the two-tool target
 - [ ] Cache monitor does not exist · nothing to diff requests with yet · phase 1

@@ -70,6 +70,12 @@ export const discover = Effect.fn("ConfigDiscovery.discover")(function* (options
   const globalDirectory = AbsolutePath.make(global.config)
   const globalAgentsDirectory = AbsolutePath.make(path.join(global.home, ".agents"))
   const globalClaudeDirectory = AbsolutePath.make(path.join(global.home, ".claude"))
+  // Reef does not read other tools' global skill folders by default. A working
+  // machine can hold thousands of skills, and the fork injects every one of them
+  // into the system prompt on every step (measured: 1,377 skills, 397 KB).
+  // Project-local .claude/.agents directories still load. Set
+  // REEF_COMPAT_SKILLS=1 to restore upstream behaviour.
+  const globalCompatibility = process.env.REEF_COMPAT_SKILLS === "1"
   const configDirectories = [...(system ? [system] : []), globalDirectory]
   const globalRoots = yield* Effect.forEach(
     [...configDirectories, globalClaudeDirectory, globalAgentsDirectory],
@@ -156,13 +162,13 @@ export const discover = Effect.fn("ConfigDiscovery.discover")(function* (options
         ? []
         : [
             ...new Set([
-              ...(globalEnabled ? [globalClaudeDirectory] : []),
+              ...(globalEnabled && globalCompatibility ? [globalClaudeDirectory] : []),
               ...visible.filter((item) => path.basename(item) === ".claude").toReversed(),
             ]),
           ],
     agents: [
       ...new Set([
-        ...(globalEnabled ? [globalAgentsDirectory] : []),
+        ...(globalEnabled && globalCompatibility ? [globalAgentsDirectory] : []),
         ...visible.filter((item) => path.basename(item) === ".agents").toReversed(),
       ]),
     ],

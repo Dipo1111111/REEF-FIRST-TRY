@@ -78,6 +78,12 @@ Under `C:\Users\USER\Documents\reef` (git repo, base commit `defcc61`, tag `phas
 - **Identity is Reef at the surface (ADR 0010).** `reef`, `reefcode`, `reef.json`, `reef`
   data dir, `REEF_*`. Internal `@opencode/*` names stay for mergeability.
 - **Polish is phase 6, after phase 5.** TUI restyle, brand strings, theme. Not v1.
+- **No global skill ingestion (ADR 0012).** Reef ignores `~/.claude/skills` and
+  `~/.agents/skills` by default. Project-local ones and Reef's own still load;
+  `REEF_COMPAT_SKILLS=1` restores upstream. Measured cut: 397,788 → 8,652 system chars.
+- **Rig auth is seeded, not configured.** The rig's isolated data dir holds a copy of the
+  local credential store. `run` authenticates there (verified by the authorization header
+  at the mock); `auth list` does not (debt log).
 - **Charter and contract amendments are pending with the owner (ADR 0009).** They still say
   "rebuild the loop and script tool" and "one model family at a time".
 
