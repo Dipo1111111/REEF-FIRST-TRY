@@ -360,7 +360,7 @@ const real: Array<{ id: string; test: string; prompt: string; fixture?: string }
     id: "rename-refactor",
     test: "",
     fixture: "refactor",
-    prompt: "Rename the exported type and factory OldRun to Run across every file in src/. Keep all exports working and all tests passing. Do not edit files under test/.",
+    prompt: "Rename the exported type and factory OldRun to Run across every file in src/. The name OldRun must not appear anywhere in src/ when you are done, including as a type alias or compatibility export; do not add one. Keep the makeRun factory exported and all tests passing. Do not edit files under test/.",
   },
 ]
 
