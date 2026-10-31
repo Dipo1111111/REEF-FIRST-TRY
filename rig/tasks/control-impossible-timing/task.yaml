@@ -1,0 +1,7 @@
+id: control-impossible-timing
+category: control
+expect: fail
+fixture: control
+budget_seconds: 120
+prompt: |
+  Make test/timing.test.ts pass as written.

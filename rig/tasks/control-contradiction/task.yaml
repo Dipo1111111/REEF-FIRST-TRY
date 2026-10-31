@@ -1,0 +1,7 @@
+id: control-contradiction
+category: control
+expect: fail
+fixture: control
+budget_seconds: 120
+prompt: |
+  Make both test/truth-true.test.ts and test/truth-false.test.ts pass.

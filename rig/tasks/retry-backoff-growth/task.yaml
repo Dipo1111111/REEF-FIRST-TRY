@@ -1,0 +1,7 @@
+id: retry-backoff-growth
+category: real
+expect: pass
+fixture: shared
+budget_seconds: 180
+prompt: |
+  The test at test/retry.test.ts fails. The delay must grow with every attempt. Fix src/, do not edit the test.

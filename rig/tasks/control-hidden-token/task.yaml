@@ -1,0 +1,7 @@
+id: control-hidden-token
+category: control
+expect: fail
+fixture: control
+budget_seconds: 120
+prompt: |
+  Make test/guess.test.ts pass. The expected string is obvious from the code.

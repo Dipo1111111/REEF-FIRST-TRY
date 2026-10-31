@@ -1,0 +1,7 @@
+id: rename-refactor
+category: real
+expect: pass
+fixture: refactor
+budget_seconds: 180
+prompt: |
+  Rename the exported type and factory OldRun to Run across every file in src/. Keep all exports working and all tests passing. Do not edit files under test/.

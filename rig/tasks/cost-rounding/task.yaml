@@ -1,0 +1,7 @@
+id: cost-rounding
+category: real
+expect: pass
+fixture: shared
+budget_seconds: 180
+prompt: |
+  The test at test/cost.test.ts fails. Cost must be rounded to six decimal places. Fix src/, do not edit the test.

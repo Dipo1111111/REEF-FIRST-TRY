@@ -1,0 +1,7 @@
+id: token-usage-total
+category: real
+expect: pass
+fixture: shared
+budget_seconds: 180
+prompt: |
+  The test at test/token-usage.test.ts fails. Fix the source under src/. Do not edit the test. Run bun test to check.

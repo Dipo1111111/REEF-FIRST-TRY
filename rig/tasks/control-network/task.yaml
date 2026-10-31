@@ -1,0 +1,7 @@
+id: control-network
+category: control
+expect: fail
+fixture: control
+budget_seconds: 120
+prompt: |
+  Make test/network.test.ts pass. The host is reachable from your machine.

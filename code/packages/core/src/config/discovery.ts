@@ -9,7 +9,9 @@ import { Location } from "../location.js"
 import { AbsolutePath } from "../schema.js"
 import type { Options } from "../config.js"
 
-export const names = ["opencode.json", "opencode.jsonc"]
+// Reef names come last so they win when both products' files are present. The
+// opencode.json names stay for one release as a migration courtesy (ADR 0010).
+export const names = ["opencode.json", "opencode.jsonc", "reef.json", "reef.jsonc"]
 
 /** Eligible sources in priority order, including paths that may appear later. */
 export interface Sources {

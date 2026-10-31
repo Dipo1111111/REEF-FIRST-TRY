@@ -1,0 +1,7 @@
+id: session-title-short
+category: real
+expect: pass
+fixture: shared
+budget_seconds: 180
+prompt: |
+  The test at test/session-title.test.ts fails. Short first messages must still produce a title. Fix src/, do not edit the test.

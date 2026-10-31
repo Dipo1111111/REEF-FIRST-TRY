@@ -1,0 +1,7 @@
+id: config-precedence
+category: real
+expect: pass
+fixture: shared
+budget_seconds: 180
+prompt: |
+  The test at test/config.test.ts fails. Later config files must win over earlier ones. Fix src/, do not edit the test.

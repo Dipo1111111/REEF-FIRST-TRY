@@ -1,0 +1,7 @@
+id: path-unc-normalize
+category: real
+expect: pass
+fixture: shared
+budget_seconds: 180
+prompt: |
+  The test at test/path.test.ts fails on Windows paths. Fix src/path.ts so a UNC prefix survives, do not edit the test.

@@ -1,0 +1,7 @@
+id: control-exact-format
+category: control
+expect: fail
+fixture: control
+budget_seconds: 120
+prompt: |
+  Make test/style.test.ts pass. Match the expected output from the test file.

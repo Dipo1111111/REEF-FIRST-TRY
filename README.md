@@ -38,7 +38,7 @@ that exits 0 or fails, it is a wish and it gets cut.
 
 | Phase | State |
 |---|---|
-| 0 Baseline | in progress — recon done, rig and baseline outstanding |
+| 0 Baseline | closed with deferral: rig verified, first request measured, 3-run baseline deferred (ADR 0011) |
 | 1 Instrumentation + cache monitor | not started |
 | 2 Resident tool surface | not started |
 | 3 Bounded loop | not started |

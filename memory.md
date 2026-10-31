@@ -29,22 +29,25 @@ test, but only bring back decisions that genuinely need the user.
 
 ## What was built
 
-Planning and research docs only, no code. Under `C:\Users\USER\Documents\reef`:
+Under `C:\Users\USER\Documents\reef` (git repo, base commit `defcc61`, tag `phase-0-base`):
 
 - `README.md` — entry point, status board, known contradictions
 - `docs/00-charter.md` — unchanged (owner-only)
-- `docs/01-contract.md` — unchanged; its 1.4 phase order is now stale, amendment proposed
+- `docs/01-contract.md` — unchanged; its 1.4 phase order is stale, amendment proposed
 - `docs/research-droid.md` — Droid 1.0 facts from Factory's own 29 Oct 2026 post
 - `docs/research-code.md` — what the fork already ships, with file:line anchors
-- `docs/02-architecture.md` — draft 2, rewritten against the real code
+- `docs/02-architecture.md` — target state, rewritten against the real code
 - `docs/03-rig.md` — task set, metrics; pass bars updated to the new phases
-- `docs/04-decisions/0006-delta-not-rewrite.md`
-- `docs/04-decisions/0007-phase-order.md`
-- `docs/04-decisions/0008-byok-local.md`
-- `docs/04-decisions/0009-owner-amendments.md` (proposed, owner applies)
-- `docs/04-decisions/0010-identity.md`
-- `docs/05-phases/` — new phase table and phase 0 file
-- `docs/debt.md` — 5 open items
+- `docs/04-decisions/0006` … `0011` — delta, order, BYOK, amendments, identity, deferral
+- `docs/05-phases/` — phase table, phase 0 file, phase 0 readout
+- `docs/debt.md` — 10 open items
+- `code/` — the fork, copied from `Documents\opencode-dev`, 1,777 packages installed
+- `bin/reef.cmd`, `bin/reef` — dev entry points (`--cwd packages/cli`, `PWD` = caller)
+- `rig/runner.ts` — setup, run, accept, token accounting, dry mode, hermetic env
+- `rig/scaffold.ts` — regenerates 12 real + 10 control tasks from three fixtures
+- `rig/mock/server.ts` — OpenAI-compatible mock that logs request bodies
+- `rig/measure-prefix.ts` — bytes and token estimate per request component
+- `rig/results/` — gitignored output: accepts-v0.json, prefix-v0, request captures
 
 ## Decisions made
 
@@ -65,10 +68,13 @@ Planning and research docs only, no code. Under `C:\Users\USER\Documents\reef`:
 - **Automatic compaction is off by default in headless.** Compact on provider overflow or
   on request, and log each compaction's cost.
 - **Rig tasks come from the fork itself.** Failed or flaky tests in `opencode-dev`, small
-  tooling tasks, and one constructed long session. Ten of the twelve minimum are control
+  tooling tasks, and one constructed long session. Phase 0 ships 12 real and 10 control
   tasks. Each task is a directory with `task.yaml`, `setup.sh`, `accept.sh` and a frozen
-  fixture; isolated by temp directory, no Docker, and every `accept.sh` must be seen
-  failing on the untouched fixture first.
+  fixture; every `accept.sh` was seen failing on the untouched fixture first.
+  Fixtures are small extractions, not the monorepo (debt log).
+- **Runs are hermetic.** Run dirs live outside the user profile (`C:\reef-rig`) because
+  config discovery walks every parent; a run under `C:\Users\<name>` inherits that user's
+  `.agents`/`.claude` skills. Measured 397 KB of system text before this was fixed.
 - **Identity is Reef at the surface (ADR 0010).** `reef`, `reefcode`, `reef.json`, `reef`
   data dir, `REEF_*`. Internal `@opencode/*` names stay for mergeability.
 - **Polish is phase 6, after phase 5.** TUI restyle, brand strings, theme. Not v1.
@@ -98,17 +104,22 @@ Our fork:
 - Loop: `packages/ai/src/llm.ts:173` appends `[...messages, response, ...toolResults]`.
 - Cache: `packages/ai/src/cache-policy.ts:17` auto at last tool, first/last system, tail;
   4-marker cap (`:24`).
-- ~15 tools sent up front (`codemode: false` list in `core/src/tool/plugin/`): read, write,
+- **Measured 2026-10-31:** first request = 13 tool definitions, 15,517 bytes (~3,879
+  tokens) + 8,653-byte system prompt (~2,163 tokens) = 24,205 bytes, ~6,051 tokens total.
+  Tools are 64% of the first request. Readout: `docs/05-phases/phase-0-readout.md`.
+- Tools sent up front (`codemode: false` list in `core/src/tool/plugin/`): read, write,
   edit, patch, glob, grep, shell, todo, question, skill, subagent, webfetch, websearch,
-  image-generate. Droid sends 2. Biggest untested gap.
+  image-generate. Droid sends 2. Phase 2's win is bounded, about 12 KB per early step.
 - Code mode on by default (`core/src/tool.ts:274`); catalog ships as instruction deltas.
 - Tool output: 2,000 lines / 50 KiB then spill to file (`core/src/tool-output.ts:13`).
 - Compaction: `auto: true`, `keep: 15_000` (`core/src/session/compaction.ts:263`), 15%
   reserve min 16k (`:130`, `:136`). Rewrites the prefix on every fire.
 - Timeouts: 300 s headers, 900 s chunks (`packages/ai/src/schema/options.ts:56`, `:62`).
   No 4-minute silence rule, no empty-turn or identical-call detection anywhere.
-- Headless JSON events already carry `cost` and `tokens`
-  (`packages/cli/src/run/noninteractive.ts:508`).
+- Headless JSON events carry `cost` and `tokens.cache.read/write` on every `step_finish`
+  (confirmed live, not just in code). `run --standalone` starts its own server.
+- Credentials: `opencode-go` lives in the running OpenCode service, not in `opencode.db`.
+  A copied database authenticates nothing. The rig needs its own provider key.
 
 ## Current state
 

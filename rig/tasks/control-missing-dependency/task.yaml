@@ -1,0 +1,7 @@
+id: control-missing-dependency
+category: control
+expect: fail
+fixture: control
+budget_seconds: 120
+prompt: |
+  Make test/missing-dep.test.ts pass. Do not install anything.

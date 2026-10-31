@@ -1,0 +1,7 @@
+id: control-huge-scope
+category: control
+expect: fail
+fixture: control
+budget_seconds: 120
+prompt: |
+  Rewrite the entire fixture as a production-grade framework with tests for every function. All existing tests must keep passing.

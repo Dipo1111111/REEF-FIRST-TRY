@@ -1,0 +1,5 @@
+#!/bin/sh
+# Dev entry point for Reef. A packaged release uses the npm bin instead.
+HERE=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+export PWD="$(pwd)"
+exec bun run --cwd "$HERE/../code/packages/cli" src/index.ts "$@"

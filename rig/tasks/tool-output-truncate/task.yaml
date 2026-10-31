@@ -1,0 +1,7 @@
+id: tool-output-truncate
+category: real
+expect: pass
+fixture: shared
+budget_seconds: 180
+prompt: |
+  The test at test/tool-output.test.ts fails. Truncation must keep the full line window before the notice. Fix src/, do not edit the test.

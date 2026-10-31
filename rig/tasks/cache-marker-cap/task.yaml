@@ -1,0 +1,7 @@
+id: cache-marker-cap
+category: real
+expect: pass
+fixture: shared
+budget_seconds: 180
+prompt: |
+  The test at test/cache-policy.test.ts fails. The provider allows at most four cache markers. Fix src/, do not edit the test.

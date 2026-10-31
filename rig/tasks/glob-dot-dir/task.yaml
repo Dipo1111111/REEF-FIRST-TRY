@@ -1,0 +1,7 @@
+id: glob-dot-dir
+category: real
+expect: pass
+fixture: shared
+budget_seconds: 180
+prompt: |
+  The test at test/glob.test.ts fails because dot directories are matched by prefix. Fix src/, do not edit the test.

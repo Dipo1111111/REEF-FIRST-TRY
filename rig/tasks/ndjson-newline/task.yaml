@@ -1,0 +1,7 @@
+id: ndjson-newline
+category: real
+expect: pass
+fixture: shared
+budget_seconds: 180
+prompt: |
+  The test at test/ndjson.test.ts fails. A newline inside text must not split the JSON line. Fix src/, do not edit the test.
