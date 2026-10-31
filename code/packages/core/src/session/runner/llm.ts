@@ -29,6 +29,7 @@ import { llmClient } from "../../effect/app-node-platform.js"
 import { StepFailedError } from "../error.js"
 import { SessionRunnerRetry } from "./retry.js"
 import { SessionStep } from "./step.js"
+import { SessionRunnerWatchdog } from "./watchdog.js"
 import { ToolOutput } from "../../tool-output.js"
 import { Plugin } from "../../plugin.js"
 import { PluginHooks } from "../../plugin/hooks.js"
@@ -238,6 +239,27 @@ const layer = Layer.effect(
         // Reuse boundary preparation once; retries refresh context without delivering more input.
         const loaded = initial ?? (yield* prepareContext(sessionID).pipe(Effect.flatMap(context.load)))
         initial = undefined
+        // Stored history decides, so a restart cannot launder a stalled loop. The nudge
+        // is a new message; the next loop iteration reloads history and sends it.
+        const verdict = SessionRunnerWatchdog.inspect(loaded.messages)
+        if (verdict.kind === "empty")
+          return yield* new StepFailedError({
+            error: {
+              type: "loop.empty",
+              message: `The model produced ${verdict.turns} assistant turns in a row with no text and no tool call.`,
+            },
+          })
+        if (verdict.kind === "stop")
+          return yield* new StepFailedError({
+            error: {
+              type: "loop.repeated",
+              message: `The same tool call was made ${verdict.calls} times with the same result.`,
+            },
+          })
+        if (verdict.kind === "nudge") {
+          yield* bus.publish(SessionEvent.Synthetic, { sessionID, text: SessionRunnerWatchdog.NUDGE })
+          continue
+        }
         const estimate = SessionCompaction.estimatePrompt(loaded)
         const compacted = yield* compaction.compact({ reason: "auto", context: loaded, estimate })
         if (compacted.status === "failed") return yield* new StepFailedError({ error: compacted.error })

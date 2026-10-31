@@ -45,6 +45,13 @@ If this file grows without shrinking, the slices are too big.
 - [ ] Resident cap overflow path is untested · no plugin currently marks a fourth direct
   tool · add a registry-level test with a synthetic direct tool when the tool layer gets
   a test harness
+- [ ] Stream silence has no timeout · a provider that sends headers then nothing keeps a
+  step open · add a per-event idle timeout at the transport boundary, not an overall step
+  timeout, which would kill long tool calls
+- [ ] Phase 3 control sweep not run · zero false stops is unproven and the rig controls are
+  still the unverified rewrite · 10 paid control sessions when approved
+- [ ] Phase 3 nudge path has no live run · the model would not repeat a call on request ·
+  unit-covered only · induce it through a scripted provider in a later measurement
 - [ ] Two core config tests fail when the temp dir sits under the user profile, because
   discovery walks parents and finds the real `~/.claude` and `~/.agents` · the tests use
   `os.tmpdir()`, which is under the profile on Windows · run them with a temp root outside
