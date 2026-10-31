@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+code/node_modules/
+
+# Rig output
+results/
+
+# Local run artifacts
+*.log
+*.tmp
+
+# OS
+.DS_Store
+Thumbs.db
