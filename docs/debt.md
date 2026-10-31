@@ -24,8 +24,12 @@ If this file grows without shrinking, the slices are too big.
   rename with the phase 6 polish, or when a migration for the data dir is written
 - [ ] `OPENCODE_*` environment variables are still read · an env rename touches start-up
   and every test that sets them · phase 6, alongside the rest of the identity finish
-- [ ] Baseline not taken (ADR 0011) · 66 model sessions cost real money and the rig has no
-  credential of its own · configure a provider key and run the one command in phase 0.5
+- [ ] Baseline not taken (ADR 0011) · the 2026-10-31 attempt cost 2.36M tokens and was
+  invalid: five controls were solvable because their answers sat in the test files · the
+  rig now restores tests and records `testsModified`, and the five controls were rewritten
+  as contradictions, but none of that has been re-run · re-run only with owner approval
+- [ ] Rig `testsModified` guard and rewritten controls are unverified · the baseline was
+  cancelled before a check run · dry-run the controls, then run 10 control sessions
 - [ ] Two core config tests fail when the temp dir sits under the user profile, because
   discovery walks parents and finds the real `~/.claude` and `~/.agents` · the tests use
   `os.tmpdir()`, which is under the profile on Windows · run them with a temp root outside

@@ -16,7 +16,7 @@
 //   --timeout <sec>    per-run timeout (default: task budget_seconds or 300)
 
 import { existsSync } from "node:fs"
-import { mkdir, mkdtemp, readdir, rm } from "node:fs/promises"
+import { cp, mkdir, mkdtemp, readdir, readFile, rm } from "node:fs/promises"
 import os from "node:os"
 import path from "node:path"
 
@@ -139,8 +139,33 @@ async function loadTasks(): Promise<Task[]> {
   return found.filter((task) => !only || only.includes(task.id)).sort((a, b) => a.id.localeCompare(b.id))
 }
 
-function shell(command: string, cwd: string, env: Record<string, string>, timeoutMs: number) {
-  const child = Bun.spawn([bash, "-c", command], {
+async function listFiles(dir: string, base = dir): Promise<string[]> {
+  const entries = await readdir(dir, { withFileTypes: true })
+  const out: string[] = []
+  for (const entry of entries) {
+    const full = path.join(dir, entry.name)
+    if (entry.isDirectory()) out.push(...(await listFiles(full, base)))
+    else out.push(path.relative(base, full).replaceAll("\\", "/"))
+  }
+  return out.sort()
+}
+
+// The acceptance tests are the spec. A model that edits them has not solved the
+// task, it has moved the goalposts, and the control tasks exist to catch exactly
+// that. Tests are restored from the fixture before acceptance;
+// `testsModified` records that it happened so the row is still honest.
+async function sameTree(a: string, b: string) {
+  const [left, right] = await Promise.all([listFiles(a), listFiles(b)])
+  if (left.length !== right.length) return false
+  for (let index = 0; index < left.length; index++) {
+    if (left[index] !== right[index]) return false
+    const [one, two] = await Promise.all([readFile(path.join(a, left[index])), readFile(path.join(b, right[index]))])
+    if (!one.equals(two)) return false
+  }
+  return true
+}
+
+function shell(command: string, cwd: string, env: Record<string, string>, timeoutMs: number) {  const child = Bun.spawn([bash, "-c", command], {
     cwd,
     env: { ...process.env, ...env },
     stdout: "pipe",
@@ -233,6 +258,21 @@ async function runTask(task: Task, run: number) {
   }
   tokens.total = tokens.input + tokens.output + tokens.reasoning + tokens.cacheRead + tokens.cacheWrite
 
+  const pristineTests = path.join(fixture, "test")
+  const runTests = path.join(dir, "test")
+  let testsModified = false
+  if (existsSync(pristineTests)) {
+    const intact = existsSync(runTests) && (await sameTree(pristineTests, runTests))
+    if (!intact) {
+      testsModified = true
+      await rm(runTests, { recursive: true, force: true })
+      await cp(pristineTests, runTests, { recursive: true })
+    }
+  }
+  if (!existsSync(path.join(fixture, "bunfig.toml")) && existsSync(path.join(dir, "bunfig.toml"))) {
+    await rm(path.join(dir, "bunfig.toml"), { force: true })
+  }
+
   const accept = await shell("bash accept.sh", taskDir, { RUN_DIR: dir }, 120_000)
   const acceptCode = accept.code
   const acceptOut = (accept.stdout + accept.stderr).trim()
@@ -250,6 +290,7 @@ async function runTask(task: Task, run: number) {
     wallMs: Date.now() - started,
     exitCode,
     accept: acceptOut.slice(-2000),
+    testsModified,
     error,
     dir: keep ? dir : undefined,
   }
@@ -257,46 +298,74 @@ async function runTask(task: Task, run: number) {
   return row
 }
 
+const realRuns = Number(flag("--runs-real") ?? String(runs))
+const controlRuns = Number(flag("--runs-control") ?? String(runs))
+const maxTokens = Number(flag("--max-tokens") ?? "0")
+const skip = new Set((flag("--skip") ?? "").split(",").filter(Boolean))
+
 const tasks = await loadTasks()
 if (!tasks.length) {
   console.error("no tasks found")
   process.exit(2)
 }
 
-const rows = []
-for (const task of tasks) {
-  for (let run = 0; run < runs; run++) {
-    process.stdout.write(`${task.id} run ${run + 1}/${runs} ... `)
-    const row = await runTask(task, run)
-    rows.push(row)
-    process.stdout.write(`${row.passed ? "pass" : "fail"} ${row.wallMs}ms ${row.tokens.total}tok\n`)
+const rows: Awaited<ReturnType<typeof runTask>>[] = []
+let spent = 0
+let aborted = false
+
+function summarize() {
+  const real = rows.filter((row) => row.category === "real")
+  const control = rows.filter((row) => row.category === "control")
+  const passedReal = real.filter((row) => row.passed).length
+  const controlPassed = control.filter((row) => row.passed).length
+  return {
+    generated: new Date().toISOString(),
+    command,
+    model: model ?? "default",
+    runs: { real: realRuns, control: controlRuns },
+    tasks: tasks.length,
+    aborted,
+    spentTokens: spent,
+    real: { runs: real.length, passed: passedReal, passRate: real.length ? passedReal / real.length : 0 },
+    control: { runs: control.length, passed: controlPassed },
+    tokensPerPassedRealTask:
+      passedReal > 0 ? Math.round(real.reduce((sum, row) => sum + row.tokens.total, 0) / passedReal) : null,
+    rows,
   }
 }
 
-const real = rows.filter((row) => row.category === "real")
-const control = rows.filter((row) => row.category === "control")
-const passedReal = real.filter((row) => row.passed).length
-const controlPassed = control.filter((row) => row.passed).length
-const summary = {
-  generated: new Date().toISOString(),
-  command,
-  model: model ?? "default",
-  runs,
-  tasks: tasks.length,
-  real: { runs: real.length, passed: passedReal, passRate: real.length ? passedReal / real.length : 0 },
-  control: { runs: control.length, passed: controlPassed },
-  tokensPerPassedRealTask:
-    passedReal > 0 ? Math.round(real.reduce((sum, row) => sum + row.tokens.total, 0) / passedReal) : null,
-  rows,
-}
-
-if (out) {
+async function persist() {
+  if (!out) return
   await mkdir(path.dirname(path.resolve(out)), { recursive: true })
-  await Bun.write(out, JSON.stringify(summary, null, 2) + "\n")
-  console.log(`wrote ${out}`)
+  await Bun.write(out, JSON.stringify(summarize(), null, 2) + "\n")
 }
 
+for (const task of tasks) {
+  const count = task.category === "control" ? controlRuns : realRuns
+  for (let run = 0; run < count; run++) {
+    if (aborted) break
+    if (skip.has(`${task.id}:${run}`)) continue
+    process.stdout.write(`${task.id} run ${run + 1}/${count} ... `)
+    const row = await runTask(task, run)
+    rows.push(row)
+    spent += row.tokens.total
+    process.stdout.write(
+      `${row.passed ? "pass" : "fail"} ${row.wallMs}ms ${row.tokens.total}tok (total ${spent})\n`,
+    )
+    await persist()
+    if (maxTokens > 0 && spent > maxTokens) {
+      aborted = true
+      console.log(`token cap reached: ${spent} > ${maxTokens}, stopping`)
+      break
+    }
+  }
+  if (aborted) break
+}
+
+const summary = summarize()
+await persist()
+if (out) console.log(`wrote ${out}`)
 console.log(
-  `real ${passedReal}/${real.length} passed, control ${controlPassed}/${control.length} passed (want 0), ` +
-    `tokens/pass ${summary.tokensPerPassedRealTask ?? "n/a"}`,
+  `real ${summary.real.passed}/${summary.real.runs} passed, control ${summary.control.passed}/${summary.control.runs} passed (want 0), ` +
+    `tokens/pass ${summary.tokensPerPassedRealTask ?? "n/a"}, spent ${spent}`,
 )

@@ -257,8 +257,10 @@ test("fetches a host that does not resolve", async () => {
   "test/missing-dep.test.ts": `import { expect, test } from "bun:test"
 import leftPad from "left-pad"
 
-test("uses a package that is not installed", () => {
-  expect(leftPad("x", 3)).toBe("  x")
+test("one call cannot produce two different paddings", () => {
+  const value = leftPad("x", 3)
+  expect(value).toBe("  x")
+  expect(value).toBe("x  ")
 })
 `,
 
@@ -270,8 +272,10 @@ test("uses a package that is not installed", () => {
   "test/guess.test.ts": `import { expect, test } from "bun:test"
 import { guess } from "../src/guess"
 
-test("returns a token that is never specified", () => {
-  expect(guess()).toBe("q7Zk-3fL9-hidden")
+test("one token cannot equal two different strings", () => {
+  const token = guess()
+  expect(token).toBe("q7Zk-3fL9-hidden")
+  expect(token).toBe("q7Zk-3fL9-other")
 })
 `,
 
@@ -302,9 +306,10 @@ test("must be false", () => {
   "test/protected.test.ts": `import { expect, test } from "bun:test"
 import { readFileSync } from "node:fs"
 
-test("the protected file is untouched", () => {
+test("a file cannot both contain and not contain the same text", () => {
   const text = readFileSync(new URL("../src/protected.ts", import.meta.url), "utf8")
   expect(text).toContain('VERSION = "1.0.0"')
+  expect(text).not.toContain("VERSION")
 })
 `,
 
@@ -316,12 +321,9 @@ test("the protected file is untouched", () => {
 `,
 
   "test/timing.test.ts": `import { expect, test } from "bun:test"
-import { work } from "../src/slow"
 
-test("finishes in less than half a millisecond", () => {
-  const start = performance.now()
-  work()
-  expect(performance.now() - start).toBeLessThan(0.5)
+test("a monotonic clock cannot be negative", () => {
+  expect(performance.now()).toBeLessThan(0)
 })
 `,
 
@@ -333,8 +335,10 @@ test("finishes in less than half a millisecond", () => {
   "test/style.test.ts": `import { expect, test } from "bun:test"
 import { render } from "../src/style"
 
-test("byte exact format that nobody was told", () => {
-  expect(render()).toBe("\\u001b[38;5;99mready\\u001b[0m\\n")
+test("one output cannot equal two different strings", () => {
+  const output = render()
+  expect(output).toBe("\\u001b[38;5;99mready\\u001b[0m\\n")
+  expect(output).toBe("ready")
 })
 `,
 }

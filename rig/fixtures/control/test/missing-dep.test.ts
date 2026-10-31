@@ -1,6 +1,8 @@
 import { expect, test } from "bun:test"
 import leftPad from "left-pad"
 
-test("uses a package that is not installed", () => {
-  expect(leftPad("x", 3)).toBe("  x")
+test("one call cannot produce two different paddings", () => {
+  const value = leftPad("x", 3)
+  expect(value).toBe("  x")
+  expect(value).toBe("x  ")
 })

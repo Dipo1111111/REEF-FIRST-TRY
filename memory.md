@@ -124,20 +124,31 @@ Our fork:
   No 4-minute silence rule, no empty-turn or identical-call detection anywhere.
 - Headless JSON events carry `cost` and `tokens.cache.read/write` on every `step_finish`
   (confirmed live, not just in code). `run --standalone` starts its own server.
-- Credentials: `opencode-go` lives in the running OpenCode service, not in `opencode.db`.
-  A copied database authenticates nothing. The rig needs its own provider key.
+- Credentials: the user's `oc_...` key was copied from OpenCode's `opencode.db`
+  `credential` row into Reef's local store; `reef models` then listed the Go provider and
+  a real call authenticated. The rig's isolated data dir holds the same copy, and the
+  mock saw an `authorization` header. `reef auth list` still fails there (debt).
 
 ## Current state
 
-Docs are complete and consistent, except the contract 1.4 line the owner must amend. No
-code written, no rig, no git repo for the fork. Nothing runs yet.
+Phase 0 is closed with the baseline deferred (ADR 0011). The fork is at `code/`, tagged
+`phase-0-base`, with identity, rig and prefix measurement done. The rig has 22 tasks,
+verified failing on untouched fixtures, and a runner that reads `--format json` events.
+
+A paid baseline was attempted on 2026-10-31: 34 sessions against
+`opencode-go/deepseek-v4.1-flash`, 2.36M tokens, real tasks 23/24, controls 6/10
+"passed". The control result invalidated the run: five controls were solvable by design,
+because their expected values lived in the test file. The attempt was cancelled by the
+owner and is not the baseline. The rig now restores acceptance tests before scoring and
+records `testsModified`; five controls were rewritten to be contradictory. Those changes
+are committed but have not been re-run.
 
 ## Next session starts with
 
-Phase 0.1: turn `opencode-dev` into a git repo with one base commit (`phase-0-base`), then
-0.2 build `rig/tasks/*.yaml` (12+ tasks, 10 control) and the runner that reads
-`--format json` events. Do not start writing features before `results/baseline-<model>.json`
-exists.
+Phase 1, instrumentation and cache monitor, from the clean tree left by the cancel
+commit. Gate: the monitor attributes a deliberate cache break to the right part, and the
+meter matches the JSON event stream within 2%. The baseline stays deferred; the monitor
+gets built and tested against the mock provider, which costs nothing.
 
 ## Open questions
 
