@@ -11,7 +11,7 @@ week one, and then we maintain documents that lie.
 |---|---|---|---|
 | 0 | Baseline | rig verified (22 tasks fail untouched); first request measured; 3-run baseline deferred by ADR 0011 | closed with deferral |
 | 1 | Instrumentation + cache monitor | monitor attributes a deliberate cache break to the right part; meter matches the JSON event stream within 2% | closed |
-| 2 | Resident tool surface | 2 resident tools (cap 4); tokens per passed task not worse; pass rate held | not started |
+| 2 | Resident tool surface | 2 resident tools (cap 4); tokens per passed task not worse; pass rate held | code complete; paid comparison deferred |
 | 3 | Bounded loop | injected stall, empty-turn and identical-call runs stop or nudge correctly; zero false stops on the control set | not started |
 | 4 | Anchoring | long-session cache ≥95% token-weighted; compaction count recorded and explained; pass rate held | not started |
 | 5 | Tuning and finish | v1 bar met on the rig: tokens per passed task −25%, wall clock −15%, pass rate not lower | not started |

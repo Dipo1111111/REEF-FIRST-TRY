@@ -78,7 +78,7 @@ export const Plugin = {
       .transform((editor) =>
         editor.add({
           name,
-          options: { codemode: false, permission: "edit" },
+          options: { codemode: true, permission: "edit" },
           description: DESCRIPTION,
           input: Input,
           output: Output,

@@ -54,7 +54,7 @@ export const Plugin = {
         if (!enabled()) return
         editor.add({
           name,
-          options: { codemode: false },
+          options: { codemode: true },
           description: DESCRIPTION,
           input: Input,
           output: Output,

@@ -149,13 +149,20 @@ each pointing at a JSONL file. Ten tests pass and the end-to-end mock run showed
 matching the event stream exactly and request kinds compared separately. See
 `docs/05-phases/phase-1-instrumentation.md`.
 
+Phase 2 is code complete, gate partly met. The resident surface is `execute` and
+`question`; the other thirteen tools are code-mode catalog entries, with a cap of three
+direct definitions plus `execute` and overflow falling back into the catalog. The first
+request dropped from 24,205 to 14,232 bytes and from ~6,051 to ~3,558 estimated tokens.
+A live call created a file through `execute`, so dispatch works. The paid before-and-after
+for tokens per passed task and pass rate waits for the owner. See
+`docs/05-phases/phase-2-tool-surface.md`.
+
 ## Next session starts with
 
-Phase 2, the resident tool surface: two resident tools (`execute` and `question`), the
-rest reachable only through code mode, hard cap of four. Gate: tokens per passed task not
-worse and pass rate held. Read the phase 1 monitor before and after the change; the rig is
-frozen and its baseline is still deferred, so the comparison will be against a fresh
-measurement the owner approves.
+Phase 2's remaining gate, if the owner approves the A/B: 12 real tasks twice on
+`phase-1-ok` and the same 12 twice on the current build, about 24 sessions. Otherwise move
+to phase 3, the bounded loop, and carry the phase 2 comparison into phase 5. The rig must
+stay frozen; its controls are still unverified after the cancelled baseline.
 
 ## Open questions
 

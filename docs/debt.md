@@ -39,6 +39,12 @@ If this file grows without shrinking, the slices are too big.
 - [ ] Meter records completed steps only · title and other internal calls do not publish
   `Step.Ended` and are absent from the stream too · provider-level accounting is the only
   fix; note the gap in any cost figure
+- [ ] Phase 2 paid gate not measured · the owner cancelled the previous paid run · run 12
+  real tasks twice on `phase-1-ok` and twice on the new build when approved, about 24
+  sessions, or compare at phase 5
+- [ ] Resident cap overflow path is untested · no plugin currently marks a fourth direct
+  tool · add a registry-level test with a synthetic direct tool when the tool layer gets
+  a test harness
 - [ ] Two core config tests fail when the temp dir sits under the user profile, because
   discovery walks parents and finds the real `~/.claude` and `~/.agents` · the tests use
   `os.tmpdir()`, which is under the profile on Windows · run them with a temp root outside
