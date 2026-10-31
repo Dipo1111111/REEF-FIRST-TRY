@@ -8,6 +8,11 @@ export function make(tools: string[]) {
 
 export function render(prompt: string, tools: string[]) {
   const instructions: string[] = []
+  if (tools.includes("execute")) {
+    instructions.push(
+      "- Prefer one `execute` script that makes many tool calls over many separate tool calls. A script can do dozens of calls in a single request; every separate call costs a full round trip. Search inside the script, then call the tools it found.",
+    )
+  }
   if (tools.includes("shell")) {
     instructions.push(
       "- Prefer dedicated tools over shell commands; fall back to the shell when a tool cannot do what you need.",

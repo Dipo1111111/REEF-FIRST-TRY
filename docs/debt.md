@@ -88,3 +88,6 @@ If this file grows without shrinking, the slices are too big.
 
 - [ ] `reefcode` 0.1.0 is built and packed locally but not published · needs an npm account and a release job · publish, host the archives, then rewrite docs/install.md from intended to real
 - [ ] Frontmatter identity is only partly done: binary, package, config and data dir say reef, environment variables still say `OPENCODE_*` · the env rename touches startup and every test that sets them · do it as one change with a single accessor, not 33 inline reads
+
+- [ ] 23 of 243 `core/test/session-runner` tests fail on a clean checkout (all compaction: request-prefix preservation, overflow recovery, output-limit continuations; two time out at 120 s) · reproduced with the working tree stashed at `97108d2`, so they predate the phase 5 fixes · find the common cause before trusting a rig result that depends on compaction
+- [ ] `requires_change` in the rig is unexercised outside `--dry` · every real task defaults to true and no task opts out yet · confirm with the first approved run, then add `requires_change: false` wherever a task is legitimately read-only

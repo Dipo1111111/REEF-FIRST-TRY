@@ -16,6 +16,8 @@ const echo: CodeModeCatalog.Tool = {
   signature: "tools.notes.echo({\n  text: string,\n}): Promise<string>",
 }
 
+const FULL = { budget: 2_000 }
+
 const lookup: CodeModeCatalog.Tool = {
   type: "tool",
   name: "orders.lookup",
@@ -31,7 +33,7 @@ describe("CodeModeInstructions", () => {
         "No Code Mode tools are currently available. Later Code Mode catalog updates may add or remove tools. Do not call `execute` unless there is at least one available Code Mode tool.",
       )
 
-      const added = yield* readUpdate(CodeModeInstructions.make({ tools: [echo] }), initialized)
+      const added = yield* readUpdate(CodeModeInstructions.make({ tools: [echo] }, FULL), initialized)
       expect(added.text).toContain("New tools are available in addition to those previously listed:")
       expect(added.text).toContain(echo.signature)
 
@@ -45,7 +47,7 @@ describe("CodeModeInstructions", () => {
 
   it.effect("renders the initial catalog, semantic deltas, and removal", () =>
     Effect.gen(function* () {
-      const initialized = yield* readInitial(CodeModeInstructions.make({ tools: [echo] }))
+      const initialized = yield* readInitial(CodeModeInstructions.make({ tools: [echo] }, FULL))
       expect(initialized.text).toContain(
         "The tools listed below cannot be called directly: they only work as JavaScript inside the `execute` tool.",
       )
@@ -53,13 +55,13 @@ describe("CodeModeInstructions", () => {
       expect(initialized.text).toContain("## Code Mode tools (call only inside `execute`)")
       expect(initialized.text).toContain(`  - ${echo.signature} // Echo text`)
 
-      const added = yield* readUpdate(CodeModeInstructions.make({ tools: [echo, lookup] }), initialized)
+      const added = yield* readUpdate(CodeModeInstructions.make({ tools: [echo, lookup] }, FULL), initialized)
       expect(added.text).toContain("The Code Mode tool catalog has changed.")
       expect(added.text).toContain("New tools are available in addition to those previously listed:")
       expect(added.text).toContain(`  - ${lookup.signature} // Look up an order`)
       expect(added.text).not.toContain("## Code Mode tools (call only inside `execute`)")
 
-      const removed = yield* readUpdate(CodeModeInstructions.make({ tools: [echo] }), { values: added.values })
+      const removed = yield* readUpdate(CodeModeInstructions.make({ tools: [echo] }, FULL), { values: added.values })
       expect(removed.text).toBe(
         "The Code Mode tool catalog has changed.\n\n" +
           "The following tools are no longer available and must not be called: tools.orders.lookup.",
@@ -100,7 +102,7 @@ describe("CodeModeInstructions", () => {
             editor.add({ ...alpha, options: { namespace: "tools" } })
           })
           const snapshot = yield* tools.snapshot()
-          return yield* readInitial(CodeModeInstructions.make(snapshot.codeModeCatalog))
+          return yield* readInitial(CodeModeInstructions.make(snapshot.codeModeCatalog, FULL))
         }),
       )
       const reordered = yield* Effect.scoped(
@@ -111,7 +113,7 @@ describe("CodeModeInstructions", () => {
             editor.add({ ...zeta, options: { namespace: "tools" } })
           })
           const snapshot = yield* tools.snapshot()
-          return yield* readUpdate(CodeModeInstructions.make(snapshot.codeModeCatalog), initialized)
+          return yield* readUpdate(CodeModeInstructions.make(snapshot.codeModeCatalog, FULL), initialized)
         }),
       )
 
@@ -120,4 +122,16 @@ describe("CodeModeInstructions", () => {
       expect(reordered.text).toBe("")
     }).pipe(Effect.provide(layer))
   })
+
+  it.effect("defaults to namespaces plus pinned tools, with the rest behind search", () =>
+    Effect.gen(function* () {
+      const initialized = yield* readInitial(
+        CodeModeInstructions.make({ tools: [{ ...echo, pinned: true }, lookup] }),
+      )
+      expect(initialized.text).toContain("The catalog is partial.")
+      expect(initialized.text).toContain(`  - ${echo.signature} // Echo text`)
+      expect(initialized.text).not.toContain(lookup.signature)
+      expect(initialized.text).toContain("- orders (1 tool, none shown)")
+    }),
+  )
 })

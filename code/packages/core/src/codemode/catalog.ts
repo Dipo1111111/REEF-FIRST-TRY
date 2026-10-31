@@ -47,6 +47,9 @@ export type Options = {
 const DESCRIPTION_LIMIT = 120
 const CHARACTERS_PER_TOKEN = 4
 const INLINE_BUDGET = 2_000
+// The session default is lazy: namespaces and pinned tools only, everything else through
+// `search`. Full listings cost about 725 tokens per request, and the tail is rarely used.
+export const LAZY_BUDGET = 0
 
 // Keep every namespace visible, then select full listings one per namespace per round,
 // considering shorter listings first until the inline budget is exhausted.

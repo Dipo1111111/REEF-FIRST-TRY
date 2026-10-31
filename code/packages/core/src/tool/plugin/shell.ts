@@ -186,7 +186,7 @@ export const Plugin = {
       .transform((editor) =>
         editor.add({
           name,
-          options: { codemode: true },
+          options: { codemode: true, pinned: true },
           description: description(),
           input: Input,
           output: Output,

@@ -86,6 +86,8 @@ interface Task {
   budget: number
   fixture: string
   prompt: string
+  /** A pass must leave the fixture changed. Read-only tasks opt out with `requires_change: false`. */
+  requiresChange: boolean
 }
 
 // Minimal YAML: flat keys plus one `prompt: |` block. Enough for task.yaml and
@@ -121,6 +123,7 @@ function parseTask(file: string, text: string): Task {
     budget: Number(flat.budget_seconds ?? defaultTimeout),
     fixture: flat.fixture ?? id,
     prompt: (prompt ?? []).join("\n").trim(),
+    requiresChange: (flat.requires_change ?? "true") !== "false",
   }
 }
 
@@ -148,6 +151,22 @@ async function listFiles(dir: string, base = dir): Promise<string[]> {
     else out.push(path.relative(base, full).replaceAll("\\", "/"))
   }
   return out.sort()
+}
+
+// The exit code of the acceptance run is not enough on its own. A model can satisfy a test
+// by doing nothing, by touching a file the test does not look at, or by leaving the tree
+// exactly as it found it. A pass therefore also needs a real change outside the tests.
+// The tree is hashed after setup and again after the run, so setup's own files never count.
+async function fingerprint(dir: string) {
+  const files = (await listFiles(dir)).filter((file) => {
+    if (file.startsWith("test/") || file === "bunfig.toml") return false
+    const first = file.split("/")[0]
+    return !first.startsWith(".") && first !== "node_modules"
+  })
+  const parts = await Promise.all(
+    files.map(async (file) => `${file}:${Bun.hash(await readFile(path.join(dir, file)))}`),
+  )
+  return parts.join("\n")
 }
 
 // The acceptance tests are the spec. A model that edits them has not solved the
@@ -202,6 +221,7 @@ async function runTask(task: Task, run: number) {
   }
 
   const tokens = { input: 0, output: 0, reasoning: 0, cacheRead: 0, cacheWrite: 0, total: 0 }
+  const before = await fingerprint(dir)
   let cost = 0
   let modelCalls = 0
   let toolCalls = 0
@@ -257,6 +277,7 @@ async function runTask(task: Task, run: number) {
     }
   }
   tokens.total = tokens.input + tokens.output + tokens.reasoning + tokens.cacheRead + tokens.cacheWrite
+  const changed = (await fingerprint(dir)) !== before
 
   const pristineTests = path.join(fixture, "test")
   const runTests = path.join(dir, "test")
@@ -282,7 +303,8 @@ async function runTask(task: Task, run: number) {
     category: task.category,
     expect: task.expect,
     run,
-    passed: acceptCode === 0,
+    passed: acceptCode === 0 && (!task.requiresChange || changed),
+    changed,
     cost,
     tokens,
     modelCalls,

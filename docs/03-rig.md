@@ -57,7 +57,8 @@ Recorded per task, per run:
 
 | Metric | Definition | Why |
 |---|---|---|
-| `passed` | acceptance command exit status | the only correctness signal |
+| `passed` | acceptance exit 0 **and** the run tree changed outside `test/` | a pass that changed nothing is not a pass |
+| `changed` | the run tree differs from its state after setup | catches a test that already passed |
 | `tokens_in` | total input tokens billed | baseline cost |
 | `tokens_cached` | input tokens read from cache | the main efficiency lever |
 | `tokens_out` | output tokens | usually small, occasionally dominant |

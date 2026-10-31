@@ -14,7 +14,7 @@ week one, and then we maintain documents that lie.
 | 2 | Resident tool surface | 2 resident tools (cap 4); tokens per passed task not worse; pass rate held | built; A/B median −30.5%, mean −3.7%, one ambiguous fixture failure |
 | 3 | Bounded loop | injected stall, empty-turn and identical-call runs stop or nudge correctly; zero false stops on the control set | built; 0/10 controls passed, no false stops |
 | 4 | Anchoring | long-session cache ≥95% token-weighted; compaction count recorded and explained; pass rate held | auto off + ledger built; long-session measurement pending |
-| 5 | Tuning and finish | v1 bar met on the rig: tokens per passed task −25%, wall clock −15%, pass rate not lower | not started |
+| 5 | Tuning and finish | v1 bar met on the rig: tokens per passed task −25%, wall clock −15%, pass rate not lower | in progress: three engine fixes in, no measurement yet |
 | 6 | Polish | deferred: TUI restyle, brand strings, theme, docs site | deferred until phase 5 closes |
 
 ## Deferred polish
