@@ -13,11 +13,18 @@ Do not read the whole tree. Terminal path only: `packages/cli`, `packages/core`,
 `reef` and `reef-cli` are taken on npm; GitHub org `reef` is blocked.
 
 **How the user wants to be spoken to:** plain words, short sentences, no jargon, lead with
-the answer, prose over bullets, no em dashes. Hard requirement, stated repeatedly.
+the answer, no em dashes. Prose for short replies. **For long replies, use hierarchy:
+headers, short sections, one idea per block.** Updated 2026-10-31 after the user said the
+wall of text was unreadable in the terminal and that people skim, not read. The old
+"no headers" rule still applies to anything that fits in two or three paragraphs.
 
 **How the user wants work done:** do not hand-hold. Do the research and the writing
 yourself. No subagents. Use the `architect` skill for planning and `grill-me` to stress
 test, but only bring back decisions that genuinely need the user.
+
+**Standing constraint:** test only with `opencode-go/deepseek-v4.1-flash`. No paid runs
+without approval. The user forbade further measurement on 2026-10-31; free packaging and
+design work may proceed.
 
 **Agreed order of work (do not reorder):**
 1. Learn how Droid works, in depth. DONE.
@@ -25,7 +32,7 @@ test, but only bring back decisions that genuinely need the user.
 3. User forks OpenCode and points at it. DONE (`opencode-dev`).
 4. Read the parts of the codebase that matter. DONE (terminal path only).
 5. Write the real plan docs against the real code. DONE.
-6. A capable model builds it, phase by phase. NEXT.
+6. A capable model builds it, phase by phase. IN PROGRESS (phases 0-4 done).
 
 ## What was built
 
@@ -38,16 +45,17 @@ Under `C:\Users\USER\Documents\reef` (git repo, base commit `defcc61`, tag `phas
 - `docs/research-code.md` — what the fork already ships, with file:line anchors
 - `docs/02-architecture.md` — target state, rewritten against the real code
 - `docs/03-rig.md` — task set, metrics; pass bars updated to the new phases
-- `docs/04-decisions/0006` … `0011` — delta, order, BYOK, amendments, identity, deferral
-- `docs/05-phases/` — phase table, phase 0 file, phase 0 readout
-- `docs/debt.md` — 10 open items
-- `code/` — the fork, copied from `Documents\opencode-dev`, 1,777 packages installed
-- `bin/reef.cmd`, `bin/reef` — dev entry points (`--cwd packages/cli`, `PWD` = caller)
-- `rig/runner.ts` — setup, run, accept, token accounting, dry mode, hermetic env
-- `rig/scaffold.ts` — regenerates 12 real + 10 control tasks from three fixtures
-- `rig/mock/server.ts` — OpenAI-compatible mock that logs request bodies
-- `rig/measure-prefix.ts` — bytes and token estimate per request component
-- `rig/results/` — gitignored output: accepts-v0.json, prefix-v0, request captures
+- `docs/04-decisions/0006` … `0012` — delta, order, BYOK, amendments, identity, deferral,
+  compat skills
+- `docs/05-phases/` — phase table, phase 0 through 4 files, readout
+- `docs/debt.md` — open items
+- `code/` — the fork, 1,777 packages installed
+- `bin/reef.cmd`, `bin/reef` — dev entry points: `bin\reef.cmd --standalone` interactive,
+  `bin\reef.cmd run --standalone --model opencode-go/deepseek-v4.1-flash "..."` one-shot
+- `rig/runner.ts`, `rig/scaffold.ts`, `rig/mock/server.ts`, `rig/measure-prefix.ts`,
+  `rig/results/` (gitignored)
+- `code/packages/core/src/session/cache-monitor.ts`, `meter.ts`, `runner/watchdog.ts`
+- `code/packages/core/src/session/compaction.ts` — event-driven, ledger row per compaction
 
 ## Decisions made
 
@@ -57,147 +65,110 @@ Under `C:\Users\USER\Documents\reef` (git repo, base commit `defcc61`, tag `phas
 - **Four changes only:** cache monitor, resident tool surface (two tools, cap four),
   bounded loop, anchoring default.
 - **Phase order (ADR 0007):** 0 baseline → 1 monitor → 2 tool surface → 3 bounded loop →
-  4 anchoring → 5 tuning.
-- v1 stays headless only (ADR 0002), anchoring default (ADR 0004), rig before features
-  (ADR 0003).
-- **No keys, no payment, no telemetry (ADR 0008).** Reef ships no credential and no plan.
-  The user brings their own provider config and it stays local. The rig is parameterised
-  by model and provider; no model is chosen on the user's behalf.
-- **Resident tool target is two:** `execute` and `question`. Read/edit come back only if
-  the rig shows the program round trip costs more than the schema. Hard cap four.
-- **Automatic compaction is off by default in headless.** Compact on provider overflow or
-  on request, and log each compaction's cost.
-- **Rig tasks come from the fork itself.** Failed or flaky tests in `opencode-dev`, small
-  tooling tasks, and one constructed long session. Phase 0 ships 12 real and 10 control
-  tasks. Each task is a directory with `task.yaml`, `setup.sh`, `accept.sh` and a frozen
-  fixture; every `accept.sh` was seen failing on the untouched fixture first.
-  Fixtures are small extractions, not the monorepo (debt log).
-- **Runs are hermetic.** Run dirs live outside the user profile (`C:\reef-rig`) because
-  config discovery walks every parent; a run under `C:\Users\<name>` inherits that user's
-  `.agents`/`.claude` skills. Measured 397 KB of system text before this was fixed.
-- **Identity is Reef at the surface (ADR 0010).** `reef`, `reefcode`, `reef.json`, `reef`
-  data dir, `REEF_*`. Internal `@opencode/*` names stay for mergeability.
-- **Polish is phase 6, after phase 5.** TUI restyle, brand strings, theme. Not v1.
-- **No global skill ingestion (ADR 0012).** Reef ignores `~/.claude/skills` and
-  `~/.agents/skills` by default. Project-local ones and Reef's own still load;
-  `REEF_COMPAT_SKILLS=1` restores upstream. Measured cut: 397,788 → 8,652 system chars.
-- **Rig auth is seeded, not configured.** The rig's isolated data dir holds a copy of the
-  local credential store. `run` authenticates there (verified by the authorization header
-  at the mock); `auth list` does not (debt log).
-- **Charter and contract amendments are pending with the owner (ADR 0009).** They still say
-  "rebuild the loop and script tool" and "one model family at a time".
+  4 anchoring → 5 tuning → 6 polish. No reordering.
+- **Baseline deferred (ADR 0011).** 66 paid sessions was too expensive; the A/B against
+  the `phase-1-ok` worktree is the substitute.
+- **No keys, no payment, no telemetry (ADR 0008).** BYOK, local, no shipped credential.
+- **Identity is Reef at the surface (ADR 0010).** `reef`, `reefcode`, `reef.json` (with
+  one release of `opencode.json` fallback), `reef` data dir, `REEF_*`. Internal
+  `@opencode/*` package names stay for mergeability.
+- **No global skill ingestion (ADR 0012).** Ignores `~/.claude/skills` and
+  `~/.agents/skills`; `REEF_COMPAT_SKILLS=1` restores upstream. Cut 397,788 → 8,652
+  system chars; one live call dropped 101,306 → 5,378 input tokens.
+- **Resident surface is `execute` + `question`, cap three direct definitions plus
+  `execute`.** Thirteen tools moved into the code-mode catalog; overflow joins the catalog.
+- **Automatic compaction is off by default.** Compact only on overflow or on request; log
+  each compaction with reason, before/after, tokens dropped and usage when
+  `REEF_COMPACTION_LOG` is set.
+- **Runs are hermetic.** Run dirs outside `C:\Users\<name>` (`C:\reef-rig`, `C:\reef-rig-b`)
+  because config discovery walks parents and ingests user skills.
+- **Rig auth is seeded from the local credential store**, not configured.
+- **Charter and contract amendments are pending with the owner (ADR 0009).**
+- **Packaging comes before more engine work (user decision, 2026-10-31).** Unlocks a
+  Reef-vs-Claude-Code head-to-head. UI is a focused readability pass after packaging, not
+  a full restyle first.
 
 ## Key facts, carrying forward
 
-Droid (Factory, 29 Oct 2026, factory.com/news/frontier-harness):
+Droid (Factory, 29 Oct 2026):
 
 - Script tool = JS in a sandbox with no fs/net/system; tool calls via bridge; hundreds of
-  calls per request; printed output capped; full results to searchable files; 5-minute
-  wait then partial return; background + wake, no polling.
+  calls per request; printed output capped; full results to searchable files; 5-minute wait
+  then partial return; background + wake, no polling.
 - 15 tool calls: 10 model calls / 56.8 s → 5 model calls / 41.6 s. Cost −15% on Opus 5.5,
   concentrated in the 12.5% of scripts with 6+ calls.
-- Cache: new tools appended at the end, not inserted. 98% of input from cache per request,
-  98.6% of requests strictly append-only, 91.5% token-weighted, over 20.4M requests.
-- Base prompt 20,887 → 13,055 (−37%); tools 11 → 2 definitions; tool definitions
-  15,798 → 8,528 (−46%); system prompt 1,618 → 2,155 (+33%).
-- Stop rules: 4 min stream silence → drop/retry; hard time limit 2 attempts; partial
-  response removed before retry; 3 empty turns → stop; 3 identical calls → nudge, 6 → stop.
-- Benchmarks (vendor): Opus 5.5 65.2% at $4.73 and 42.6 min; OpenCode 62.1%; Claude Code
-  57.6%. GPT-6.1 Sol 57.6% at $0.79, 25.8 min, 10% slower than Codex.
+- 312-call Linear cleanup case: ~36 round trips, ~3.1M tokens → 2 requests, 61k tokens
+  (vendor claim, ~98% reduction). This is the case our short rig cannot reproduce.
+- Cache: 98% of input from cache per request, 98.6% of requests strictly append-only, over
+  20.4M requests.
+- Prompt: base 20,887 → 13,055 (−37%); tools 11 → 2; tool definitions −46%.
+- Stop rules: 4 min stream silence → drop/retry; hard limit 2 attempts; 3 empty turns →
+  stop; 3 identical calls → nudge, 6 → stop.
+- Benchmarks (vendor): Opus 5.5 65.2%, OpenCode 62.1%, Claude Code 57.6%. GPT-6.1 Sol
+  57.6% vs Codex 54.0%, but 10% slower than Codex.
 
-Our fork:
+Our fork and measured state:
 
-- Loop: `packages/ai/src/llm.ts:173` appends `[...messages, response, ...toolResults]`.
-- Cache: `packages/ai/src/cache-policy.ts:17` auto at last tool, first/last system, tail;
-  4-marker cap (`:24`).
-- **Measured 2026-10-31:** first request = 13 tool definitions, 15,517 bytes (~3,879
-  tokens) + 8,653-byte system prompt (~2,163 tokens) = 24,205 bytes, ~6,051 tokens total.
-  Tools are 64% of the first request. Readout: `docs/05-phases/phase-0-readout.md`.
-- Tools sent up front (`codemode: false` list in `core/src/tool/plugin/`): read, write,
-  edit, patch, glob, grep, shell, todo, question, skill, subagent, webfetch, websearch,
-  image-generate. Droid sends 2. Phase 2's win is bounded, about 12 KB per early step.
-- Code mode on by default (`core/src/tool.ts:274`); catalog ships as instruction deltas.
-- Tool output: 2,000 lines / 50 KiB then spill to file (`core/src/tool-output.ts:13`).
-- Compaction: now `auto: false` by default (`core/src/session/compaction.ts`), compact only
-  on overflow or request; `keep: 15_000`, 15% reserve min 16k (`:130`, `:136`). A completed
-  compaction appends a cost row when `REEF_COMPACTION_LOG` is set.
-- Timeouts: 300 s headers, 900 s chunks (`packages/ai/src/schema/options.ts:56`, `:62`).
-  No 4-minute silence rule, no empty-turn or identical-call detection anywhere.
-- Headless JSON events carry `cost` and `tokens.cache.read/write` on every `step_finish`
-  (confirmed live, not just in code). `run --standalone` starts its own server.
-- Credentials: the user's `oc_...` key was copied from OpenCode's `opencode.db`
-  `credential` row into Reef's local store; `reef models` then listed the Go provider and
-  a real call authenticated. The rig's isolated data dir holds the same copy, and the
-  mock saw an `authorization` header. `reef auth list` still fails there (debt).
+- Loop appends (`packages/ai/src/llm.ts:173`); cache markers at 4 points
+  (`cache-policy.ts:17`, cap `:24`).
+- First request after phase 2: 14,232 bytes, ~3,558 tokens (13 tools, 24,205 bytes,
+  ~6,051 tokens before). Tool defs are now 2,674 bytes; system is 11,548.
+- **Catalog correction:** the catalog block is 2,895 bytes, about 725 tokens per request,
+  not 2-3k tokens. Across six calls that is ~4,300 tokens, roughly a tenth of a small task.
+- Tool output spills at 2,000 lines / 50 KiB. Timeouts 300 s headers, 900 s chunks.
+  Watchdog: empty 3, nudge 3, stop 6; stall timeout 240 s with two attempts.
+- OpenCode Go reports `cost: 0`; compare on tokens. Totals include cache reads, so a 287k
+  run was 18 model calls with 253,952 cache reads, not 287k of fresh billing.
+- **A/B vs `phase-1-ok`:** current 464,537 tokens, 42,231/pass, 11/12; old 526,280,
+  43,857/pass, 12/12. Median 31,668 vs 45,585 (−30.5% tokens), median wall 42.7 s vs
+  46.6 s (−8.2%). Mean only −3.7% because of two tail runs (125k fail, 287k pass) at 14
+  and 18 calls against a median of 6.
+- Controls: 10 controls, 0 passed, 828,900 tokens. One control edited its tests; the guard
+  restored them and it still failed.
+- Scores are judgement, not measurement: Droid 90, Claude Code 81, Reef 71, OpenCode 69.
+  Reef subscores: efficiency 85, speed 76, reliability 70, maturity 30. Overall is 79% of
+  Droid; engine axes ~86%, product ~30%. No Reef-vs-Claude-Code or Reef-vs-Droid run
+  exists.
 
 ## Current state
 
-Phase 0 is closed with the baseline deferred (ADR 0011). The fork is at `code/`, tagged
-`phase-0-base`, with identity, rig and prefix measurement done. The rig has 22 tasks,
-verified failing on untouched fixtures, and a runner that reads `--format json` events.
+Phases 0-4 are code complete and tested. 21 unit tests across the three additions pass.
+Everything below is committed at `bce2718` except three working-tree edits:
 
-A paid baseline was attempted on 2026-10-31: 34 sessions against
-`opencode-go/deepseek-v4.1-flash`, 2.36M tokens, real tasks 23/24, controls 6/10
-"passed". The control result invalidated the run: five controls were solvable by design,
-because their expected values lived in the test file. The attempt was cancelled by the
-owner and is not the baseline. The rig now restores acceptance tests before scoring and
-records `testsModified`; five controls were rewritten to be contradictory. Those changes
-are committed but have not been re-run.
+- `rig/tasks/rename-refactor/task.yaml` and `rig/scaffold.ts` — prompt now says `OldRun`
+  must not remain, no alias. Fixes the only A/B failure.
+- `code/packages/cli/script/build.ts` — `OPENCODE_CLI_NAME` now `'reef'`.
 
-Phase 1 is closed. The cache monitor and the step meter live in
-`code/packages/core/src/session/` and are enabled by `REEF_CACHE_MONITOR` and `REEF_METER`,
-each pointing at a JSONL file. Ten tests pass and the end-to-end mock run showed the meter
-matching the event stream exactly and request kinds compared separately. See
-`docs/05-phases/phase-1-instrumentation.md`.
+Not yet done: the rename fix is uncommitted and unscored; the standalone build has never
+been run; `reefcode` metadata and install docs do not exist.
 
-Phase 2 is built and measured. The resident surface is `execute` and `question`; the other
-thirteen tools are code-mode catalog entries, with a cap of three direct definitions plus
-`execute` and overflow falling back into the catalog. The first request dropped from
-24,205 to 14,232 bytes and from ~6,051 to ~3,558 estimated tokens.
-
-The paid A/B ran on 2026-10-31: six tasks, two runs each, current build against a
-`phase-1-ok` worktree. Current 11/12 passed, 464,537 tokens, 42,231 per pass. Old 12/12,
-526,280, 43,857 per pass. Median tokens per run 31,668 against 45,585 (−30.5%), median wall
-clock 42.7s against 46.6s. The mean is only −3.7% because two runs on one task blew up
-(125k fail, 287k pass) at 14 and 18 model calls against a median of 6.
-
-The one failure was `rename-refactor`: the model kept `export type OldRun = Run` as a
-compatibility alias because the prompt says both "rename across every file" and "keep all
-exports working", and `accept.sh` forbids `OldRun`. Three reruns passed 3/3. The fixture
-prompt is the defect. See `docs/05-phases/phase-2-tool-surface.md`.
-
-Phase 3 has all three signals built and the control sweep is clean: 10 controls, 0 passed,
-828,900 tokens, no false stops. One control had the model edit the tests; the guard
-restored them and it still failed. Thirteen unit tests pass and the stalling mock ends in
-21 seconds. The nudge path still has no live run. See
-`docs/05-phases/phase-3-bounded-loop.md`.
-
-Phase 4 is code complete: automatic compaction is off by default, so compaction happens
-only on overflow or on request, and every completed compaction writes a row with its
-reason, tokens before and after, tokens dropped and usage when `REEF_COMPACTION_LOG` is
-set. The long-session cache ratio and pass rate wait for the measurement batch. See
-`docs/05-phases/phase-4-anchoring.md`.
+Known gaps: no long-session run, no many-call task, no hard tasks, `rig/runner.ts`
+`toolCalls` always 0 (watches `event.type === "tool"`, which the JSON stream never emits),
+no script-first instruction, no verified-done guard, no repo map, no router, no mission
+mode.
 
 ## Next session starts with
 
-The measurement batch is done, 2,174,257 tokens total: controls 828,900, A/B 990,817,
-rename repro 354,540. Phases 2 and 3 have evidence, phase 4 still needs a long session.
+1. Commit the three working-tree edits (rename prompt and scaffold, CLI name).
+2. Attempt the standalone build from `code/packages/cli`:
+   `bun run build --single --skip-web-ui`, then check `--version` and one real run.
+3. Finish packaging: `reef` bin, version `0.1.0`, `reefcode` package metadata, install docs.
+4. Then the engine fixes in this order: script-first instruction + step budget (kill the
+   14-18 call tail), verified-done guard (clean test run plus non-empty diff), lazy tool
+   catalog.
+5. Then one many-call task (100+ tool calls) and one long-session task, when measurement is
+   approved again.
+6. Then a focused TUI readability pass, then the router.
 
-Next, in order:
-1. Fix the `rename-refactor` prompt (say `OldRun` must be gone, no alias) and re-score
-   that task. Then the pass-rate gate is defensible.
-2. Decide on a step budget for small tasks (soft nudge at 12 model calls, hard stop at 20,
-   or a no-file-change rule). The 125k and 287k runs are the reason the mean misses.
-3. Add a long-session rig task so phase 4 can be measured for the cache ratio.
-4. Tag phases 2 and 3 if step 1 is clean, then start phase 5 tuning.
-
-The rig also has a counting bug: `toolCalls` is 0 on every row because the runner watches
-`event.type === "tool"`, which the JSON stream never emits. Fix before the next analysis.
+Do not run paid measurement without asking.
 
 ## Open questions
 
-- Do `read` / `edit` really need to stay resident, or can they live in code mode? Phase 2
-  measurement decides; two resident tools is the opening bet.
-- Can we guarantee a retry lands on the provider that holds the cache, like Droid does?
-- Does the provider in use return cache-read token counts at all? If not, that metric is
-  reported unavailable, never estimated.
+- Do `read` / `edit` need to stay resident, or can they live entirely in code mode?
+- Can Reef guarantee a retry lands on the provider holding the cache, like Droid does?
+- Does the provider return cache-read counts at all? If not, report unavailable, never
+  estimate.
+- Will the user's landing-page head-to-head be same-model? Claude Code is Anthropic-bound,
+  so DeepSeek through it needs a proxy; OpenCode is the fair same-model pair.
+- Is the tail a prompt problem or a model-confidence problem? The script-first instruction
+  is the cheap test.
