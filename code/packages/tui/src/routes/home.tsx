@@ -18,7 +18,11 @@ import { FadeInText } from "../component/fade-in-text"
 
 let once = false
 const placeholder = {
-  normal: ["Fix a TODO in the codebase", "What is the tech stack of this project?", "Fix broken tests"],
+  normal: [
+    "make the retry backoff cap at 30 seconds",
+    "why does this test only fail on CI?",
+    "add a health check endpoint",
+  ],
   shell: ["ls -la", "git status", "pwd"],
 }
 
@@ -32,7 +36,7 @@ export function Home() {
   const data = useData()
   const location = useLocation()
   const dimensions = useTerminalDimensions()
-  const [logoWidth, setLogoWidth] = createSignal(0)
+  const theme = useTheme()
   // Global MCP elicitations can arrive without a session route, so keep them reachable from Home.
   const currentLocation = () => route.location ?? data.location.default()
   const forms = createMemo(() => data.session.form.list("global", currentLocation()) ?? [])
@@ -82,26 +86,44 @@ export function Home() {
     <>
       <box
         flexGrow={1}
-        alignItems="center"
+        flexDirection="column"
         paddingLeft={dimensions().width < 44 ? 1 : 2}
         paddingRight={dimensions().width < 44 ? 1 : 2}
       >
-        <box flexGrow={1} minHeight={0} />
-        <box height={3} minHeight={0} flexShrink={1} />
-        <box
-          flexShrink={0}
-          onSizeChange={function () {
-            setLogoWidth(this.width)
-          }}
-        >
-          <Logo />
+        <box flexGrow={1} minHeight={0} flexDirection="column">
+          <box width="100%" alignItems="center" paddingTop={1} flexShrink={0}>
+            <box width="80%" maxWidth={110}>
+              <box
+                width="100%"
+                border
+                borderStyle="rounded"
+                borderColor={theme.border.base}
+                paddingLeft={2}
+                paddingRight={2}
+                paddingTop={1}
+                paddingBottom={1}
+              >
+                <Logo />
+                <box height={1} flexShrink={0} />
+                <text fg={theme.text.base} wrapMode="word">
+                  Welcome. Describe the change and Reef takes it from there.
+                </text>
+                <box height={1} flexShrink={0} />
+                <text fg={theme.text.muted} wrapMode="none" truncate>
+                  /help for commands · /models to switch · /sessions to reopen work
+                </text>
+              </box>
+            </box>
+          </box>
+          <box flexGrow={1} minHeight={0} />
+          <box width="100%" alignItems="center" flexShrink={0}>
+            <box width="80%" maxWidth={110} zIndex={1000} flexShrink={0} position="relative">
+              <UpdateNotification width={96} />
+              <Prompt ref={bind} placeholders={placeholder} disabled={forms().length > 0} />
+            </box>
+          </box>
         </box>
         <box height={1} flexShrink={0} />
-        <UpdateNotification width={logoWidth()} />
-        <box width="100%" maxWidth={75} zIndex={1000} paddingTop={1} flexShrink={0} position="relative">
-          <Prompt ref={bind} placeholders={placeholder} disabled={forms().length > 0} />
-        </box>
-        <box flexGrow={1} minHeight={0} />
       </box>
       <box width="100%" flexShrink={0}>
         <Slot path="home.footer" />

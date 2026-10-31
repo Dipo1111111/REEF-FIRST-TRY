@@ -5,11 +5,18 @@ An open agent harness built for one thing: more work per token, faster.
 - Binary: `reef`
 - Package: `reefcode` (npm `reef` is taken by a dead 0.0.1 package)
 - Repo: `reefcode/reef`
-- Status: engine phases 0-4 built and tested, packaging at 0.1.0, not published
+- Status: engine phases 0-4 built and tested, TUI rebuilt for 0.1.0, packaging verified, not published
 
 ## Install
 
-Not published yet. The intended path, once `reefcode` is on npm:
+Not on npm yet. The `0.1.0` tarballs install cleanly today:
+
+```sh
+npm install -g ./reefcode-0.1.0.tgz ./reefcode-windows-x64-0.1.0.tgz
+reef --version
+```
+
+Once published, the path becomes:
 
 ```sh
 npm install -g reefcode

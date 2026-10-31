@@ -16,11 +16,7 @@ function wordmark(pad = "") {
       })
       .join("")
 
-  return logo.left.map((line, index) => {
-    const left = draw(line, dim, "\x1b[38;5;235m", "\x1b[48;5;235m")
-    const right = draw(logo.right[index] ?? "", reset, "\x1b[38;5;238m", "\x1b[48;5;238m")
-    return `${pad}${left} ${right}`
-  })
+  return logo.word.map((line) => `${pad}${draw(line, reset, "\x1b[38;5;238m", "\x1b[48;5;238m")}`)
 }
 
 export type SessionEpilogue = { readonly title: string; readonly sessionID?: string }
@@ -33,10 +29,10 @@ export function epilogue(input: { readonly session?: SessionEpilogue; readonly u
     ...wordmark("  "),
     "",
     ...(input.updatedVersion
-      ? [`  ${dim}Run ${reset}${bold}opencode${reset}${dim} to use ${reset}${bold}${input.updatedVersion}${reset}`, ""]
+      ? [`  ${dim}Run ${reset}${bold}reef${reset}${dim} to use ${reset}${bold}${input.updatedVersion}${reset}`, ""]
       : []),
     ...(input.session
-      ? [row("Session", input.session.title), row("Continue", `opencode -s ${input.session.sessionID}`), ""]
+      ? [row("Session", input.session.title), row("Continue", `reef -s ${input.session.sessionID}`), ""]
       : []),
   ].join("\n")
 }

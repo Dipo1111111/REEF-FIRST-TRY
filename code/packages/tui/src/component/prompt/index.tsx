@@ -15,7 +15,6 @@ import { useLocal } from "../../context/local"
 import { useTheme, useThemes } from "../../context/theme"
 import { tint } from "../../theme/color"
 import { createAnimatable, tween } from "../../ui/animation"
-import { EmptyBorder, SplitBorder } from "../../ui/border"
 import { useTuiPaths, useTuiTerminalEnvironment } from "../../context/runtime"
 import { useClipboard } from "../../context/clipboard"
 import { Spinner } from "../spinner"
@@ -67,8 +66,6 @@ import {
 import { DialogImagePreview } from "../dialog-image-preview"
 import { useDirectoryRecents } from "../../prompt/directory-recents"
 import { directoryRecentValue } from "../../prompt/directory-completion"
-import { useWorkingDirectoryActions } from "../../ui/working-directory-actions"
-import { truncateFilePath } from "../../ui/file-path"
 import { PromptMetadataRow } from "./metadata"
 import { limitLabel, useUsageLimits } from "../usage"
 
@@ -214,6 +211,7 @@ export function Prompt(props: PromptProps) {
   const history = usePromptHistory()
   const stash = usePromptStash()
   const keymap = Keymap.use()
+  const commandShortcut = Keymap.useShortcut("command.palette.show")
   const renderer = useRenderer()
   const measure = (text: string) => measureEditText(text, { widthMethod: renderer.widthMethod })
   const exit = useExit()
@@ -1618,10 +1616,10 @@ export function Prompt(props: PromptProps) {
     const value = (() => {
       if (store.mode === "shell") {
         if (!shell().length) return undefined
-        return `Run a command… "${shell()[store.placeholder % shell().length]}"`
+        return `${shell()[store.placeholder % shell().length]}`
       }
       if (!list().length) return undefined
-      return `Ask anything… "${list()[store.placeholder % list().length]}"`
+      return `${list()[store.placeholder % list().length]}`
     })()
     if (!value) return undefined
     const width = dimensions().width < 44 ? dimensions().width - 5 : Math.min(75, dimensions().width - 4) - 5
@@ -1643,17 +1641,6 @@ export function Prompt(props: PromptProps) {
     const branch = data.location.vcs.info(location)?.branch.current
     return branch ? `${directory}:${branch}` : directory
   })
-  const [locationWidth, setLocationWidth] = createSignal(dimensions().width)
-  const locationLabelDisplay = createMemo(() => {
-    const label = locationLabel()
-    if (!label) return
-    return truncateFilePath(label, locationWidth())
-  })
-  const locationActions = useWorkingDirectoryActions({
-    directory: () => footerLocation()?.directory,
-    onMove: () => void move.open(),
-  })
-
   const spinnerDef = createMemo(() => {
     const color = promptDisplay().agentColor ?? theme.border.base
     return {
@@ -1675,26 +1662,36 @@ export function Prompt(props: PromptProps) {
   })
   const maxHeight = createMemo(() => Math.max(6, Math.floor(dimensions().height / 3)))
 
-  const promptBg = createMemo(() => theme.decrease(theme.background.raised.base))
-
   return (
     <>
       <box ref={(r: BoxRenderable) => (anchor = r)} visible={props.visible !== false} width="100%">
         <box
           width="100%"
-          border={["left"]}
+          border
+          borderStyle="rounded"
           borderColor={borderHighlight()}
-          customBorderChars={{
-            ...SplitBorder.customBorderChars,
-            bottomLeft: "╹",
-          }}
+          paddingLeft={1}
+          paddingRight={1}
         >
+          <box
+            height={1}
+            width="100%"
+            flexDirection="row"
+            justifyContent="space-between"
+            flexShrink={0}
+          >
+            <text fg={theme.text.muted} wrapMode="none" truncate>
+              {locationLabel() ?? ""}
+            </text>
+            <text fg={theme.text.muted} wrapMode="none">
+              {commandShortcut() ?? ""} commands
+            </text>
+          </box>
           <box
             paddingLeft={dimensions().width < 44 ? 1 : 2}
             paddingRight={dimensions().width < 44 ? 1 : 2}
             paddingTop={1}
             flexShrink={0}
-            backgroundColor={promptBg()}
             flexGrow={1}
             width="100%"
           >
@@ -1871,44 +1868,10 @@ export function Prompt(props: PromptProps) {
             </box>
           </box>
         </box>
-        <box
-          height={1}
-          border={["left"]}
-          borderColor={borderHighlight()}
-          customBorderChars={{
-            ...EmptyBorder,
-            vertical: promptBg().a !== 0 ? "╹" : " ",
-          }}
-        >
-          <box
-            height={1}
-            border={["bottom"]}
-            borderColor={promptBg()}
-            customBorderChars={
-              promptBg().a !== 0
-                ? {
-                    ...EmptyBorder,
-                    horizontal: "▀",
-                  }
-                : {
-                    ...EmptyBorder,
-                    horizontal: " ",
-                  }
-            }
-          />
-        </box>
-        <box width="100%" flexDirection="row" justifyContent="space-between" gap={2}>
+        <box width="100%" flexDirection="row" justifyContent="space-between" gap={2} paddingTop={1}>
           <Slot path="prompt.footer" input={footerInput()}>
             <Slot path="prompt.footer.status" input={footerInput()}>
-              <box
-                flexGrow={1}
-                flexShrink={1}
-                minWidth={0}
-                onSizeChange={function (this: BoxRenderable) {
-                  const width = this.width
-                  queueMicrotask(() => setLocationWidth(width))
-                }}
-              >
+              <box flexGrow={1} flexShrink={1} minWidth={0}>
                 <Switch>
                   <Match when={status() === "running"}>
                     <box flexDirection="row" gap={1} flexGrow={1} justifyContent="flex-start">
@@ -1944,25 +1907,7 @@ export function Prompt(props: PromptProps) {
                       </text>
                     </box>
                   </Match>
-                  <Match when={true}>
-                    <Show when={locationLabelDisplay()} fallback={<text />}>
-                      {(location) => (
-                        <text
-                          id="prompt.footer.location"
-                          fg={locationActions.hovered() ? theme.text.base : theme.text.muted}
-                          wrapMode="none"
-                          truncate
-                          flexGrow={1}
-                          flexShrink={1}
-                          onMouseOver={locationActions.onMouseOver}
-                          onMouseOut={locationActions.onMouseOut}
-                          onMouseUp={locationActions.onMouseUp}
-                        >
-                          {location()}
-                        </text>
-                      )}
-                    </Show>
-                  </Match>
+                  <Match when={true}><box flexGrow={1} /></Match>
                 </Switch>
               </box>
             </Slot>

@@ -1,0 +1,11 @@
+#!/bin/sh
+# Live design loop. Runs the TUI straight from source and restarts it in place when a
+# source file changes. No build, no global install.
+#
+#   reef-ui            open the shell in the current directory
+#   reef-ui -c         continue the last session
+#
+# Leave it open in a second terminal while the source is edited. Ctrl+C quits.
+HERE=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+export PWD="$(pwd)"
+exec bun run "$HERE/reef-ui.ts" "$@"

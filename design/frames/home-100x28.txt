@@ -1,0 +1,28 @@
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                ▄                                   
+                               █▀▀█ █▀▀█ █▀▀█ █▀▀▄ █▀▀▀ █▀▀█ █▀▀█ █▀▀█                              
+                               █  █ █  █ █▀▀▀ █  █ █    █  █ █  █ █▀▀▀                              
+                               ▀▀▀▀ █▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀                              
+                                                                                                    
+                                                                                                    
+             ┃                                                                                      
+             ┃  Ask anything… "What is the tech stack of this project?"                             
+             ┃                                                                                      
+             ┃                                                                                      
+             ╹▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀            
+             /tmp/opencode/packages/tui:main           shift+tab agents  ctrl+p commands            
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                                    
+                                                                                              test  
+                                                                                                    

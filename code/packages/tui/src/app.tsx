@@ -78,7 +78,7 @@ import { DialogAgent } from "./component/dialog-agent"
 import { DialogSessionList } from "./component/dialog-session-list"
 import { DialogOpen, DialogOpenKey, moveOpenSession } from "./component/dialog-open"
 import { SessionTabs } from "./component/session-tabs"
-import { clampSessionTabsWidth, sessionTabsFitVertically, SESSION_SIDEBAR_WIDTH } from "./ui/layout"
+import { clampSessionTabsWidth, SESSION_SIDEBAR_WIDTH } from "./ui/layout"
 import { createPaneResize } from "./ui/pane-resize"
 import { PaneResizeHandle } from "./ui/pane-resize-handle"
 import { clickedLink } from "./ui/link"
@@ -494,7 +494,7 @@ function App() {
   const app = useTuiApp()
   const startup = useTuiStartup()
   const config = useConfig()
-  const devtools = createMemo(() => config.data.debug?.devtools ?? app.channel === "local")
+  const devtools = createMemo(() => config.data.debug?.devtools ?? false)
   const route = useRoute()
   const dimensions = useTerminalDimensions()
   const renderer = useRenderer()
@@ -611,8 +611,9 @@ function App() {
   }
   const terminalTitleEnabled = () => config.data.terminal?.title ?? true
   const pasteSummaryEnabled = () => config.data.prompt?.paste !== "full"
-  const tabsVertical = () =>
-    config.data.tabs.layout === "vertical" && sessionTabsFitVertically(dimensions().width, tabsResize.size())
+  // Reef keeps a single column: sessions live in the strip at the top rather than a
+  // permanent sidebar, so the work always gets the full width.
+  const tabsVertical = () => false
   const tabsAvailable = () => sessionTabs.enabled() && sessionTabs.tabs().length > 0 && route.data.type !== "plugin"
   const fullscreenPanel = () =>
     route.data.type === "session" &&
@@ -641,14 +642,14 @@ function App() {
     if (!terminalTitleEnabled()) return
 
     if (route.data.type === "home") {
-      setTerminalTitle(renderer, "OpenCode")
+      setTerminalTitle(renderer, "Reef")
       return
     }
 
     if (route.data.type === "session") {
       const title = session?.title
       if (!title || isFallbackTitle(title)) {
-        setTerminalTitle(renderer, "OpenCode")
+        setTerminalTitle(renderer, "Reef")
         return
       }
 
@@ -1063,7 +1064,7 @@ function App() {
         ? [
             {
               name: "opencode.update",
-              title: "Update OpenCode",
+              title: "Update Reef",
               slash: { name: "update" },
               run: () => updater.open?.("manual"),
               category: "System",

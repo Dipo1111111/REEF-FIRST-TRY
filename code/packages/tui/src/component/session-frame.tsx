@@ -322,7 +322,7 @@ export function SessionFrame(props: { sessionID: string; verticalTabsWidth: numb
           />
         </Show>
       </box>
-      <Show when={rightPane() === "terminal" || rightPane() === "panel" || (rightPane() === "sidebar" && wide())}>
+      <Show when={rightPane() === "terminal" || rightPane() === "panel"}>
         <box
           ref={(value: BoxRenderable) => (rightNode = value)}
           flexShrink={0}

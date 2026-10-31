@@ -1,12 +1,12 @@
-{
+﻿{
   "$schema": "https://opencode.ai/theme.json",
   "base": {
     "categorical": [
-      "blue",
+      "red",
       "purple",
       "green",
       "orange",
-      "red"
+      "blue"
     ],
     "text": {
       "base": "$hue.neutral.100",
@@ -234,8 +234,8 @@
         "800": "#f6fff6",
         "900": "#fbfffb"
       },
-      "accent": "$hue.blue",
-      "interactive": "$hue.blue",
+      "accent": "$hue.red",
+      "interactive": "$hue.red",
       "neutral": "$hue.gray"
     },
     "text": {
@@ -387,8 +387,8 @@
         "800": "#131a13",
         "900": "#090d09"
       },
-      "accent": "$hue.blue",
-      "interactive": "$hue.blue",
+      "accent": "$hue.red",
+      "interactive": "$hue.red",
       "neutral": "$hue.gray"
     }
   }

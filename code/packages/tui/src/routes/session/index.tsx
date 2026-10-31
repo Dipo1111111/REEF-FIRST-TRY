@@ -1630,20 +1630,24 @@ export function Session(props: {
                   />
                 </Match>
                 <Match when={!disabled()}>
-                  <Prompt
-                    visible={true}
-                    ref={bind}
-                    muted={props.promptMuted}
-                    onSubmit={() => {
-                      toBottom()
-                    }}
-                    onEmptySubmit={async () => {
-                      const next = queuedPrompts()[0]
-                      if (!next) return false
-                      return mutatePending("steer", next.id)
-                    }}
-                    sessionID={route.sessionID}
-                  />
+                  <box width="100%" alignItems="center">
+                    <box width="80%" maxWidth={110}>
+                      <Prompt
+                        visible={true}
+                        ref={bind}
+                        muted={props.promptMuted}
+                        onSubmit={() => {
+                          toBottom()
+                        }}
+                        onEmptySubmit={async () => {
+                          const next = queuedPrompts()[0]
+                          if (!next) return false
+                          return mutatePending("steer", next.id)
+                        }}
+                        sessionID={route.sessionID}
+                      />
+                    </box>
+                  </box>
                 </Match>
               </Switch>
             </box>

@@ -1,8 +1,7 @@
-# Install
+﻿# Install
 
-Status: packaging is built and tested locally at `0.1.0`. Nothing is published to npm yet
-and no release archive is hosted. The commands below are the intended path, not a working
-download.
+Status: the `0.1.0` tarballs build reproducibly and install cleanly into an empty project.
+Nothing is published to npm yet, so the tarball path is the working one today.
 
 Reef ships as one standalone binary. The npm package is `reefcode`; the command it installs
 is `reef`. The two names differ because npm `reef` is taken by a dead package (ADR 0005).
@@ -23,6 +22,16 @@ reef --version
 ```sh
 bunx reefcode
 ```
+
+From the built tarballs, without a registry:
+
+```sh
+npm install -g ./reefcode-0.1.0.tgz ./reefcode-windows-x64-0.1.0.tgz
+reef --version
+```
+
+Verified on `0.1.0`: both tarballs install into an empty project and `reef v0.1.0`
+runs from the local `node_modules/.bin`. The platform tarball is roughly 96 MB.
 
 The package is a small launcher. Its postinstall step links the native binary for your
 platform from the matching `reefcode-<os>-<arch>` package, or downloads it if your package
