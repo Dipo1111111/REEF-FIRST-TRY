@@ -29,6 +29,7 @@ import { SessionUsage } from "../usage.js"
 import { SessionRunnerModel } from "./model.js"
 import { createLLMEventPublisher } from "./publish-llm-event.js"
 import { SessionRunnerRetry } from "./retry.js"
+import { SessionRunnerStall } from "./stall.js"
 
 export type Outcome = Data.TaggedEnum<{
   Completed: { readonly needsContinuation: boolean }
@@ -106,8 +107,11 @@ export const make = Effect.gen(function* () {
     // A local execution starts only after its Tool.Called publication completes.
     let overflowFailure: ProviderErrorEvent | undefined
     // Read to the end, not just the finish event, so the next request can reuse this response.
-    const providerStream = llm.stream(input.prepared.request, input.prepared.options).pipe(
-      Stream.runForEach((event) =>
+    const providerStream = llm
+      .stream(input.prepared.request, input.prepared.options)
+      .pipe(
+        SessionRunnerStall.withStallTimeout,
+        Stream.runForEach((event) =>
         Effect.gen(function* () {
           if (overflowFailure || publisher.hasProviderError()) return
           // Wait here, where cancellation still works, rather than inside the uninterruptible publish.

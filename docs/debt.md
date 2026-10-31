@@ -46,8 +46,8 @@ If this file grows without shrinking, the slices are too big.
   tool · add a registry-level test with a synthetic direct tool when the tool layer gets
   a test harness
 - [ ] Stream silence has no timeout · a provider that sends headers then nothing keeps a
-  step open · add a per-event idle timeout at the transport boundary, not an overall step
-  timeout, which would kill long tool calls
+  step open · ~~resolved in phase 3: `stall.ts` adds a per-pull timeout, two attempts, then
+  a `provider.timeout` failure~~
 - [ ] Phase 3 control sweep not run · zero false stops is unproven and the rig controls are
   still the unverified rewrite · 10 paid control sessions when approved
 - [ ] Phase 3 nudge path has no live run · the model would not repeat a call on request ·

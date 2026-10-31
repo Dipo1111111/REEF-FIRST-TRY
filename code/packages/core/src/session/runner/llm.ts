@@ -28,6 +28,7 @@ import { makeLocationNode } from "@opencode/util/effect/app-node"
 import { llmClient } from "../../effect/app-node-platform.js"
 import { StepFailedError } from "../error.js"
 import { SessionRunnerRetry } from "./retry.js"
+import { SessionRunnerStall } from "./stall.js"
 import { SessionStep } from "./step.js"
 import { SessionRunnerWatchdog } from "./watchdog.js"
 import { ToolOutput } from "../../tool-output.js"
@@ -235,6 +236,7 @@ const layer = Layer.effect(
       let initial: SessionContext.Loaded | undefined = first
       let recoverOverflow = true
       let recoverContinuation = true
+      let stalls = 0
       while (true) {
         // Reuse boundary preparation once; retries refresh context without delivering more input.
         const loaded = initial ?? (yield* prepareContext(sessionID).pipe(Effect.flatMap(context.load)))
@@ -340,13 +342,37 @@ const layer = Layer.effect(
               )
             return outcome.needsContinuation
           }),
-          Retry: (outcome) =>
-            retry.wait({
+          Retry: Effect.fnUntraced(function* (outcome) {
+            // A silent provider gets one retry, then the attempt fails instead of
+            // backing off through the whole retry schedule.
+            if (outcome.error.message.includes(SessionRunnerStall.STALL_MESSAGE)) {
+              stalls++
+              if (stalls >= 2)
+                return yield* new StepFailedError({
+                  error: {
+                    type: "provider.timeout",
+                    message: `Provider stalled twice in a row; last: ${outcome.error.message}`,
+                  },
+                })
+            }
+            return yield* retry.wait({
               decision: outcome.decision,
               error: outcome.error,
               assistantMessageID,
-            }),
+            })
+          }),
           Continue: Effect.fnUntraced(function* (outcome) {
+            // A stall after output started surfaces here rather than in Retry.
+            if (outcome.error.message.includes(SessionRunnerStall.STALL_MESSAGE)) {
+              stalls++
+              if (stalls >= 2)
+                return yield* new StepFailedError({
+                  error: {
+                    type: "provider.timeout",
+                    message: `Provider stalled twice in a row; last: ${outcome.error.message}`,
+                  },
+                })
+            }
             yield* retry.wait({
               decision: outcome.decision,
               error: outcome.error,

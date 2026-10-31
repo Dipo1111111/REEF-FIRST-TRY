@@ -157,18 +157,17 @@ A live call created a file through `execute`, so dispatch works. The paid before
 for tokens per passed task and pass rate waits for the owner. See
 `docs/05-phases/phase-2-tool-surface.md`.
 
-Phase 3 is code complete for two signals, gate partly met. A stored-history watchdog stops
-after three empty assistant turns, nudges once at three identical tool calls, stops at six,
-and resets when the same call returns a different result. Nine unit tests pass. The 240
-second stream-silence rule and the rig control sweep are still open. See
-`docs/05-phases/phase-3-bounded-loop.md`.
+Phase 3 has all three signals built: the stored-history watchdog (empty turns, identical
+calls), the per-pull stall timeout with a two-attempt cap, and the nudge. Thirteen unit
+tests pass, the stalling mock ends in 21 seconds instead of hanging, and three healthy
+real runs finished without a false stop. The only open item is the paid rig control sweep.
+See `docs/05-phases/phase-3-bounded-loop.md`.
 
 ## Next session starts with
 
-The two phase 3 gaps, in order: a per-event idle timeout at the transport boundary so a
-silent stream fails as a transport error, then the paid rig control sweep (10 sessions) to
-show zero false stops. After that, phase 4, anchoring. The phase 2 paid A/B is still
-pending too; the two could share one approved run.
+The phase 3 paid control sweep (10 sessions) when the owner approves, then tag the phase.
+The phase 2 paid A/B is still pending; the two can share one approved run. After that,
+phase 4, anchoring.
 
 ## Open questions
 

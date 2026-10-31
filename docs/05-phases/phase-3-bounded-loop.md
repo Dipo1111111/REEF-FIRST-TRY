@@ -1,66 +1,76 @@
 # Phase 3 — Bounded loop
 
-Status: code complete for two signals, gate partly met · 2026-10-31
+Status: all three signals built, control sweep pending · 2026-10-31
 
 Gate: an injected stall, an empty turn, and an identical-call run each stop or nudge
 correctly, and the control set produces zero false stops.
 
 ## What was built
 
-`packages/core/src/session/runner/watchdog.ts` reads stored messages and returns one of
-four verdicts: ok, nudge, empty, stop. The runner calls it at the top of every attempt in
-`runner/llm.ts`, before the request is built.
+`packages/core/src/session/runner/watchdog.ts` reads stored messages and returns ok, nudge,
+empty, or stop. The runner calls it at the top of every attempt in `runner/llm.ts`, before
+the request is built.
 
-Rules:
+- Three assistant turns in a row with no visible text and no tool call stop the run with
+  `loop.empty`. Reasoning alone is not visible text.
+- The same tool call, same name and deep-equal input, three times publishes one synthetic
+  nudge and continues. The nudge is append-only.
+- Six identical calls stop with `loop.repeated`.
+- The same call returning a different result is polling, and the run resets.
+- Input key order does not matter.
 
-- Three assistant turns in a row with no visible text and no tool call stop the run with a
-  `loop.empty` error. Reasoning alone does not count as visible text.
-- The same tool call, meaning the same name and a deep-equal input, three times in a row
-  publishes one synthetic nudge message and continues. The nudge is append-only.
-- Six identical calls stop the run with `loop.repeated`.
-- The same call returning different results is polling, and the run resets. Two reads of
-  the same file with different output never trigger the rule.
-- Input key order does not matter; the comparison sorts keys before hashing.
+Counters come from stored messages, so a restart cannot reset a streak.
 
-Counters are derived from stored messages, not held in memory, so a process restart cannot
-reset a streak. The nudge is detected by its exact text, so it is published once per
-session, not once per step.
+`packages/core/src/session/runner/stall.ts` wraps the provider stream with a per-pull idle
+timeout, 240 seconds by default and configurable with `REEF_STALL_MS`. Each event resets
+the clock. A silence fails as a transport read failure, so the normal retry path applies.
+The runner counts stalls and fails the step after two, instead of backing off through the
+whole retry schedule. A stall after output started is counted on the continuation path too.
 
 ## Evidence
 
-Nine unit tests in `packages/core/test/session/watchdog.test.ts` cover: varied history,
-three empty turns, text breaking the streak, a tool call breaking the streak, three
-identical calls producing a nudge, the nudge not repeating, six identical calls stopping,
-polling resetting the run, and key-order independence. All pass. `bun typecheck` in
-`packages/core` is clean across 1,865 files.
+Unit tests: nine for the watchdog, four for the stall wrapper. The stall cases cover a
+stream that keeps producing, a stream that stops, a long gap after one event, and the
+duration fallback. `bun typecheck` in `packages/core` is clean across 1,867 files.
 
-One live run with a normal prompt listed the files in a directory and answered, which
-shows the watchdog does not fire on a healthy history. An attempt to make the model repeat
-the same `execute` call three times failed to induce the loop: it called once and stopped,
-so the nudge path has unit coverage but no live run behind it.
+Injected stall against a stalling mock:
 
-## What is not built
+```
+REEF_STALL_MS=1000, mock sends one chunk then goes quiet
+before the attempt cap: 111 s and still retrying
+after the cap: 21 s, exits with provider.transport
+```
 
-- The 240-second stream-silence rule. Detecting silence after headers needs a per-event
-  idle timeout at the transport boundary. An overall step timeout would kill legitimate
-  long tool calls, so it was not faked with one.
-- The two-attempt hard limit for one attempt. The existing retry policy bounds retries;
-  a second independent cap was not added without a stall signal to attach it to.
-- Zero false stops on the control set. The rig controls are still the rewritten, unverified
-  set from the cancelled baseline, and running them costs a paid sweep.
+The 21 seconds is two attempts plus retry backoff; the important part is that it ends
+instead of crawling the schedule.
+
+False-stop check, three short real runs on healthy work:
+
+```
+run 1 exit 0, no loop error: listed files and counted them
+run 2 exit 0, no loop error: created hello.txt, read it back
+run 3 exit 0, no loop error: ran a shell command and reported the path
+```
+
+The nudge path itself still has no live run: the real model refused to make the same call
+three times on request. It is covered by unit tests and by the stored-history design.
 
 ## Gate status
 
-- Empty turn: covered by unit tests, wired into the runner.
-- Identical calls, nudge and stop: covered by unit tests, wired into the runner.
-- Injected stall: not implemented.
-- Control sweep: not run.
+- Empty turn: built, unit-tested, wired.
+- Identical calls, nudge and stop: built, unit-tested, wired.
+- Injected stall: built, unit-tested, proven against a stalling mock.
+- Zero false stops on the control set: three healthy runs passed, but the rig control
+  sweep, which is the formal check, is still a paid run and has not been done.
 
-The phase is not tagged. Two of the four checks are evidence-backed; the stall needs a
-transport change and the control sweep needs owner approval.
+No tag yet. The only open item is the paid control sweep.
 
 ## Files
 
 - `packages/core/src/session/runner/watchdog.ts`
-- `packages/core/src/session/runner/llm.ts` (inspect call and nudge publish)
+- `packages/core/src/session/runner/stall.ts`
+- `packages/core/src/session/runner/llm.ts` (inspect call, nudge, stall cap)
+- `packages/core/src/session/runner/step.ts` (stream timeout)
 - `packages/core/test/session/watchdog.test.ts`
+- `packages/core/test/session/stall.test.ts`
+- `rig/mock/server.ts` (`--stall` scaffolding)

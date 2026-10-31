@@ -16,6 +16,7 @@ const arg = (name: string, fallback: string) => {
 
 const port = Number(arg("--port", "4567"))
 const out = arg("--out", "rig/results/requests")
+const stall = args.includes("--stall")
 
 const counter = { value: 0 }
 
@@ -87,6 +88,10 @@ const server = Bun.serve({
     return new Response(
       new ReadableStream({
         start(controller) {
+          if (stall) {
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify(chunks[0])}\n\n`))
+            return
+          }
           for (const chunk of chunks) controller.enqueue(encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`))
           controller.enqueue(encoder.encode("data: [DONE]\n\n"))
           controller.close()
@@ -96,5 +101,9 @@ const server = Bun.serve({
     )
   },
 })
+
+if (stall) {
+  console.log(`mock provider stalling on http://127.0.0.1:${server.port}`)
+}
 
 console.log(`mock provider on http://127.0.0.1:${server.port} writing to ${out}`)
