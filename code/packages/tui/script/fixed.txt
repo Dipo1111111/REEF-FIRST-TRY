@@ -1,2 +1,0 @@
-﻿const first = Number(flag("first", "0"))
-const messages = (first ? fixture.messages.slice(0, first) : fixture.messages).map((message) => ({ ...message, sessionID: session.id }))
