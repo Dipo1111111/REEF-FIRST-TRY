@@ -65,6 +65,14 @@ opencode-go/deepseek-v4.1-flash --format json $prompt`.
   edits and minutes, days only for multi-session work.
 - Step-12 nudge also injects `Elapsed: Nm` as a second synthetic line.
 
+**Orientation** (2026-11-01, after the first handoff run wandered):
+
+- The system prompt now names the working directory: "The working directory is `<path>`.
+  Relative paths resolve there. Do not search outside it for project files."
+- New rule: read a file in one call when it is under 2,000 lines.
+- A "no change after N steps" nudge was built and then removed: it broke one scenario test
+  and would fire wrongly on read-only analysis tasks. The map and the read rule stayed.
+
 **Tests and images:**
 
 - New registry test: a denied tool is absent from definitions and the sandbox catalog and

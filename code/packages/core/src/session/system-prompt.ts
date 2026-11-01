@@ -2,12 +2,22 @@ export * as SessionSystemPrompt from "./system-prompt.js"
 
 import PROMPT from "./runner/prompt/system.txt"
 
-export function make(tools: string[]) {
-  return render(PROMPT, tools)
+export function make(tools: string[], workspace?: string) {
+  return render(PROMPT, tools, workspace)
 }
 
-export function render(prompt: string, tools: string[]) {
+export function render(prompt: string, tools: string[], workspace?: string) {
   const instructions: string[] = []
+  if (workspace) {
+    instructions.push(
+      `- The working directory is \`${workspace}\`. Relative paths resolve there. Do not search outside it for project files.`,
+    )
+  }
+  if (tools.includes("read")) {
+    instructions.push(
+      "- Read a file in one call when it is under 2,000 lines. Do not page through a small file in slices.",
+    )
+  }
   if (tools.includes("execute")) {
     instructions.push(
       "- Batch mechanical work: many reads, greps, or edits of different files belong in one `execute` script. Search inside the script, then call the tools it found.",

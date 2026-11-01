@@ -105,6 +105,7 @@ export const baseTranscript = (input: {
   readonly tools: Tool.Snapshot
   readonly initial: ReadonlyArray<Instructions.Rendered>
   readonly messages: ReadonlyArray<SessionMessage.Info>
+  readonly workspace?: string
 }) => {
   const providerMetadataKey = input.model.model.route.providerMetadataKey ?? input.model.model.provider
   return {
@@ -113,7 +114,10 @@ export const baseTranscript = (input: {
       SystemPart.make(
         input.agent.system
           ? input.agent.system
-          : SessionSystemPrompt.make(input.tools.definitions.map((tool) => tool.name)),
+          : SessionSystemPrompt.make(
+              input.tools.definitions.map((tool) => tool.name),
+              input.workspace,
+            ),
       ),
       {
         ...SystemPart.make(Instructions.join(input.initial)),

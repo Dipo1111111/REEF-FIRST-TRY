@@ -14,6 +14,11 @@ Build and test commands are in `memory.md`.
 next standalone boot never sweeps it. `resume_attempts` stays 0 and no restart notice is
 written. The service layer works: `test/session-execution.test.ts` passes 36/36.
 
+**Known diagnosis.** `packages/server/src/process.ts` around line 110 calls
+`installRestartContinuity` only when a `lifecycle` is present. `reef run --standalone` spawns
+`reef serve --stdio`, and `packages/cli/src/server-process.ts` passes a lifecycle only for
+service mode. Start from that line. Do not rediscover it.
+
 **Relevant code.**
 
 - `packages/core/src/session/execution/restart.ts` — `resumeSuspendedSessions`

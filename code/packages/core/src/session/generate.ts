@@ -43,6 +43,7 @@ export const generate = Effect.fn("SessionGenerate.generate")(function* (input: 
       tools: selection.tools,
       initial: history.initial,
       messages: history.messages,
+      workspace: selection.session.location.directory,
     })
     const prepared = yield* context.request.generate({
       session: selection.session,

@@ -297,6 +297,7 @@ const layer = Layer.effect(
           tools: loaded.tools,
           initial: loaded.initial,
           messages: loaded.messages,
+          workspace: loaded.session.location.directory,
         })
         const prepared = yield* context.request
           .primary({
