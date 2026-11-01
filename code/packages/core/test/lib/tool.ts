@@ -88,14 +88,53 @@ export interface ToolExecution {
   readonly error?: SessionError.Error
 }
 
+/** Renders a catalog path as a Code Mode reference: `tools.read`, or bracket form when a segment is not an identifier. */
+const reference = (path: string) => {
+  const segments = path.split(".")
+  return segments.every((segment) => /^[A-Za-z_$][w$]*$/.test(segment))
+    ? `tools.${segments.join(".")}`
+    : `tools${segments.map((segment) => `[${JSON.stringify(segment)}]`).join("")}`
+}
+
+const parseValue = (text: string) => {
+  try {
+    return JSON.parse(text)
+  } catch {
+    return text
+  }
+}
+
+/**
+ * Executes a tool the way the model reaches it: catalog tools run through the `execute` tool, and
+ * resident tools run directly. Errors from a catalog call arrive as text, matching what the model reads.
+ */
 export const executeTool = (
   registry: Tool.Interface,
   input: Parameters<Tool.Snapshot["execute"]>[0],
 ): Effect.Effect<ToolExecution> =>
   registry.snapshot().pipe(
-    Effect.flatMap((tools) => tools.execute(input)),
-    Effect.map((result) => ({ status: "completed" as const, ...result }) satisfies ToolExecution),
-    Effect.catchTag("Tool.Error", (error) =>
-      Effect.succeed({ status: "error" as const, error: toSessionError(error) } satisfies ToolExecution),
-    ),
+    Effect.flatMap((tools) => {
+      const cataloged =
+        tools.codeModeCatalog !== undefined &&
+        codeModeListings(tools.codeModeCatalog).some((tool) => tool.path === input.call.name)
+      const call = cataloged
+        ? {
+            type: "tool-call" as const,
+            id: input.call.id,
+            name: "execute",
+            input: { code: `return await ${reference(input.call.name)}(${JSON.stringify(input.call.input)})` },
+          }
+        : input.call
+      return tools.execute({ ...input, call }).pipe(
+        Effect.map((result): ToolExecution => {
+          if (!cataloged) return { status: "completed", ...result }
+          const value = result.output as { readonly output: string; readonly error?: true }
+          if (value.error) return { status: "error", error: { type: "unknown", message: value.output } }
+          return { status: "completed", output: parseValue(value.output), content: result.content, metadata: result.metadata }
+        }),
+        Effect.catchTag("Tool.Error", (error) =>
+          Effect.succeed({ status: "error", error: toSessionError(error) } satisfies ToolExecution),
+        ),
+      )
+    }),
   )

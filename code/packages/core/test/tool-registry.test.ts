@@ -159,7 +159,8 @@ describe("Tool", () => {
       const snapshot = yield* service.snapshot([{ action: "denied", resource: "*", effect: "deny" }])
       expect(snapshot.definitions.map((tool) => tool.name)).toEqual(["execute"])
       expect(codeModeListings(snapshot.codeModeCatalog!).map((tool) => tool.path)).toEqual(["allowed"])
-      expect((yield* executeTool(service, call("denied"))).status).toBe("error")
+      // The denied name is missing from the filtered catalog, so the sandbox never sees it.
+      expect((yield* snapshot.execute(call("denied")).pipe(Effect.flip)).message).toContain('"denied"')
       yield* Scope.close(scope, Exit.void)
     }),
   )

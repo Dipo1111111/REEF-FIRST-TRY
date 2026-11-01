@@ -3265,7 +3265,9 @@ describe("SessionRunnerLLM", () => {
             LLMEvent.toolCall({
               id: `hosted-${index}-${call}`,
               name: "web_search",
-              input: { query: "q" },
+              // Distinct queries: twelve identical searches with identical results are a loop
+              // signature the watchdog nudges and then fails, which is not what this test covers.
+              input: { query: `q${index}-${call}` },
               providerExecuted: true,
             }),
             LLMEvent.toolResult({
@@ -5261,6 +5263,11 @@ describe("SessionRunnerLLM", () => {
 
   scenario("interrupts runner continuation on a decline after settling an ordinary tool error", function* (s) {
     const registry = yield* Tool.Service
+    // The resident cap keeps three direct tools; clear the layer defaults so the three tools this
+    // scenario calls by name stay direct instead of overflowing into the Code Mode catalog.
+    yield* registry.transform((editor) => {
+      editor.list().forEach((tool) => editor.remove(tool.id))
+    })
     yield* transformTools(
       registry,
       {
@@ -5999,8 +6006,16 @@ describe("SessionRunnerLLM", () => {
           LLMEvent.textDelta({ id: "partial", text: "Partial" }),
           LLMEvent.textEnd({ id: "partial" }),
         )
+      // Only output-limit continuations. The loop watchdog adds its own synthetic for the repeated
+      // fixture calls, which is a separate signal this test does not measure.
       const syntheticCount = s.context.pipe(
-        Effect.map((messages) => messages.filter((message) => message.type === "synthetic").length),
+        Effect.map(
+          (messages) =>
+            messages.filter(
+              (message) =>
+                message.type === "synthetic" && message.text.startsWith("Your last response hit the output token limit"),
+            ).length,
+        ),
       )
       const expectedNudges = (count: number) => (tools === "hosted" ? count : 0)
       yield* s.llm.push(...Array.from({ length: 3 }, truncated))
