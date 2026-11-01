@@ -79,6 +79,7 @@ const description = [
   'Call tools through `tools` using only exact paths and signatures from the catalog. Do not infer or normalize tool names; preserve bracket notation such as `tools.<namespace>["tool-name"](input)`.',
   "Prefer an explicit `return`; if omitted, the final top-level expression becomes the result.",
   "Await every call whose completion matters; pending calls are interrupted when execution ends. Run independent calls concurrently with `Promise.allSettled`.",
+  "Only the returned value reaches the conversation, so return the smallest answer the job needs: ids, paths, counts, or the lines that matched, never raw tool output or a whole file.",
 ].join("\n")
 
 export const create = (
@@ -412,8 +413,16 @@ function formatResult(result: CodeMode.Result) {
       ? `Warnings:\n${result.warnings.map((item) => `- [${item.kind}] ${item.message}`).join("\n")}`
       : undefined
   const logs = result.logs && result.logs.length > 0 ? `Logs:\n${result.logs.join("\n")}` : undefined
-  return [output, warnings, logs].filter((part) => part !== undefined && part !== "").join("\n\n")
+  return cap([output, warnings, logs].filter((part) => part !== undefined && part !== "").join("\n\n"))
 }
+
+/** The return value is the only thing that reaches the model, so a dump costs every later step. */
+export const OUTPUT_LIMIT = 16 * 1024
+
+const cap = (text: string) =>
+  text.length <= OUTPUT_LIMIT
+    ? text
+    : `${text.slice(0, OUTPUT_LIMIT)}\n\n[Return truncated at ${OUTPUT_LIMIT / 1024} KB by the harness. Keep the value small next time: ids, paths, counts, or the matching lines.]`
 
 function formatValue(value: CodeMode.DataValue) {
   if (typeof value === "string") return value

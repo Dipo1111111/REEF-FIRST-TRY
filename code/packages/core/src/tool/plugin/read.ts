@@ -3,8 +3,9 @@ export * as ReadTool from "./read.js"
 import type { Context } from "@opencode/plugin/effect/plugin"
 import { basename, dirname, join } from "path"
 import { ToolFailure } from "@opencode/ai/effect"
-import { Effect, Schema } from "effect"
+import { Effect, Ref, Schema } from "effect"
 import { FSUtil } from "@opencode/util/fs-util"
+import { Hash } from "@opencode/util/hash"
 import { Location } from "../../location.js"
 import { FileAccess } from "../../file-access.js"
 import { SessionInstructions } from "../../session/instructions.js"
@@ -34,6 +35,12 @@ export const Plugin = {
     const sessionInstructions = yield* SessionInstructions.Service
     const fs = yield* FSUtil.Service
     const location = yield* Location.Service
+    // A model that already read a file tends to read it again to be sure. Remember the
+    // content of the last read per session, file, and range so a repeat returns a one-line
+    // note instead of the body. Any change to the file clears the match.
+    const seen = yield* Ref.make<ReadonlyMap<string, string>>(new Map())
+    const SEEN_LIMIT = 256
+    const UNCHANGED_MIN = 200
 
     yield* ctx.tool
       .transform((editor) =>
@@ -105,13 +112,47 @@ export const Plugin = {
                 Effect.catch(() => Effect.void),
                 Effect.catchDefect(() => Effect.void),
               )
-              return { output: result.content, path: result.path }
+              return { output: result.content, path: result.path, absolute: result.target.absolute }
             }).pipe(
-              Effect.map((result) => ({
-                output: result.output,
-                content: toModelContent(result.path, input.offset, result.output),
-                metadata: { truncated: result.output.type === "file" ? false : result.output.truncated },
-              })),
+              Effect.flatMap((result) => {
+                const metadata = {
+                  truncated: result.output.type === "file" ? false : result.output.truncated,
+                }
+                const text =
+                  result.output.type === "file" || result.output.type === "text-page"
+                    ? result.output.content
+                    : undefined
+                if (text === undefined || text.length < UNCHANGED_MIN)
+                  return Effect.succeed({
+                    output: result.output,
+                    content: toModelContent(result.path, input.offset, result.output),
+                    metadata,
+                  })
+                const key = [context.sessionID, result.absolute, input.offset ?? 0, input.limit ?? 0].join("\0")
+                const hash = Hash.fast(text)
+                return Effect.gen(function* () {
+                  const prior = (yield* Ref.get(seen)).get(key)
+                  yield* Ref.update(seen, (map) => {
+                    const next = new Map(map)
+                    next.set(key, hash)
+                    for (const oldest of next.keys()) {
+                      if (next.size <= SEEN_LIMIT) break
+                      next.delete(oldest)
+                    }
+                    return next
+                  })
+                  const body = result.output.type === "file" ? text.replace(/\n$/, "") : text
+                  const start = result.output.type === "text-page" ? result.output.offset : 1
+                  return {
+                    output: result.output,
+                    content:
+                      prior === hash
+                        ? unchangedContent(result.path, start, body === "" ? 0 : body.split("\n").length)
+                        : toModelContent(result.path, input.offset, result.output),
+                    metadata,
+                  }
+                })
+              }),
               Effect.mapError((error) => {
                 if (error instanceof ToolFailure) return error
                 const message =
@@ -236,3 +277,9 @@ export const toModelContent = (path: string, offset: number | undefined, output:
     content.push(`[Output truncated. Continue reading with offset: ${output.next}]`)
   return content.join("\n")
 }
+
+/** Returned instead of a repeated body when the same range has the same content. */
+export const unchangedContent = (path: string, start: number, lines: number) =>
+  lines === 0
+    ? `Read file ${path}, 0 lines: unchanged since the earlier read in this session.`
+    : `Read file ${path}, lines ${start}-${start + lines - 1}: unchanged since the earlier read in this session. Use the content you already have; do not read it again.`

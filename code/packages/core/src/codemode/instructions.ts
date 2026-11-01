@@ -14,6 +14,10 @@ ${hasMoreTools ? `The catalog is partial. Before calling a tool that is not list
 
 - ${searchSignature}` : "The catalog is complete. Do not guess tool names."}
 
+## What comes back
+
+Raw tool results stay inside the sandbox. Only the value you return reaches the conversation, so return the smallest answer that does the job: counts, ids, paths, or the matching lines. Never return a whole file, a full log, or the same data twice. Anything over 16 KB is truncated.
+
 ## Code Mode tools (call only inside \`execute\`)`
 
 export function render(catalog: CodeModeCatalog.Summary) {
