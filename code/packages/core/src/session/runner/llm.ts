@@ -2,7 +2,7 @@ export * as SessionRunnerLLM from "./llm.js"
 
 import { Message } from "@opencode/ai/effect"
 import { and, desc, eq, inArray, sql } from "drizzle-orm"
-import { Cause, Effect, Exit, FiberMap, Layer } from "effect"
+import { Cause, DateTime, Effect, Exit, FiberMap, Layer } from "effect"
 import { Database } from "../../database/database.js"
 import { Bus } from "../../bus.js"
 import { LocationLifecycle } from "../../location-lifecycle.js"
@@ -273,6 +273,12 @@ const layer = Layer.effect(
         ) {
           budgetNudged = true
           yield* bus.publish(SessionEvent.Synthetic, { sessionID, text: SessionStepBudget.NUDGE })
+          const elapsed = Math.floor((Date.now() - DateTime.toEpochMillis(loaded.session.time.created)) / 60_000)
+          if (elapsed > 0)
+            yield* bus.publish(SessionEvent.Synthetic, {
+              sessionID,
+              text: `Elapsed: ${elapsed}m. Estimate the remaining work in edits and minutes, not days.`,
+            })
           continue
         }
         const estimate = SessionCompaction.estimatePrompt(loaded)

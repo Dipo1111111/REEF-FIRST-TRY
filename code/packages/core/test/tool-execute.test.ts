@@ -50,10 +50,16 @@ test("execute rejects filesystem fetches", async () => {
 
 test("execute caps the value returned to the model", async () => {
   const result = await Effect.runPromise(
-    createCodeMode(new Map()).execute({ code: 'return "x".repeat(60000)' }, context),
+    createCodeMode(new Map()).execute(
+      { code: 'return "A".repeat(20000) + "B".repeat(20000) + "TAILMARK"' },
+      context,
+    ),
   )
 
   expect(result.output.output.length).toBeLessThan(17 * 1024)
+  expect(result.output.output.startsWith("A")).toBe(true)
+  expect(result.output.output).toContain("TAILMARK")
+  expect(result.output.output).toContain("bytes omitted")
   expect(result.output.output).toContain("Return truncated at 16 KB")
 })
 

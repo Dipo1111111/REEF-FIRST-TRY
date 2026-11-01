@@ -37,10 +37,12 @@ export const Plugin = {
     const location = yield* Location.Service
     // A model that already read a file tends to read it again to be sure. Remember the
     // content of the last read per session, file, and range so a repeat returns a one-line
-    // note instead of the body. Any change to the file clears the match.
-    const seen = yield* Ref.make<ReadonlyMap<string, string>>(new Map())
+    // note instead of the body. Any change to the file clears the match, and entries expire
+    // so compaction cannot leave the note standing in for content the transcript has lost.
+    const seen = yield* Ref.make<ReadonlyMap<string, { hash: string; at: number }>>(new Map())
     const SEEN_LIMIT = 256
     const UNCHANGED_MIN = 200
+    const UNCHANGED_TTL = 20 * 60_000
 
     yield* ctx.tool
       .transform((editor) =>
@@ -130,11 +132,12 @@ export const Plugin = {
                   })
                 const key = [context.sessionID, result.absolute, input.offset ?? 0, input.limit ?? 0].join("\0")
                 const hash = Hash.fast(text)
+                const now = Date.now()
                 return Effect.gen(function* () {
                   const prior = (yield* Ref.get(seen)).get(key)
                   yield* Ref.update(seen, (map) => {
                     const next = new Map(map)
-                    next.set(key, hash)
+                    next.set(key, { hash, at: now })
                     for (const oldest of next.keys()) {
                       if (next.size <= SEEN_LIMIT) break
                       next.delete(oldest)
@@ -143,12 +146,12 @@ export const Plugin = {
                   })
                   const body = result.output.type === "file" ? text.replace(/\n$/, "") : text
                   const start = result.output.type === "text-page" ? result.output.offset : 1
+                  const unchanged = prior !== undefined && prior.hash === hash && now - prior.at < UNCHANGED_TTL
                   return {
                     output: result.output,
-                    content:
-                      prior === hash
-                        ? unchangedContent(result.path, start, body === "" ? 0 : body.split("\n").length)
-                        : toModelContent(result.path, input.offset, result.output),
+                    content: unchanged
+                      ? unchangedContent(result.path, start, body === "" ? 0 : body.split("\n").length)
+                      : toModelContent(result.path, input.offset, result.output),
                     metadata,
                   }
                 })

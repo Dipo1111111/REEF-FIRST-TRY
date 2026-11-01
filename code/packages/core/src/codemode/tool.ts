@@ -422,7 +422,12 @@ export const OUTPUT_LIMIT = 16 * 1024
 const cap = (text: string) =>
   text.length <= OUTPUT_LIMIT
     ? text
-    : `${text.slice(0, OUTPUT_LIMIT)}\n\n[Return truncated at ${OUTPUT_LIMIT / 1024} KB by the harness. Keep the value small next time: ids, paths, counts, or the matching lines.]`
+    : [
+        text.slice(0, 2 * 1024),
+        `[... ${text.length - 8 * 1024} bytes omitted ...]`,
+        text.slice(-6 * 1024),
+        `[Return truncated at ${OUTPUT_LIMIT / 1024} KB by the harness. Keep the value small next time: ids, paths, counts, or the matching lines.]`,
+      ].join("\n\n")
 
 function formatValue(value: CodeMode.DataValue) {
   if (typeof value === "string") return value
