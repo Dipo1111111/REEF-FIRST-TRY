@@ -44,8 +44,10 @@ describe("ToolOutput", () => {
           if (typeof outputPath !== "string") return
           expect(yield* fs.readFileString(outputPath)).toBe("one\ntwo\nthree")
           expect(result.content).toEqual([
-            { type: "text", text: "one\ntwo" },
-            { type: "text", text: `[showing lines 1-2 of 3; full output saved to ${outputPath}]` },
+            { type: "text", text: "one" },
+            { type: "text", text: "two" },
+            { type: "text", text: `[showing the first 2 and last 1 of 3 lines; full output saved to ${outputPath}]` },
+            { type: "text", text: "three" },
           ])
         }),
       { maxLines: 2, maxBytes: 1_000 },
@@ -61,7 +63,7 @@ describe("ToolOutput", () => {
             { type: "text", text: "one" },
             {
               type: "text",
-              text: expect.stringMatching(/^\[showing lines 1-1 of 2; full output saved to .+\]$/),
+              text: expect.stringMatching(/^\[showing the first 1 and last 0 of 2 lines; full output saved to .+\]$/),
             },
           ])
         }),
@@ -79,9 +81,10 @@ describe("ToolOutput", () => {
           })
           expect(result.content).toEqual([
             { type: "text", text: "before" },
-            file,
             { type: "text", text: "after" },
-            { type: "text", text: expect.stringMatching(/^\[showing lines 1-2 of 3; full output saved to /) },
+            { type: "text", text: expect.stringMatching(/^\[showing the first 2 and last 1 of 3 lines; full output saved to /) },
+            { type: "text", text: "omitted" },
+            file,
           ])
         }),
       { maxLines: 2, maxBytes: 1_000 },
@@ -122,17 +125,28 @@ describe("ToolOutput", () => {
     ),
   )
 
-  it.live("reports a trailing newline omitted by the byte limit", () =>
+  it.live("does not count a trailing newline against the byte limit", () =>
     withStore(
       (output) =>
         Effect.gen(function* () {
-          const result = yield* output.truncate({ content: [{ type: "text", text: "one\n" }] })
-          expect(result.content).toEqual([
-            { type: "text", text: "one" },
-            { type: "text", text: expect.stringMatching(/^\[showing lines 1-1 of 1; full output saved to /) },
-          ])
+          expect(yield* output.truncate({ content: [{ type: "text", text: "one\n" }] })).toEqual({
+            content: [{ type: "text", text: "one\n" }],
+            metadata: { truncated: false },
+          })
         }),
-      { maxLines: 2, maxBytes: 3 },
+      { maxLines: 2, maxBytes: 4 },
+    ),
+  )
+
+  it.live("gives file reads more room than command output", () =>
+    withStore((output) =>
+      Effect.gen(function* () {
+        const text = Array.from({ length: 1_000 }, (_, index) => `line ${index}`).join("\n")
+        const shell = yield* output.truncate({ content: [{ type: "text", text }] }, "shell")
+        const read = yield* output.truncate({ content: [{ type: "text", text }] }, "read")
+        expect(shell.metadata?.truncated).toBe(true)
+        expect(read.metadata).toEqual({ truncated: false })
+      }),
     ),
   )
 

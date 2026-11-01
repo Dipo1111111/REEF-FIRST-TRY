@@ -12,6 +12,12 @@ import { State } from "./state.js"
 
 export const MAX_LINES = 800
 export const MAX_BYTES = 8 * 1024 // 8 KiB
+/**
+ * File contents are the model's working memory, not log noise. Cutting the middle out of a source
+ * file leaves the model unable to read it at all, since reading the saved output hits the same cap.
+ */
+export const READ_MAX_LINES = 1_000
+export const READ_MAX_BYTES = 24 * 1024 // 24 KiB
 export const RETENTION = Duration.days(7)
 export const DIRECTORY = "tool-output"
 
@@ -29,7 +35,7 @@ export type Editor = {
 }
 
 export interface Interface extends State.Transformable<Editor> {
-  readonly truncate: (result: Result) => Effect.Effect<Result>
+  readonly truncate: (result: Result, name?: string) => Effect.Effect<Result>
   /** Writes bytes the model cannot receive inline to a retained file and returns its path. */
   readonly save: (bytes: Uint8Array, extension: string) => Effect.Effect<string>
   readonly cleanup: () => Effect.Effect<void>
@@ -66,11 +72,11 @@ const layer = Layer.effect(
       }),
     })
 
-    const truncate = Effect.fnUntraced(function* (result: Result) {
+    const truncate = Effect.fnUntraced(function* (result: Result, name?: string) {
       if (result.metadata?.truncated !== undefined) return result
       const content = result.content
       const text = content.flatMap((item) => (item.type === "text" ? [item.text] : [])).join("\n")
-      const limits = state.get()
+      const limits = name === "read" ? { maxLines: READ_MAX_LINES, maxBytes: READ_MAX_BYTES } : state.get()
       const lines = text.split("\n")
       if (text.endsWith("\n")) lines.pop()
       const totalBytes = Buffer.byteLength(text, "utf-8")

@@ -139,7 +139,7 @@ export const make = Effect.gen(function* () {
                 return elapsed >= 1_000 ? withDuration(result, elapsed) : result
               }),
             ).pipe(
-                Effect.flatMap(toolOutput.truncate),
+                Effect.flatMap((result) => toolOutput.truncate(result, event.name)),
                 Effect.flatMap((outcome) => publisher.toolExecution(event.id, event.name, outcome)),
                 Effect.catchTag("Tool.Error", (error) =>
                   publisher.failTool(event.id, toSessionError(error), error.metadata).pipe(Effect.asVoid),

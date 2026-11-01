@@ -159,7 +159,7 @@ for (const fixture of [
   )
 }
 
-it.effect("records the cost the endpoint reports instead of the catalog price", () =>
+it.effect("fills in the catalog price when the endpoint reports none", () =>
   Effect.gen(function* () {
     const db = (yield* Database.Service).db
     const llm = yield* TestLLM.Test
@@ -223,7 +223,11 @@ it.effect("records the cost the endpoint reports instead of the catalog price", 
       .from(SessionMessageTable)
       .where(eq(SessionMessageTable.id, assistantMessageID))
       .get()
-    expect(message?.data).toMatchObject({ finish: "stop", cost: 0 })
-    expect(yield* db.select().from(SessionTable).where(eq(SessionTable.id, sessionID)).get()).toMatchObject({ cost: 0 })
+    // The gateway reports zero for paid models, so a reported zero falls back to the catalog price:
+    // 10 input tokens at $1/M plus 4 output tokens at $2/M.
+    expect(message?.data).toMatchObject({ finish: "stop" })
+    expect((message?.data as { cost: number }).cost).toBeCloseTo(0.000018, 8)
+    const session = yield* db.select().from(SessionTable).where(eq(SessionTable.id, sessionID)).get()
+    expect(session?.cost).toBeCloseTo(0.000018, 8)
   }),
 )
