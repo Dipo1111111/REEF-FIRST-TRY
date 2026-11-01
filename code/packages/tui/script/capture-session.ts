@@ -1,4 +1,4 @@
-﻿// Renders a real session from design/fixtures/session.json so the transcript can be
+// Renders a real session from design/fixtures/session.json so the transcript can be
 // designed without a model call.
 //
 //   bun run script/capture-session.ts --width 120 --height 40 --name session-120x40
@@ -8,7 +8,8 @@ import { Effect, FileSystem } from "effect"
 import { Global } from "@opencode/util/global"
 import { mkdir } from "node:fs/promises"
 import path from "node:path"
-import { createEventStream, createFetch, directory, json } from "../test/fixture/tui-client"
+import { createFetch, createEventStream, directory, json } from "../test/fixture/tui-client"
+import { waitForHighlightedFrame } from "../test/fixture/frame"
 import { tmpdir } from "../test/fixture/fixture"
 
 const args = process.argv.slice(2)
@@ -29,10 +30,13 @@ const session = { ...fixture.session, location: { directory } }
 const first = Number(flag("first", "0"))
 const messages = (first ? fixture.messages.slice(0, first) : fixture.messages).map((message) => ({ ...message, sessionID: session.id }))
 
+await Bun.write("C:/Users/USER/Documents/reef/design/frames/stage.txt", "start")
 await using state = await tmpdir()
+await Bun.write("C:/Users/USER/Documents/reef/design/frames/stage.txt", "tmpdir")
 const setup = await createTestRenderer({ width, height, kittyKeyboard: true })
 await setup.renderer.setupTerminal()
 setup.renderer.start()
+await Bun.write("C:/Users/USER/Documents/reef/design/frames/stage.txt", "renderer")
 
 const events = createEventStream()
 const calls = createFetch(async (url) => {
@@ -51,6 +55,7 @@ const calls = createFetch(async (url) => {
 
 const server = Bun.serve({ port: 0, idleTimeout: 0, fetch: (request) => calls.fetch(request) })
 
+await Bun.write("C:/Users/USER/Documents/reef/design/frames/stage.txt", "server")
 const { run } = await import("../src/app")
 void Effect.runPromise(
   run({
@@ -68,21 +73,17 @@ void Effect.runPromise(
 )
 
 console.log("server up: " + server.url)
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 setTimeout(() => {
   console.log("watchdog: capture did not finish")
   process.exit(3)
-}, 90_000)
-let frame = ""
-for (let attempt = 0; attempt < 40; attempt++) {
-  await sleep(250)
-  frame = setup.captureCharFrame()
-  if (frame.includes("architect")) break
-}
-console.log("frame wait done: " + frame.length)
-await Promise.race([setup.renderOnce(), sleep(4000)])
+}, 120_000)
+await Bun.write("C:/Users/USER/Documents/reef/design/frames/stage.txt", "running")
+await waitForHighlightedFrame(setup, (frame) => frame.includes("architect"))
+console.log("frame wait done")
+await Bun.write("C:/Users/USER/Documents/reef/design/frames/stage.txt", "waited")
+await setup.renderOnce()
 
-frame = setup.captureCharFrame()
+const frame = setup.captureCharFrame()
 const captured = setup.captureSpans()
 await mkdir(out, { recursive: true })
 const file = `${name}-${width}x${height}`

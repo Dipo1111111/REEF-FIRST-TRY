@@ -259,6 +259,12 @@ export function Session(props: {
     commands: [{ bind: "escape,ctrl+c", title: "Close sidebar", group: "Session", run: props.onToggleSidebar }],
   }))
   const contentWidth = createMemo(() => (props.width ?? dimensions().width - props.verticalTabsWidth) - 4)
+  // One reading measure for the transcript, the title and the composer, so the column lines up.
+  const gutter = createMemo(() => {
+    const inner = Math.max(0, contentWidth())
+    const measure = Math.min(Math.floor(inner * 0.8), 110)
+    return Math.max(0, Math.floor((inner - measure) / 2))
+  })
   const models = createMemo(() => data.location.model.list(location()) ?? [])
 
   const scrollAcceleration = createMemo(() => getScrollAcceleration(config))
@@ -1507,12 +1513,12 @@ export function Session(props: {
           paddingRight={dimensions().width < 44 ? 1 : 2}
         >
           <Show when={session()}>
-            <box flexShrink={0} paddingBottom={1} flexDirection="row" gap={2}>
+            <box flexShrink={0} paddingBottom={1} paddingLeft={gutter()} paddingRight={gutter()} flexDirection="row" gap={2}>
               <text fg={theme.text.muted} wrapMode="none" truncate flexGrow={1}>
                 {session()!.title}
               </text>
             </box>
-            <box flexGrow={1} minHeight={0} position="relative">
+            <box flexGrow={1} minHeight={0} position="relative" paddingLeft={gutter()} paddingRight={gutter()}>
               <scrollbox
                 ref={(r) => {
                   scroll = r
