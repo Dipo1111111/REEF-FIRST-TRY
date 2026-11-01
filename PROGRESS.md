@@ -37,5 +37,7 @@ Started: 2026-11-01. Owner: overnight agent. User asleep; no blocking on questio
 
 ## Log
 - Config repaired after a bad bulk edit; JSON re-validated.
-- Build 0.1.0 (00:51), pack, and clean install all pass.
-- Packaged binary boots to the new home in a pty: wordmark, welcome text, rounded frames, new placeholder confirmed present in the frame stream.
+- Build 0.1.0 (00:51 and 01:00), pack, and clean install all pass.
+- Packaged binary boots to the new home in a pty: welcome text and the `Reef 0.1.0` line confirmed in the frame stream.
+- Welcome panel now carries version and model (`Reef 0.1.0 · <model>`).
+- Commits: 87dc3fc (home and composer rebuild), 5bcda12 (frames untracked), 18f5173 (version line).
