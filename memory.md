@@ -73,9 +73,7 @@ opencode-go/deepseek-v4.1-flash --format json $prompt`.
 - A "no change after N steps" nudge was built and then removed: it broke one scenario test
   and would fire wrongly on read-only analysis tasks. The map and the read rule stayed.
 
-**Long runs** (2026-11-01, after the second handoff run stopped at step 12 with the fix in hand):
-
-- `reef run --steps 40 --ceiling 80` sets the turn budget and the hard ceiling. The handler
+**Long runs** (2026-11-01, after the second handoff run stopped at step 12 with the fix in hand):- `reef run --steps 40 --ceiling 80` sets the turn budget and the hard ceiling. The handler
   writes `REEF_STEP_BUDGET` / `REEF_STEP_CEILING` before the server child is spawned, so the
   flag works in standalone and stdio mode. The bare `reef` command (TUI) takes the same two
   flags. A managed background service keeps its own boot environment, so the flag does not
@@ -86,6 +84,20 @@ opencode-go/deepseek-v4.1-flash --format json $prompt`.
   are only for overriding it up or down.
 - The step-budget tests read `DEFAULT_BUDGET` / `DEFAULT_CEILING` instead of literals, so the
   numbers can move without test churn.
+
+**Stability and spend** (2026-11-01, after the escape spam and the Flat cost meter):
+
+- Terminal teardown: `shutdownRenderer` destroys, waits at most 2s, retries once, writes
+  `\x1b[0m\x1b[?25h\x1b[?1049l`, and forces exit when a non-handoff run still owns a live
+  renderer. `resetTerminal` also runs on `process.once("exit")`. Fixes the frame spam where a
+  live renderer kept painting after the terminal returned to cooked mode.
+- Cost: `SessionUsage.record` now falls back to catalog pricing when an endpoint reports zero.
+  OpenCode Go reports 0, so every session recorded $0 and both footers hid the line. A verified
+  one-word run now records $0.00076.
+- Footer and sidebar show cost beside context tokens, as `<$0.01` below a cent. Older sessions
+  keep cost 0 because they were recorded before the fix.
+- Prompt rule: batch at most two file reads per `execute` call. Three overflows the 16 KB return
+  cap, which is what forced the re-reads in the first handoff run.
 
 **Tests and images:**
 

@@ -104,7 +104,7 @@ import { CommandPaletteDialog } from "./component/command-palette"
 import { COMMAND_PALETTE_COMMAND, Keymap, type KeymapCommand } from "./context/keymap"
 
 import { DialogVariant } from "./component/dialog-variant"
-import { destroyRenderer, setTerminalTitle } from "./util/renderer"
+import { destroyRenderer, resetTerminal, setTerminalTitle, shutdownRenderer } from "./util/renderer"
 import { cliErrorMessage, errorFormat } from "./util/error"
 import { AttentionProvider } from "./context/attention"
 import { StorageProvider, useStorage } from "./context/storage"
@@ -266,11 +266,7 @@ export const run = Effect.fn("Tui.run")(function* (input: TuiInput) {
         if (handoff) {
           handoff.renderer.useMouse = options.useMouse
           return yield* Effect.acquireRelease(Effect.succeed(handoff.renderer), (renderer) =>
-            Effect.promise(async () => {
-              destroyRenderer(renderer)
-              // closed rejects when the terminal is gone or the final flush times out; nothing is left to restore.
-              await renderer.closed.catch(() => {})
-            }),
+            Effect.promise(() => shutdownRenderer(renderer, false)),
           )
         }
         if (process.env.OPENCODE_DRIVE) {
@@ -282,14 +278,15 @@ export const run = Effect.fn("Tui.run")(function* (input: TuiInput) {
             try: () => createCliRenderer(options),
             catch: (error) => (error instanceof Error ? error : new Error(String(error))),
           }),
-          (renderer) =>
-            Effect.promise(async () => {
-              destroyRenderer(renderer)
-              await renderer.closed.catch(() => {})
-            }),
+          (renderer) => Effect.promise(() => shutdownRenderer(renderer, true)),
         )
       })
       renderer.setMaxListeners(15)
+      // A signal that skips the scope still leaves a cooked-mode prompt behind.
+      yield* Effect.acquireRelease(
+        Effect.sync(() => process.once("exit", resetTerminal)),
+        () => Effect.sync(() => process.off("exit", resetTerminal)),
+      )
       const clipboard = yield* Effect.acquireRelease(
         Effect.sync(() => createTuiClipboard(renderer)),
         (clipboard) =>

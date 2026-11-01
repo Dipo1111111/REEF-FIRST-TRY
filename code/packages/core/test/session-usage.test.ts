@@ -22,9 +22,12 @@ test("records the cost the endpoint reports instead of the catalog price", () =>
   )
 })
 
-test("keeps a reported zero cost, as for a request a subscription covered", () => {
-  expect(SessionUsage.record(new Usage({ nonCachedInputTokens: 1_000_000, cost: 0 }), costs)).toEqual({
-    tokens: { input: 1_000_000, output: 0, reasoning: 0, cache: { read: 0, write: 0 } },
-    cost: Money.USD.zero,
-  })
+test("falls back to the catalog when a subscription reports zero", () => {
+  expect(
+    SessionUsage.record(new Usage({ nonCachedInputTokens: 1_000_000, cost: 0 }), costs).cost,
+  ).toBe(Money.USD.make(1))
+})
+
+test("keeps a reported zero when the catalog has no price", () => {
+  expect(SessionUsage.record(new Usage({ nonCachedInputTokens: 1_000_000, cost: 0 }), []).cost).toBe(Money.USD.zero)
 })

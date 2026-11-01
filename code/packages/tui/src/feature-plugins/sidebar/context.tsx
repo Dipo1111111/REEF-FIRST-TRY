@@ -1,11 +1,7 @@
 import { Plugin } from "@opencode/plugin/tui"
 import { createMemo, Show } from "solid-js"
 import { contextUsage } from "../../util/session"
-
-const money = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-})
+import { formatCost } from "../../util/money"
 
 export function SidebarContext(props: { context: Plugin.Context; sessionID: string }) {
   const theme = props.context.theme
@@ -34,7 +30,7 @@ export function SidebarContext(props: { context: Plugin.Context; sessionID: stri
           )}
         </Show>
         <Show when={cost() > 0}>
-          <text fg={theme.text.muted}>{money.format(cost())} spent</text>
+          <text fg={theme.text.muted}>{formatCost(cost())} spent</text>
         </Show>
       </box>
     </Show>

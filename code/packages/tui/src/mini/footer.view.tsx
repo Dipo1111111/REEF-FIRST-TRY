@@ -12,6 +12,7 @@ import { useRenderer, useTerminalDimensions } from "@opentui/solid"
 import { TextBuffer, TextBufferView } from "@opentui/core"
 import { For, Match, Show, Switch, createEffect, createMemo, createSignal, onCleanup } from "solid-js"
 import { OneCellSpinner } from "../component/one-cell-spinner"
+import { formatCost } from "../util/money"
 import { WORK_SPINNERS, SEED_LAUNCH, SEED_MONO } from "../ui/one-cell-motion"
 import { entrySplashLayout } from "./splash"
 import {
@@ -63,7 +64,6 @@ import type {
 } from "./types"
 import type { RunTheme } from "./theme"
 
-const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" })
 
 const EMPTY_BORDER = {
   topLeft: "",
@@ -214,7 +214,7 @@ export function RunFooterView(props: RunFooterViewProps) {
     const current = usage()
     return current && current.tokens > 0 ? formatContextUsage(current.tokens, current.percent) : ""
   })
-  const cost = createMemo(() => (usage()?.cost ? money.format(usage()!.cost!) : ""))
+  const cost = createMemo(() => (usage()?.cost ? formatCost(usage()!.cost!) : ""))
   const takeover = createMemo(() => exiting() || (busy() && armed()) || !!props.state().notice.trim())
   const footerDetails = createMemo(() => props.miniSettings().footer === "show" && !takeover())
   const interruptLabel = createMemo(() => {

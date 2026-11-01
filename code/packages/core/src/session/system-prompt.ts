@@ -16,6 +16,7 @@ export function render(prompt: string, tools: string[], workspace?: string) {
   if (tools.includes("read")) {
     instructions.push(
       "- Read a file in one call when it is under 2,000 lines. Do not page through a small file in slices.",
+      "- Batch at most two file reads in one `execute` call. Three or more overflows the return cap and forces a re-read.",
     )
   }
   if (tools.includes("execute")) {

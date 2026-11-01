@@ -43,11 +43,14 @@ export type Recorded = {
 
 export const record = (usage: Usage | undefined, costs: Model.Info["cost"]): Recorded => {
   const normalized = tokens(usage)
+  const catalog = calculateCost(costs, normalized)
+  // A reported zero means the endpoint billed out of band, usually a subscription. Falling back
+  // to the catalog keeps the meter useful: spend shows as an estimate instead of a flat zero.
+  // A model with no catalog price still records zero.
+  const billed = usage?.cost === undefined ? undefined : Money.USD.make(usage.cost)
   return {
     tokens: normalized,
-    // What an endpoint says it charged beats the catalog, which can't see its peak pricing, subscriptions or routing.
-    // A reported zero is authoritative.
-    cost: usage?.cost === undefined ? calculateCost(costs, normalized) : Money.USD.make(usage.cost),
+    cost: billed === undefined || (billed === 0 && catalog > 0) ? catalog : billed,
   }
 }
 
