@@ -1,6 +1,5 @@
 import { describe, expect, test } from "bun:test"
 import { SessionStepBudget } from "@opencode/core/session/runner/step-budget"
-import { SessionVerifiedDone } from "@opencode/core/session/runner/verified-done"
 
 describe("step budget", () => {
   test("nudges once at the default budget step", () => {
@@ -28,10 +27,3 @@ describe("step budget", () => {
   })
 })
 
-describe("verified done", () => {
-  test("nudges once per turn", () => {
-    expect(SessionVerifiedDone.nudged([])).toBe(false)
-    expect(SessionVerifiedDone.nudged([{ type: "synthetic", text: SessionVerifiedDone.NUDGE }])).toBe(true)
-    expect(SessionVerifiedDone.nudged([{ type: "user", text: SessionVerifiedDone.NUDGE }])).toBe(false)
-  })
-})

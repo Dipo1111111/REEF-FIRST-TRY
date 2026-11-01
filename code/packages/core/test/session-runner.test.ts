@@ -2779,7 +2779,9 @@ describe("SessionRunnerLLM", () => {
               reason: { normalized: "stop" },
               providerMetadata: { [s.currentModel.provider]: { responseId: "summary" } },
             },
+            LLMEvent.textStart({ id: "prefix-summary" }),
             LLMEvent.textDelta({ id: "prefix-summary", text: "## Objective\n- Checkpoint summary" }),
+            LLMEvent.textEnd({ id: "prefix-summary" }),
           ),
         )
         yield* s.runPrompt("Review these changes")
