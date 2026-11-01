@@ -358,10 +358,12 @@ const make = Effect.gen(function* () {
     return version
   })
 
+  // Reef ships its own npm package and has no upstream release feed. Anything installed
+  // through npm reports itself as current, so the update prompt never offers OpenCode.
   const latest = (selected?: Method) =>
     (selected ? Effect.succeed(selected) : method()).pipe(
       Effect.flatMap((method) =>
-        method === "winget" ? wingetVersion() : release(method).pipe(Effect.map((data) => data.version)),
+        method === "winget" ? wingetVersion() : Effect.succeed(OPENCODE_VERSION),
       ),
     )
 

@@ -80,7 +80,12 @@ export function Dialog(
           width={dialogWidth(props.size ?? "medium")}
           maxWidth={dimensions().width - 2}
           backgroundColor={theme.background.base}
-          paddingTop={1}
+          border
+          borderStyle="rounded"
+          borderColor={theme.border.base}
+          paddingTop={0}
+          paddingLeft={1}
+          paddingRight={1}
         >
           {props.children}
         </box>
