@@ -25,5 +25,15 @@ describe("step budget", () => {
     expect(SessionStepBudget.nudged([{ type: "synthetic", text: "something else" }])).toBe(false)
     expect(SessionStepBudget.nudged([{ type: "user", text: SessionStepBudget.NUDGE }])).toBe(false)
   })
+
+  test("the ceiling stops the turn after the default budget", () => {
+    expect(SessionStepBudget.exhausted(23, undefined)).toBe(false)
+    expect(SessionStepBudget.exhausted(24, undefined)).toBe(true)
+  })
+
+  test("an explicit agent limit wins over the default ceiling", () => {
+    expect(SessionStepBudget.exhausted(24, 50)).toBe(false)
+    expect(SessionStepBudget.exhausted(50, 50)).toBe(true)
+  })
 })
 

@@ -10,7 +10,8 @@ export function render(prompt: string, tools: string[]) {
   const instructions: string[] = []
   if (tools.includes("execute")) {
     instructions.push(
-      "- Prefer one `execute` script that makes many tool calls over many separate tool calls. A script can do dozens of calls in a single request; every separate call costs a full round trip. Search inside the script, then call the tools it found.",
+      "- Batch mechanical work: many reads, greps, or edits of different files belong in one `execute` script. Search inside the script, then call the tools it found.",
+      "- Do not batch exploratory or visual work. When the next step depends on what you just saw, make one change, look at the result, then decide. Small iterations beat one large blind edit.",
       "- Do not write helper scripts to disk and run them; put the code in the script body. Verify a result once, then report it.",
     )
   }

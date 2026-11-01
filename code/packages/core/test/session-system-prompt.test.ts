@@ -7,9 +7,16 @@ test("renders the default system prompt instructions", () => {
   expect(prompt).toContain("Use the edit tool for targeted changes to existing text files")
 })
 
-test("asks for one script instead of one call per step when execute is resident", () => {
+test("batches mechanical work but not exploratory or visual work when execute is resident", () => {
   expect(SessionSystemPrompt.make(["execute", "question"])).toContain(
-    "Prefer one `execute` script that makes many tool calls over many separate tool calls",
+    "Batch mechanical work: many reads, greps, or edits of different files belong in one `execute` script",
   )
-  expect(SessionSystemPrompt.make(["read", "edit"])).not.toContain("Prefer one `execute` script")
+  expect(SessionSystemPrompt.make(["execute", "question"])).toContain(
+    "Do not batch exploratory or visual work",
+  )
+  expect(SessionSystemPrompt.make(["read", "edit"])).not.toContain("Batch mechanical work")
+})
+
+test("asks for one verification pass, then a stop", () => {
+  expect(SessionSystemPrompt.make(["read", "edit"])).toContain("One verification pass is enough")
 })

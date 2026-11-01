@@ -35,6 +35,7 @@ import { ToolOutput } from "../../tool-output.js"
 import { Plugin } from "../../plugin.js"
 import { PluginHooks } from "../../plugin/hooks.js"
 import { MAX_STEPS_PROMPT } from "./max-steps.js"
+import { SessionStepBudget } from "./step-budget.js"
 
 const CONTINUE_AFTER_INCOMPLETE_STREAM =
   "The previous response was interrupted. Continue from where you left off without repeating completed content."
@@ -237,6 +238,7 @@ const layer = Layer.effect(
       let recoverOverflow = true
       let recoverContinuation = true
       let stalls = 0
+      let budgetNudged = false
       while (true) {
         // Reuse boundary preparation once; retries refresh context without delivering more input.
         const loaded = initial ?? (yield* prepareContext(sessionID).pipe(Effect.flatMap(context.load)))
@@ -262,6 +264,17 @@ const layer = Layer.effect(
           yield* bus.publish(SessionEvent.Synthetic, { sessionID, text: SessionRunnerWatchdog.NUDGE })
           continue
         }
+        // Ask once, at the budget step, to land the smallest version of the work. The ceiling
+        // below disables tools if the model keeps going anyway.
+        if (
+          !budgetNudged &&
+          !SessionStepBudget.nudged(loaded.messages) &&
+          SessionStepBudget.due(step, undefined)
+        ) {
+          budgetNudged = true
+          yield* bus.publish(SessionEvent.Synthetic, { sessionID, text: SessionStepBudget.NUDGE })
+          continue
+        }
         const estimate = SessionCompaction.estimatePrompt(loaded)
         const compacted = yield* compaction.compact({ reason: "auto", context: loaded, estimate })
         if (compacted.status === "failed") return yield* new StepFailedError({ error: compacted.error })
@@ -270,7 +283,8 @@ const layer = Layer.effect(
           continue
         }
         yield* compaction.precompute(Effect.succeed(loaded), estimate)
-        const stepLimitReached = loaded.agent.info.steps !== undefined && step >= loaded.agent.info.steps
+        const agentLimitReached = loaded.agent.info.steps !== undefined && step >= loaded.agent.info.steps
+        const stepLimitReached = agentLimitReached || SessionStepBudget.exhausted(step, undefined)
         const transcript = SessionModelRequest.baseTranscript({
           agent: loaded.agent.info,
           model: loaded.model,
@@ -286,7 +300,10 @@ const layer = Layer.effect(
             tools: loaded.tools,
             system: transcript.system,
             messages: stepLimitReached
-              ? [...transcript.messages, Message.assistant(MAX_STEPS_PROMPT)]
+              ? [
+                  ...transcript.messages,
+                  Message.assistant(agentLimitReached ? MAX_STEPS_PROMPT : SessionStepBudget.CEILING_PROMPT),
+                ]
               : transcript.messages,
             // Keep tool definitions on the final Step to preserve the provider's cached prefix.
             toolChoice: stepLimitReached ? "none" : undefined,
