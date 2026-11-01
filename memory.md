@@ -73,6 +73,16 @@ opencode-go/deepseek-v4.1-flash --format json $prompt`.
 - A "no change after N steps" nudge was built and then removed: it broke one scenario test
   and would fire wrongly on read-only analysis tasks. The map and the read rule stayed.
 
+**Long runs** (2026-11-01, after the second handoff run stopped at step 12 with the fix in hand):
+
+- `reef run --steps 40 --ceiling 80` sets the turn budget and the hard ceiling. The handler
+  writes `REEF_STEP_BUDGET` / `REEF_STEP_CEILING` before the server child is spawned, so the
+  flag works in standalone and stdio mode. A managed background service keeps its own boot
+  environment, so the flag does not reach it.
+- The step-12 nudge now says: apply what you already learned, make the change, verify once,
+  then report. It used to read like "wrap up", and the model reported with nothing changed.
+- Defaults stay at 12 / 24. The flag is the escape hatch, not a new default.
+
 **Tests and images:**
 
 - New registry test: a denied tool is absent from definitions and the sandbox catalog and
@@ -119,18 +129,20 @@ requests, not Reef trimming.
 
 ## Next session starts with
 
-**The work for the next run is written down in `docs/handoff-pair-1-2.md`.** Hand that file to
-Reef in a new terminal with this instruction:
+**The work for the next run is written down in `docs/handoff-pair-1-2.md`.** Run one
+sub-task per prompt, with a raised budget:
 
 ```
-Read AGENTS.md, memory.md, and docs/handoff-pair-1-2.md. Execute Pair 1 and Pair 2 in
-that order. Stop and report after each pair with what changed, commands run, pass/fail
-counts, and wall-clock time. Do not start anything outside those two pairs.
+reef run --steps 40 --ceiling 80 --standalone "Start in C:\Users\USER\Documents\reef. Read
+code/AGENTS.md, memory.md, and docs/handoff-pair-1-2.md. Do only Pair 1A: apply the known
+lifecycle fix so reef run --standalone calls the restart sweep, then typecheck, build,
+install, and prove it with the kill test. Report commands, counts, and wall-clock time."
 ```
 
-Pair 1: restart recovery in `reef run --standalone`, then the green suite. Pair 2:
-`/review`, then the checkpoint picker. Expected agent time is 2 to 4 hours per pair. If a
-pair passes 6 hours, stop it and inspect the diff before letting it continue.
+Then 1B, 2A, 2B as separate runs. Two full pairs in one prompt do not fit 12 steps; the first
+two attempts proved that. Pair 1: restart recovery in `reef run --standalone`, then the green
+suite. Pair 2: `/review`, then the checkpoint picker. If a sub-task passes 6 hours, stop it
+and inspect the diff before letting it continue.
 
 After both pairs and a fresh benchmark row, the order is: benchmark script plus
 long-session gate, then sub-agent offload plus output elision, then prefix instrumentation

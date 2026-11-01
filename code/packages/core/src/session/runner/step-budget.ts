@@ -11,7 +11,7 @@ export * as SessionStepBudget from "./step-budget.js"
  */
 
 export const NUDGE =
-  "You have used enough steps for this task. Stop expanding scope: finish the smallest version of the request now. If the work is already done, say so and stop. Do not start another investigation, refactor, or polish pass."
+  "You have used enough steps for this task. Stop exploring: apply what you already learned and finish the smallest complete version now. If you already know the fix, make the change, verify it once, then report. Do not start a new investigation, refactor, or polish pass, and do not stop to report with nothing changed when the fix is in hand."
 
 export const CEILING_PROMPT = `CRITICAL - STEP CEILING REACHED
 

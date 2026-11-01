@@ -5,6 +5,12 @@ import { ServerConnection } from "../../services/server-connection"
 
 export default Runtime.handler(Commands.commands.run, (input) =>
   Effect.gen(function* () {
+    // A long task needs more than the default turn budget. The server reads these at boot,
+    // so set them before the connection is resolved and the child process is spawned.
+    const steps = Option.getOrUndefined(input.steps)
+    const ceiling = Option.getOrUndefined(input.ceiling)
+    if (steps !== undefined) process.env.REEF_STEP_BUDGET = String(steps)
+    if (ceiling !== undefined) process.env.REEF_STEP_CEILING = String(ceiling)
     const { reportRunError, runNonInteractive } = yield* Effect.promise(() => import("../../run/run"))
     const separator = process.argv.indexOf("--", 2)
     const server = yield* ServerConnection.resolve().pipe(

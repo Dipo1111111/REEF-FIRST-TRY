@@ -1,7 +1,10 @@
 # Handoff — Pair 1 and Pair 2
 
-Read `AGENTS.md` and `memory.md` first. This file is the whole task. Do Pair 1, report,
-then Pair 2, report. Do not start anything else.
+Read `AGENTS.md` and `memory.md` first. This file is the whole task.
+
+Each `##` section below is **one run**. Do the section named in your prompt, report, and
+stop. Do not start the next one. Run with `reef run --steps 40 --ceiling 80 --standalone`;
+the default 12-step budget cuts a section mid-investigation with nothing changed.
 
 Repo: `C:\Users\USER\Documents\reef`. Work in `code/packages/core` unless stated.
 Build and test commands are in `memory.md`.
