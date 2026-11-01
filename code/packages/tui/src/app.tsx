@@ -1167,15 +1167,6 @@ function App() {
         category: "System",
       },
       {
-        name: "docs.open",
-        title: "Open docs",
-        run: () => {
-          openUrl("https://opencode.ai/v2/docs").catch(() => {})
-          dialog.clear()
-        },
-        category: "System",
-      },
-      {
         name: "app.exit",
         title: "Exit the app",
         slash: { name: "exit", aliases: ["quit", "q"] },
