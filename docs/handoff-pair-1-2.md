@@ -6,6 +6,10 @@ Each `##` section below is **one run**. Do the section named in your prompt, rep
 stop. Do not start the next one. Run with `reef run --steps 40 --ceiling 80 --standalone`;
 the default 12-step budget cuts a section mid-investigation with nothing changed.
 
+Put the whole related batch of work in one `execute` program. Each program is one model request,
+and the model request is the expensive part. Report the numbers `code/scripts/bench-session.ts`
+prints for your session: model requests, tool calls per request, prompt tokens, wall clock.
+
 Repo: `C:\Users\USER\Documents\reef`. Work in `code/packages/core` unless stated.
 Build and test commands are in `memory.md`.
 

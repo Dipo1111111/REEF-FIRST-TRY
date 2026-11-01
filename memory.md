@@ -99,6 +99,39 @@ opencode-go/deepseek-v4.1-flash --format json $prompt`.
 - Prompt rule: batch at most two file reads per `execute` call. Three overflows the 16 KB return
   cap, which is what forced the re-reads in the first handoff run.
 
+**Throughput** (2026-11-01, after the "why is it still slow" research):
+
+Measured on the Pair 1A+1B session: 226 real tool calls spread over **134 model requests**,
+1.56 calls per Code Mode program, prompt growing 4.8k to **184k tokens with zero compactions**
+(the catalog advertises a 1M window, so the threshold never fired). Every request paid for the
+whole conversation. Factory's published Droid trace does the same work in 5 to 10 requests.
+
+Shipped in `ce4a1f9`:
+
+- One program per turn, stated as a rule in the system prompt, the Code Mode instructions, and
+  the execute tool description.
+- Tool output bounded to 8 KB, head and tail kept, full text written to a file the model can read
+  or grep (`tool-output.ts`). The execute cap went from 16 KB to 64 KB so the harness can save
+  the whole thing.
+- Every tool result carries how long the call took (`(took 3.6s)`), so the model stops repeating
+  calls it cannot otherwise feel.
+- Compaction uses a practical 250k ceiling instead of the advertised window.
+- A generated workspace map lands in the system prompt once per session (`session/workspace-map.ts`).
+- The shell default timeout drops from two minutes to one minute.
+
+A/B on the identical task (six failing modules, same model, same prompt):
+
+| | old build | new build |
+|---|---|---|
+| model requests | 9 | **4** |
+| calls per program | 3.50 | **7.67** |
+| prompt tokens | 80,612 | **27,756** |
+| wall clock | 57.2s | **35.0s** |
+| cost | $0.0040 | $0.0033 |
+
+**The scoreboard is now `code/scripts/bench-session.ts`**: model requests, tool calls per request,
+prompt tokens per request, wall clock. Cache share is off the list.
+
 **Tests and images:**
 
 - New registry test: a denied tool is absent from definitions and the sandbox catalog and
