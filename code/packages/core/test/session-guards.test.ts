@@ -3,9 +3,9 @@ import { SessionStepBudget } from "@opencode/core/session/runner/step-budget"
 
 describe("step budget", () => {
   test("nudges once at the default budget step", () => {
-    expect(SessionStepBudget.due(11, undefined)).toBe(false)
-    expect(SessionStepBudget.due(12, undefined)).toBe(true)
-    expect(SessionStepBudget.due(13, undefined)).toBe(false)
+    expect(SessionStepBudget.due(SessionStepBudget.DEFAULT_BUDGET - 1, undefined)).toBe(false)
+    expect(SessionStepBudget.due(SessionStepBudget.DEFAULT_BUDGET, undefined)).toBe(true)
+    expect(SessionStepBudget.due(SessionStepBudget.DEFAULT_BUDGET + 1, undefined)).toBe(false)
   })
 
   test("never nudges on the step where the hard limit disables tools", () => {
@@ -27,8 +27,8 @@ describe("step budget", () => {
   })
 
   test("the ceiling stops the turn after the default budget", () => {
-    expect(SessionStepBudget.exhausted(23, undefined)).toBe(false)
-    expect(SessionStepBudget.exhausted(24, undefined)).toBe(true)
+    expect(SessionStepBudget.exhausted(SessionStepBudget.DEFAULT_CEILING - 1, undefined)).toBe(false)
+    expect(SessionStepBudget.exhausted(SessionStepBudget.DEFAULT_CEILING, undefined)).toBe(true)
   })
 
   test("an explicit agent limit wins over the default ceiling", () => {

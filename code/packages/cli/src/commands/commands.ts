@@ -51,11 +51,11 @@ const Root = Spec.make(typeof OPENCODE_CLI_NAME === "string" ? OPENCODE_CLI_NAME
   params: {
     ...ServerParams,
     steps: Flag.Int("steps").pipe(
-      Flag.withDescription("Model calls allowed in one turn before the wrap-up nudge (default 12)"),
+      Flag.withDescription("Model calls allowed in one turn before the wrap-up nudge (default 40)"),
       Flag.optional,
     ),
     ceiling: Flag.Int("ceiling").pipe(
-      Flag.withDescription("Hard model-call ceiling before tools are disabled (default 24)"),
+      Flag.withDescription("Hard model-call ceiling before tools are disabled (default 80)"),
       Flag.optional,
     ),
     ...PermissionParams,
@@ -449,11 +449,11 @@ const Root = Spec.make(typeof OPENCODE_CLI_NAME === "string" ? OPENCODE_CLI_NAME
         title: Flag.String("title").pipe(Flag.withDescription("Session title"), Flag.optional),
         thinking: Flag.Boolean("thinking").pipe(Flag.withDescription("Show thinking blocks"), Flag.withDefault(false)),
         steps: Flag.Int("steps").pipe(
-          Flag.withDescription("Model calls allowed in one turn before the wrap-up nudge (default 12)"),
+          Flag.withDescription("Model calls allowed in one turn before the wrap-up nudge (default 40)"),
           Flag.optional,
         ),
         ceiling: Flag.Int("ceiling").pipe(
-          Flag.withDescription("Hard model-call ceiling before tools are disabled (default 24)"),
+          Flag.withDescription("Hard model-call ceiling before tools are disabled (default 80)"),
           Flag.optional,
         ),
         ...PermissionParams,

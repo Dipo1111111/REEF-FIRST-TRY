@@ -24,11 +24,11 @@ STRICT REQUIREMENTS:
 
 Any attempt to use tools is a critical violation. Respond with text ONLY.`
 
-/** Steps are numbered from one, so this is the twelfth model call in the turn. */
-export const DEFAULT_BUDGET = 12
+/** Steps are numbered from one, so this is the fortieth model call in the turn. */
+export const DEFAULT_BUDGET = 40
 
 /** Hard safety net for a turn that ignores the nudge. Twice the soft budget. */
-export const DEFAULT_CEILING = 24
+export const DEFAULT_CEILING = 80
 
 export function limit(configured: number | undefined, environment = process.env.REEF_STEP_BUDGET) {
   const override = environment === undefined ? undefined : Number(environment)
