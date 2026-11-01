@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reef: pay for the work, not the transcript</title>
+<meta name="description" content="Reef is an open agent harness built on OpenCode. Append-only requests, two resident tools, deterministic stop rules. More work per token.">
+<meta name="theme-color" content="#f1f4ee">
+<meta property="og:title" content="Reef: pay for the work, not the transcript">
+<meta property="og:description" content="An open agent harness built for one thing: more work per token, faster.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="bar">
+  <a class="mark" href="#top" aria-label="Reef, back to top">
+    <svg viewBox="0 0 24 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+      <path d="M1 4.5c2.5 0 2.5-2.2 5-2.2s2.5 2.2 5 2.2 2.5-2.2 5-2.2 2.5 2.2 5 2.2"/>
+      <path d="M3 10c2.2 0 2.2-2 4.5-2s2.2 2 4.5 2 2.2-2 4.5-2 2.2 2 4.5 2" opacity=".55"/>
+      <path d="M6 15.5c1.8 0 1.8-1.8 3.6-1.8s1.8 1.8 3.6 1.8 1.8-1.8 3.6-1.8 1.8 1.8 3.6 1.8" class="mark-accent"/>
+    </svg>
+    <span>reef</span>
+  </a>
+  <nav aria-label="Sections">
+    <a href="#cost">Cost</a>
+    <a href="#loop">Loop</a>
+    <a href="#rig">Rig</a>
+    <a href="#install">Install</a>
+  </nav>
+  <p class="ver"><span class="dot" aria-hidden="true"></span>0.1.0, tarball only</p>
+</header>
+
+<main id="main">
+
+  <section class="hero" id="top">
+    <div class="contours" aria-hidden="true">
+      <svg viewBox="0 0 1440 240" preserveAspectRatio="none">
+        <path d="M-20 196c150-14 210 26 360 20s250-44 400-30 260 54 420 34 200-44 300-30"/>
+        <path d="M-20 214c150-14 210 26 360 20s250-44 400-30 260 54 420 34 200-44 300-30" opacity=".7"/>
+        <path d="M-20 164c170 8 220 34 380 22s240-52 400-34 250 46 420 40 200-40 300-26" opacity=".5"/>
+        <path d="M-20 132c170 10 230 30 390 18s250-46 400-26 250 40 420 34 210-34 310-22" opacity=".3"/>
+      </svg>
+    </div>
+
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <h1>Pay for the work,<br>not the <span class="waved">transcript<svg class="wave" viewBox="0 0 240 12" preserveAspectRatio="none" aria-hidden="true"><path d="M2 7c30-8 52 6 82 2s46-10 74-6 46 10 80 4"/></svg></span>.</h1>
+        <p class="lede">Reef is an open agent harness built on OpenCode. It keeps the request prefix byte stable, sends two tool definitions instead of fifteen, and ends the loop on evidence rather than the model's word.</p>
+        <p class="actions">
+          <a class="btn" href="#install">Install 0.1.0</a>
+          <a class="link" href="../docs/00-charter.md">Read the charter</a>
+        </p>
+      </div>
+
+      <figure class="term" aria-label="A Reef session log">
+        <div class="term-bar">
+          <span>reef 0.1.0</span>
+          <span class="dim">session 7c2a</span>
+        </div>
+        <pre class="term-body"><span class="pr">$</span> <b>reef</b>
+<span class="dim">  opencode-go/deepseek-v4.1-flash</span>
+<span class="dim">  2 tools resident   prefix 4,204 tok</span>
+
+<span class="pr">›</span> read   packages/core/src/session/runner/to-llm-message.ts
+<span class="pr">›</span> edit   +12 -4
+<span class="pr">›</span> exec   bun test session
+<span class="ok">ok</span>     34 passed                       1m 12s
+
+<span class="dim">cache reuse</span>  94.8%    <span class="dim">sent</span>  6,112 tok</pre>
+      </figure>
+    </div>
+
+    <p class="specs wrap">
+      <span><b>One binary.</b> Native, no runtime</span>
+      <span><b>Two names.</b> Install <code>reefcode</code>, run <code>reef</code></span>
+      <span><b>Your key.</b> No service of ours in the path</span>
+    </p>
+  </section>
+
+  <section class="band dark cost" id="cost">
+    <div class="wrap">
+      <h2 class="reveal">The harness sets the bill before the model answers.</h2>
+      <div class="cost-grid">
+        <p class="reveal" style="--i:1">Two harnesses on the same model, same task, can land 30% apart on tokens and 25% apart on wall clock. The difference is what they re-send, how many round trips a task takes, what the model sees at each step, and when the loop stops. That is the whole product.</p>
+        <p class="reveal" style="--i:2">Everything OpenCode already does well, Reef keeps. The loop and the request builder are what changed.</p>
+      </div>
+
+      <div class="compare reveal" style="--i:3">
+        <div class="crow">
+          <p class="clabel"><span>Default session</span><b>15</b></p>
+          <ol class="slots" aria-label="Fifteen tool definitions">
+            <li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+          </ol>
+        </div>
+        <div class="crow reef">
+          <p class="clabel"><span>Reef, resident</span><b>2</b></p>
+          <ol class="slots" aria-label="Two tool definitions, thirteen removed">
+            <li class="kept"></li><li class="kept"></li>
+            <li class="void"></li><li class="void"></li><li class="void"></li><li class="void"></li><li class="void"></li>
+            <li class="void"></li><li class="void"></li><li class="void"></li><li class="void"></li><li class="void"></li>
+            <li class="void"></li><li class="void"></li><li class="void"></li>
+          </ol>
+        </div>
+        <p class="cap">Tool definitions sent before the model reads a single line of the task.</p>
+      </div>
+
+      <p class="fine">Counts come from the fork's own request builder. The rig is the only source of truth for a progress claim.</p>
+    </div>
+  </section>
+
+  <section class="band light loop" id="loop">
+    <div class="wrap">
+      <h2 class="reveal">Four changes to the loop.</h2>
+      <p class="intro reveal" style="--i:1">Reef is a delta, not a rewrite. Each layer ships with a measurement, in this order.</p>
+
+      <ol class="layers">
+        <li class="reveal">
+          <span class="n">01</span>
+          <h3>Request discipline</h3>
+          <p>Requests only append. The prefix stays byte stable, tool discovery is appended rather than spliced in, and a monitor names the token that broke the cache.</p>
+        </li>
+        <li class="reveal">
+          <span class="n">02</span>
+          <h3>Script tool</h3>
+          <p>The model writes a program. The program calls Reef's tools through a bridge, inside a sandbox with no ambient authority. Many tool calls, one turn.</p>
+        </li>
+        <li class="reveal">
+          <span class="n">03</span>
+          <h3>Bounded loop</h3>
+          <p>Stop rules are deterministic: empty turns, identical calls, stream silence, retry limits, and token and wall clock budgets. No false stops on the control set.</p>
+        </li>
+        <li class="reveal">
+          <span class="n">04</span>
+          <h3>Anchoring</h3>
+          <p>Keep the prefix stable by default. Compact rarely, deliberately, and at a boundary, instead of on every turn.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="band dark rig" id="rig">
+    <div class="wrap">
+      <blockquote class="reveal">If a claim cannot exit 0 or fail, it is a wish.</blockquote>
+      <p class="intro reveal" style="--i:1">Progress is measured on a frozen rig against stock OpenCode: same model, same tasks, three runs per point. These are the bars the build has to clear.</p>
+
+      <table class="bars reveal" style="--i:2">
+        <caption class="sr-only">Pass bars by phase</caption>
+        <thead>
+          <tr><th scope="col">Phase</th><th scope="col">Bar</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row"><span class="ph">03</span> Model calls per task</th><td>Down <b>25%</b> on script-eligible tasks, pass rate held</td></tr>
+          <tr><th scope="row"><span class="ph">05</span> Cache reuse</th><td>At or above <b>95%</b> token weighted on long sessions</td></tr>
+          <tr><th scope="row"><span class="ph">v1</span> Tokens per passed task</th><td>Down <b>25%</b> against stock, wall clock down <b>15%</b>, pass rate not lower</td></tr>
+        </tbody>
+      </table>
+
+      <p class="status reveal" style="--i:3"><span class="dot" aria-hidden="true"></span>Phases 0 to 4 are built and tested. Phase 5 is in progress. Nothing is published yet.</p>
+    </div>
+  </section>
+
+  <section class="band abyss install" id="install">
+    <div class="wrap">
+      <h2 class="reveal">0.1.0 installs from the tarball.</h2>
+      <p class="intro reveal" style="--i:1">The npm package is a small launcher that links the native binary for your platform. No registry account, no credential, no service of ours in the path.</p>
+
+      <div class="code reveal" style="--i:2">
+        <button class="copy" type="button" aria-live="polite">Copy</button>
+        <pre><code id="install-cmd">npm install -g ./reefcode-0.1.0.tgz ./reefcode-windows-x64-0.1.0.tgz
+reef --version</code></pre>
+      </div>
+
+      <p class="next reveal" style="--i:3">Once 0.1.0 is on the registry, that becomes <code>npm install -g reefcode</code>.</p>
+
+      <dl class="reqs reveal" style="--i:4">
+        <div><dt>Runtime</dt><dd>Node 20+ or Bun. The archive needs neither.</dd></div>
+        <div><dt>Credential</dt><dd>An API key for the model you already use.</dd></div>
+        <div><dt>Download</dt><dd>About 96 MB for the platform tarball.</dd></div>
+      </dl>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap foot-grid">
+    <p class="foot-mark"><svg viewBox="0 0 24 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1 4.5c2.5 0 2.5-2.2 5-2.2s2.5 2.2 5 2.2 2.5-2.2 5-2.2 2.5 2.2 5 2.2"/><path d="M6 15.5c1.8 0 1.8-1.8 3.6-1.8s1.8 1.8 3.6 1.8 1.8-1.8 3.6-1.8 1.8 1.8 3.6 1.8" class="mark-accent"/></svg> reef</p>
+    <nav aria-label="Documentation">
+      <a href="../docs/00-charter.md">Charter</a>
+      <a href="../docs/01-contract.md">Contract</a>
+      <a href="../docs/02-architecture.md">Architecture</a>
+      <a href="../docs/install.md">Install notes</a>
+    </nav>
+    <p class="colophon">Built on OpenCode. Bring your own key.</p>
+  </div>
+</footer>
+
+<script src="main.js" defer></script>
+</body>
+</html>

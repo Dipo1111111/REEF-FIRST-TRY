@@ -132,6 +132,13 @@ A/B on the identical task (six failing modules, same model, same prompt):
 **The scoreboard is now `code/scripts/bench-session.ts`**: model requests, tool calls per request,
 prompt tokens per request, wall clock. Cache share is off the list.
 
+**Platform builds:** the build script cross-compiles with `OPENCODE_TARGET`. `--single` builds only
+the host platform, and the build wipes `packages/cli/dist` at the start, so one target at a time.
+`bun run pack` needs `OPENCODE_VERSION` and `OPENCODE_CHANNEL` set too, or it throws a version
+mismatch. The meta package only lists the platforms present at pack time, so build every target
+before packing once. macOS tarballs for 0.1.0 live in `Documents/reef/release/`; the binary is
+unsigned, so a quarantine attribute needs `xattr -dr com.apple.quarantine`.
+
 **Tests and images:**
 
 - New registry test: a denied tool is absent from definitions and the sandbox catalog and
