@@ -115,11 +115,30 @@ const toolInput = (tool: SessionMessage.AssistantTool) =>
     ? Option.getOrElse(decodeToolInput(tool.state.input), () => tool.state.input)
     : tool.state.input
 
+/** A completed call keeps its arguments in the replay. File bodies and inline scripts written
+ * through `execute` dominate the transcript, and every later step pays for them again. The
+ * result is already in the conversation and the file can be read again, so oversized
+ * arguments become a note after the call has run. Calls carrying provider-bound metadata
+ * (thought signatures) keep their exact input. */
+const REPLAY_INPUT_LIMIT = 4 * 1024
+
+const boundedInput = (input: unknown) => {
+  const size = JSON.stringify(input)?.length ?? 0
+  if (size <= REPLAY_INPUT_LIMIT) return input
+  return {
+    note: "Arguments omitted from replayed history. The call already ran and its result is in the conversation; read the file again if you need the exact content.",
+    omittedBytes: size,
+  }
+}
+
 const toolCall = (tool: SessionMessage.AssistantTool, providerMetadata: ProviderMetadata | undefined): ContentPart =>
   ToolCallPart.make({
     id: tool.id,
     name: tool.name,
-    input: toolInput(tool),
+    input:
+      providerMetadata === undefined && tool.state.status === "completed"
+        ? boundedInput(toolInput(tool))
+        : toolInput(tool),
     providerExecuted: tool.executed,
     providerMetadata,
   })
