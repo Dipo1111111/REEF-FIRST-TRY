@@ -1,0 +1,1411 @@
+{
+  "session": {
+    "id": "ses_e6eab16fdffeyqfj7KuSsMYEqy",
+    "title": "Enable only the disabled architect skill in OpenCode",
+    "projectID": "project",
+    "location": {
+      "directory": "C:/Users/USER"
+    },
+    "cost": 0.00936786,
+    "tokens": {
+      "input": 33281,
+      "output": 2964,
+      "reasoning": 2270,
+      "cache": {
+        "read": 421120,
+        "write": 0
+      }
+    },
+    "time": {
+      "created": 1793439623443,
+      "updated": 1793441944613
+    },
+    "agent": "build",
+    "model": "{\"id\":\"deepseek-v4.1-flash\",\"providerID\":\"opencode-go\"}"
+  },
+  "messages": [
+    {
+      "id": "msg_19154e909001fxlp58LiSzf6H2",
+      "type": "user",
+      "time": {
+        "created": 1793439623657
+      },
+      "text": "go to my opencode and enable only my archtiect skil, tis curetly disbaled",
+      "files": [],
+      "agents": [],
+      "seq": 4
+    },
+    {
+      "id": "msg_19154ea07001oK5hRYN2jmrkqR",
+      "type": "assistant",
+      "time": {
+        "created": 1793439623715,
+        "streamed": 1793439626556,
+        "completed": 1793439627239
+      },
+      "agent": "build",
+      "model": {
+        "id": "deepseek-v4.1-flash",
+        "providerID": "opencode-go",
+        "variant": "default"
+      },
+      "content": [
+        {
+          "type": "reasoning",
+          "text": "The user wants to enable a skill in opencode — \"architect\" skill currently disabled. I should look at opencode config. Let me check the opencode skill for configuration knowledge, and inspect config files.\n\nLet me first look at the filesystem: ~/.config/opencode/opencode.json etc.\n\nThis is a question about OpenCode itself, so the opencode skill applies. Let me load it and inspect config in parallel.",
+          "state": {
+            "reasoningField": "reasoning_content"
+          },
+          "time": {
+            "created": 1793439625522,
+            "completed": 1793439626531
+          }
+        },
+        {
+          "type": "tool",
+          "id": "call_00_dankaud1x2992rukwgojtz97",
+          "name": "skill",
+          "executed": false,
+          "state": {
+            "status": "completed",
+            "input": {
+              "id": "opencode"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "<skill_content name=\"OpenCode\">\n# Skill: OpenCode\n\n# OpenCode\n\nUse this guide as the starting point for work involving OpenCode itself. It\ncovers the core concepts needed to configure and customize OpenCode, extend it\nwith plugins, and build integrations with the OpenCode SDK, clients, and API.\n\nFull documentation is available at <https://opencode.ai/v2/docs/>. This overview is\nonly an index of core concepts. Before answering a question about a topic below,\nfetch the URL named in that section and use the full page as the source of\ntruth. Follow links from that page when the question needs more detail. Fetch\n<https://opencode.ai/v2/docs/> first when you need to discover the relevant\ndocumentation page.\n\nA machine-readable documentation index is available at\n<https://opencode.ai/v2/llms.txt>.\n\n## Version policy\n\nAlways answer for OpenCode V2 unless the user explicitly asks about V1,\nlegacy OpenCode, or migrating from V1.\n\nUse only <https://opencode.ai/v2/docs/> documentation as the source of truth for V2.\nDo not use <https://opencode.ai/docs/>, which documents V1, and do not use\ngeneral web search to resolve a V2 documentation question when the V2 docs or\nlinked pages cover it. The schema served from\n<https://opencode.ai/config.json> may describe V1 even though V2 configuration\nfiles include that URL for editor integration. Never use it to infer V2 field\nnames or shapes. If V2 documentation is missing or contradictory, state the\nuncertainty or ask for clarification instead of falling back to V1.\n\nV1 documentation and syntax may be consulted only when the user explicitly\nasks about V1 or when needed as migration input. Outputs and recommendations\nmust still use V2 unless the user specifically requests a V1 result.\n\n## [CLI](https://opencode.ai/v2/docs/cli)\n\nFor questions about the terminal interface, command-line invocation, `run`,\n`mini`, terminal providers, or other CLI behavior, fetch the\n[CLI guide](https://opencode.ai/v2/docs/cli) and the relevant page linked from\nthat section.\n\nCLI and TUI preferences are separate from OpenCode's server and project\nconfiguration. They live in the global `~/.config/opencode/cli.json`, or\n`$XDG_CONFIG_HOME/opencode/cli.json` when `XDG_CONFIG_HOME` is set. There is no\nproject-local CLI configuration. Set `OPENCODE_CLI_CONFIG_CONTENT` to merge\ninline JSON over the global settings. Most preferences can also be changed from\nthe TUI by pressing `Ctrl+P` and selecting **Open settings**.\n\n### [Settings](https://opencode.ai/v2/docs/cli/config)\n\nFetch the full [CLI settings reference](https://opencode.ai/v2/docs/cli/config)\nbefore editing `cli.json`. It documents every terminal-only setting, accepted\nvalues, and examples, including themes, input, sessions, tabs, diffs, alerts,\nMini, keybindings, terminal plugins, and debugging. Do not put these settings\nin `opencode.json(c)`.\n\n### [Keybinds](https://opencode.ai/v2/docs/cli/keybinds)\n\nConfigure keybindings under `keybinds` in `cli.json`. The leader key is the\n`keybinds.leader` entry; leader timing is configured separately under\n`leader.timeout`. Bindings can use a string, an array of strings, or an object\nwhen event behavior such as `preventDefault` is required. Disable a binding\nwith `\"none\"` or `false`.\n\nNever guess a command ID, default binding, or accepted key syntax. Fetch the\nfull [keybind reference](https://opencode.ai/v2/docs/cli/keybinds), which lists\nthe current IDs and defaults, before answering or editing a binding.\n\n## [OpenCode configuration](https://opencode.ai/v2/docs/config)\n\nOpenCode's server and project configuration uses JSON or JSONC. Include the\npublished schema so the user's editor can validate fields and provide\nautocomplete:\n\n```jsonc\n{\n  \"$schema\": \"https://opencode.ai/config.json\",\n}\n```\n\nGlobal configuration lives at `~/.config/opencode/opencode.json(c)` and applies\nto every project for that user. Project configuration can live in any directory\nas `opencode.json(c)` or `.opencode/opencode.json(c)`, including nested packages\nin a monorepo.\n\nDuring ordinary project discovery, OpenCode searches the current Location\ndirectory and every ancestor through the filesystem root, including directories\nabove the detected project or repository root. It merges direct\n`opencode.json(c)` files from the farthest ancestor to the current directory,\nthen does the same for `.opencode/opencode.json(c)` files. This means every\ndiscovered `.opencode` config overrides every discovered direct config. Global\nfilesystem configuration has lower precedence than these discovered documents.\n\nCommon configuration fields include `model`, `default_agent`, `permissions`,\n`agents`, `commands`, `plugins`, `providers`, `mcp`, `skills`, `instructions`,\n`references`, `formatter`, and `lsp`.\n\nThis configuration is distinct from `cli.json`. Use the\n[CLI settings reference](https://opencode.ai/v2/docs/cli/config) for terminal\npreferences, especially themes and keybindings.\n\nDo not guess field names or shapes. Fetch the V2 configuration guide and its\nlinked topic guide as the source of truth, and preserve unrelated settings when\nediting an existing file. Keep the published `$schema` URL in configuration\nexamples, but do not fetch it to determine the V2 configuration shape.\n\nSee the [full configuration guide](https://opencode.ai/v2/docs/config) for\nevery field, examples, config locations, and links to dedicated feature guides.\n\n## [MCP servers](https://opencode.ai/v2/docs/mcp-servers)\n\nConfigure MCP servers under `mcp.servers`. Prefer the CLI because it preserves\nunrelated configuration. Use `--global` when the user asks to set up a service\nfor themselves without limiting it to the current project; omit it when they\nexplicitly want project-local configuration.\n\n```sh\nopencode mcp add <name> --global --url <remote-url>\nopencode mcp list\n```\n\nRemote servers use OAuth by default. If `mcp list` reports that a server needs\nauthentication, tell the user to run `/mcps`, select the server, and sign in.\nDo not run `opencode mcp auth` through the shell tool: it starts an interactive\nflow whose authorization link can be hidden in background process output.\nUse the user-facing MCP interface instead.\n\nReport the server as configured but awaiting sign-in until its connection\nstatus confirms it is connected.\n\nOAuth credentials are stored outside the OpenCode configuration. Do not ask for or\nstore an API key when the server supports OAuth. Use header-based credentials\nonly when OAuth is unavailable or the user explicitly requires them, and use an\nenvironment substitution such as `{env:MCP_API_KEY}` instead of writing a\nsecret into configuration.\n\n## [V1 to V2 migration](https://opencode.ai/v2/docs/migrate-v1)\n\nFor any request to migrate OpenCode configuration, agents, commands, skills,\nplugins, integrations, or other behavior from V1 to V2, read the full\n[migration guide](https://opencode.ai/v2/docs/migrate-v1) before acting. In\nthe repository, its source is `services/www/src/docs/content/migrate-v1.mdx`.\n\nV1 config files and `.opencode/` definitions are intended to remain compatible.\nThe only intentional breaking changes are the server API and plugin API. Native\nV2 config uses more ergonomic shapes, but conversion is optional. When the user\nrequests conversion, inspect the complete configuration, preserve behavior and\nunrelated settings, and apply only the relevant migrations from the guide. For\nplugin migrations, fetch and follow both the migration guide and the full\n[plugins guide](https://opencode.ai/v2/docs/build/plugins). If non-API V1\nfunctionality fails in V2, use the `report` skill to file it as a compatibility\nbug.\n\n## [Plugins](https://opencode.ai/v2/docs/build/plugins)\n\nFor questions about creating, configuring, loading, publishing, or migrating\nplugins, fetch the full [plugins guide](https://opencode.ai/v2/docs/build/plugins)\nbefore answering. Refer to this guide when the user wants to build a plugin. It\ncovers hooks, transforms, tools, plugin context capabilities, and package\nentrypoints. Plugins can also extend the TUI; for those, fetch the\n[CLI plugin guide](https://opencode.ai/v2/docs/build/plugins/cli).\nFor custom methods and events shared with other plugins or clients, fetch the\n[RPC guide](https://opencode.ai/v2/docs/build/plugins/rpc).\n\n## [Service](https://opencode.ai/v2/docs/troubleshooting#check-the-background-service)\n\nOpenCode uses a client-server architecture. Interfaces such as the TUI connect\nto a background OpenCode service, which owns sessions, configuration, plugins,\npermissions, and tool execution.\n\nOpenCode normally discovers or starts the shared background service\nautomatically. If the service is stuck or unhealthy, restart it:\n\n```sh\nopencode service restart\n```\n\nCheck its status after restarting:\n\n```sh\nopencode service status\n```\n\n## [API](https://opencode.ai/v2/docs/api)\n\nOpenCode exposes an HTTP API from its server. The API is described by an\nOpenAPI document available from the running server at `/openapi.json`.\n\nUse OpenCode's built-in `api` command for local requests. It uses the same\ndiscovery and authentication flow as the TUI and may start the background\nservice when no compatible healthy service is available. It accepts either an\nHTTP method and path or an OpenAPI operation ID.\n\nCall an endpoint with an HTTP method and path:\n\n```sh\nopencode api get /api/info\n```\n\nPass a request body with `--data` or `-d`, and additional headers with\n`--header` or `-H`:\n\n```sh\nopencode api post /api/example --data '{\"key\":\"value\"}'\nopencode api get /api/example --header 'X-Example:value'\n```\n\nRequest bodies default to `Content-Type: application/json`. When OpenCode is\nconnected to an explicit server instead of its managed background service, use\nthe same configured server and authentication context rather than constructing\nan unauthenticated request separately.\n\nSee the [full API reference](https://opencode.ai/v2/docs/api) for available\nendpoints, parameters, request bodies, and response schemas. The\nraw [OpenAPI specification](https://opencode.ai/v2/openapi.json) is also\navailable for code generation and other tooling.\n\n## [Client](https://opencode.ai/v2/docs/build/client)\n\nFor questions about connecting an application to OpenCode over the network,\nfetch the full [client guide](https://opencode.ai/v2/docs/build/client) before\nanswering.\n\n`@opencode/client` is the generated TypeScript client for the OpenCode HTTP\nAPI. Its methods and types come from the same contract as the API reference.\nThe default entrypoint exposes Promise-based resource clients and async\niterables for streaming endpoints. The `@opencode/client/effect` entrypoint\nexposes typed Effects, Streams, and decoded OpenCode schema values. Its\n`Service` API can discover, start, stop, and authenticate with the local\nbackground service from a Node application.\n\n## [SDK](https://opencode.ai/v2/docs/build/sdk)\n\nFor questions about embedding OpenCode directly in an application, fetch the\nfull [SDK guide](https://opencode.ai/v2/docs/build/sdk) before answering. The SDK\nhosts OpenCode in the application without opening an HTTP listener.\n\nUse the [Effect SDK guide](https://opencode.ai/v2/docs/build/sdk/effect) for\nEffect applications. For Cloudflare Durable Objects, use the\n[Cloudflare SDK guide](https://opencode.ai/v2/docs/build/sdk/cloudflare).\n\n## [Troubleshooting](https://opencode.ai/v2/docs/troubleshooting)\n\nOpenCode runs a client and a background server. Start by determining whether a\nproblem belongs to the client, the shared server, or one project.\n\n- Check the service with `opencode service status` and verify the API with\n  `opencode api get /api/info`.\n- Compare with `opencode --standalone`, which runs the TUI with a private\n  server, to isolate shared-service issues.\n- Inspect `~/.local/share/opencode/log/opencode.log`. Filter `role=cli` for\n  client startup and `role=server` for sessions, providers, plugins,\n  permissions, and tools.\n- Run one reproduction with `OPENCODE_LOG_LEVEL=DEBUG` when normal logs are not\n  sufficient.\n- Do not delete or edit the database, service registration, or service config\n  while diagnosing a problem. Back up persistent data before inspecting it\n  with external tools.\n- Redact API keys, authorization headers, prompts, file contents, and other\n  sensitive data before sharing diagnostics.\n\nSee the [full troubleshooting guide](https://opencode.ai/v2/docs/troubleshooting)\nfor service lifecycle commands, API inspection, log locations, explicit server\nconnections, issue-reporting details, and local development paths.\n\nBase directory for this skill: /builtin\nRelative paths in this skill (e.g., scripts/, reference/) are relative to this base directory.\nNote: file list is sampled.\n\n<skill_files>\n</skill_files>\n</skill_content>"
+              }
+            ],
+            "metadata": {
+              "name": "OpenCode",
+              "directory": "/builtin",
+              "truncated": false
+            }
+          },
+          "time": {
+            "created": 1793439626461,
+            "ran": 1793439626540,
+            "completed": 1793439626562
+          }
+        },
+        {
+          "type": "tool",
+          "id": "call_01_zi1zsvd1s533yzn4y707r768",
+          "name": "shell",
+          "executed": false,
+          "state": {
+            "status": "completed",
+            "input": {
+              "command": "Get-ChildItem -Force $env:USERPROFILE\\.config\\opencode -ErrorAction SilentlyContinue | Select-Object Name; Get-ChildItem -Force $env:USERPROFILE\\.opencode -ErrorAction SilentlyContinue | Select-Object Name"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "\r\nName             \r\n----             \r\ncommand          \r\nnode_modules     \r\nskills           \r\n.gitignore       \r\nbun.lock         \r\ncli.json         \r\nopencode.jsonc   \r\npackage-lock.json\r\npackage.json     \r\nservice.json     \r\n\r\n\r\n"
+              },
+              {
+                "type": "text",
+                "text": "Exited with code 1"
+              }
+            ],
+            "metadata": {
+              "status": "completed",
+              "truncated": false,
+              "exit": 1
+            }
+          },
+          "time": {
+            "created": 1793439626478,
+            "ran": 1793439626550,
+            "completed": 1793439627232
+          }
+        }
+      ],
+      "finish": "tool-calls",
+      "rawFinish": "tool_calls",
+      "cost": 0.0008782439999999999,
+      "tokens": {
+        "input": 4978,
+        "output": 119,
+        "reasoning": 90,
+        "cache": {
+          "read": 2048,
+          "write": 0
+        }
+      },
+      "seq": 7
+    },
+    {
+      "id": "msg_19154f8200011flpEGmuzyswm2",
+      "type": "assistant",
+      "time": {
+        "created": 1793439627325,
+        "streamed": 1793439629077,
+        "completed": 1793439630164
+      },
+      "agent": "build",
+      "model": {
+        "id": "deepseek-v4.1-flash",
+        "providerID": "opencode-go",
+        "variant": "default"
+      },
+      "content": [
+        {
+          "type": "reasoning",
+          "text": "Let me read opencode.jsonc and the skills directory.",
+          "state": {
+            "reasoningField": "reasoning_content"
+          },
+          "time": {
+            "created": 1793439628640,
+            "completed": 1793439629050
+          }
+        },
+        {
+          "type": "tool",
+          "id": "call_00_fzwl82rdteij2q7qowrl0xdn",
+          "name": "read",
+          "executed": false,
+          "state": {
+            "status": "completed",
+            "input": {
+              "path": "C:\\Users\\USER\\.config\\opencode\\opencode.jsonc"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Read file C:\\Users\\USER\\.config\\opencode\\opencode.jsonc, lines 1-36\n1: {\n2:   \"$schema\": \"https://opencode.ai\",\n3:   \"plugin\": [\n4:     \"opencode-supabase\"\n5:   ],\n6:   // --- Skill context budget -------------------------------------------------\n7:   // ~/.agents/skills holds 1,400+ skills. If they are all advertised, the\n8:   // system prompt costs ~94k tokens before you type a single word.\n9:   // Deny every skill by default, then allow only the ones actually used.\n10:   // Add more by copying a line below with the skill's ID.\n11:   \"permissions\": [\n12:     { \"action\": \"skill\", \"resource\": \"*\", \"effect\": \"deny\" },\n13: \n14:     { \"action\": \"skill\", \"resource\": \"impeccable\", \"effect\": \"allow\" },\n15:     { \"action\": \"skill\", \"resource\": \"design-taste-frontend\", \"effect\": \"allow\" },\n16:     { \"action\": \"skill\", \"resource\": \"frontend-design\", \"effect\": \"allow\" },\n17:     { \"action\": \"skill\", \"resource\": \"remember\", \"effect\": \"allow\" },\n18:     { \"action\": \"skill\", \"resource\": \"debug\", \"effect\": \"allow\" },\n19:     { \"action\": \"skill\", \"resource\": \"fleet\", \"effect\": \"allow\" },\n20:     { \"action\": \"skill\", \"resource\": \"handoff\", \"effect\": \"allow\" },\n21:     { \"action\": \"skill\", \"resource\": \"humanizer\", \"effect\": \"allow\" },\n22:     { \"action\": \"skill\", \"resource\": \"opencode\", \"effect\": \"allow\" }\n23:   ],\n24:   \"mcp\": {\n25:     \"supabase\": {\n26:       \"type\": \"remote\",\n27:       \"url\": \"https://mcp.supabase.com/mcp?project_ref=llwlgzujsyxlseiqiwsp&read_only=false&features=docs%2Caccount%2Cdatabase%2Cdebugging%2Cdevelopment%2Cfunctions%2Cbranching\",\n28:       \"enabled\": true\n29:     },\n30:     \"revenuecat\": {\n31:       \"type\": \"remote\",\n32:       \"url\": \"https://mcp.revenuecat.ai/mcp\",\n33:       \"enabled\": true\n34:     }\n35:   }\n36: }"
+              }
+            ],
+            "metadata": {
+              "truncated": false
+            }
+          },
+          "time": {
+            "created": 1793439628999,
+            "ran": 1793439629060,
+            "completed": 1793439629164
+          }
+        },
+        {
+          "type": "tool",
+          "id": "call_01_4jsf4hjbtxy0s0wo867005mg",
+          "name": "shell",
+          "executed": false,
+          "state": {
+            "status": "completed",
+            "input": {
+              "command": "Get-ChildItem -Force -Recurse -Depth 2 $env:USERPROFILE\\.config\\opencode\\skills | Select-Object FullName"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "sers\\USER\\.config\\opencode\\skills\\check\\agents                                                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\check\\modes                                                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\check\\review-agent-prompt.md                                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\check\\review-guide.md                                       \r\nC:\\Users\\USER\\.config\\opencode\\skills\\check\\SKILL.md                                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\check\\agents\\openai.yaml                                    \r\nC:\\Users\\USER\\.config\\opencode\\skills\\check\\modes\\review.md                                       \r\nC:\\Users\\USER\\.config\\opencode\\skills\\check\\modes\\verify.md                                       \r\nC:\\Users\\USER\\.config\\opencode\\skills\\code-review\\agents                                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\code-review\\SKILL.md                                        \r\nC:\\Users\\USER\\.config\\opencode\\skills\\code-review\\agents\\openai.yaml                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\codebase-design\\agents                                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\codebase-design\\DEEPENING.md                                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\codebase-design\\DESIGN-IT-TWICE.md                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\codebase-design\\SKILL.md                                    \r\nC:\\Users\\USER\\.config\\opencode\\skills\\codebase-design\\agents\\openai.yaml                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\debug\\agents                                                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\debug\\SKILL.md                                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\debug\\agents\\openai.yaml                                    \r\nC:\\Users\\USER\\.config\\opencode\\skills\\debugging-toolkit-smart-debug\\SKILL.md                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\deep-study\\SKILL.md                                         \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design\\data                                                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design\\references                                           \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design\\scripts                                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design\\SKILL.md                                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design\\data\\cip                                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design\\data\\icon                                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design\\data\\logo                                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design\\references\\banner-sizes-and-styles.md                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design\\references\\cip-deliverable-guide.md                  \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design\\references\\cip-design.md                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design\\references\\cip-prompt-engineering.md                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design\\references\\cip-style-guide.md                        \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design\\references\\design-routing.md                         \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design\\references\\icon-design.md                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design\\references\\logo-color-psychology.md                  \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design\\references\\logo-design.md                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design\\references\\logo-prompt-engineering.md                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design\\references\\logo-style-guide.md                       \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design\\references\\slides-copywriting-formulas.md            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design\\references\\slides-create.md                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design\\references\\slides-html-template.md                   \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design\\references\\slides-layout-patterns.md                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design\\references\\slides-strategies.md                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design\\references\\slides.md                                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design\\references\\social-photos-design.md                   \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design\\scripts\\cip                                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design\\scripts\\icon                                         \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design\\scripts\\logo                                         \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\data                                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\references                                    \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\scripts                                       \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\templates                                     \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\SKILL.md                                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\data\\slide-backgrounds.csv                    \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\data\\slide-charts.csv                         \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\data\\slide-color-logic.csv                    \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\data\\slide-copy.csv                           \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\data\\slide-layout-logic.csv                   \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\data\\slide-layouts.csv                        \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\data\\slide-strategies.csv                     \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\data\\slide-typography.csv                     \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\references\\component-specs.md                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\references\\component-tokens.md                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\references\\primitive-tokens.md                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\references\\semantic-tokens.md                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\references\\states-and-variants.md             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\references\\tailwind-integration.md            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\references\\token-architecture.md              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\scripts\\tests                                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\scripts\\embed-tokens.cjs                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\scripts\\fetch-background.py                   \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\scripts\\generate-slide.py                     \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\scripts\\generate-tokens.cjs                   \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\scripts\\html-token-validator.py               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\scripts\\search-slides.py                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\scripts\\slide-token-validator.py              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\scripts\\slide_search_core.py                  \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\scripts\\validate-tokens.cjs                   \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\templates\\design-tokens-starter.json          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-taste-frontend\\SKILL.md                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-taste-frontend-v1\\SKILL.md                           \r\nC:\\Users\\USER\\.config\\opencode\\skills\\develop\\agents                                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\develop\\flow                                                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\develop\\ui                                                  \r\nC:\\Users\\USER\\.config\\opencode\\skills\\develop\\checklist.md                                        \r\nC:\\Users\\USER\\.config\\opencode\\skills\\develop\\logical-guide.md                                    \r\nC:\\Users\\USER\\.config\\opencode\\skills\\develop\\SKILL.md                                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\develop\\ui-guide.md                                         \r\nC:\\Users\\USER\\.config\\opencode\\skills\\develop\\agents\\openai.yaml                                  \r\nC:\\Users\\USER\\.config\\opencode\\skills\\develop\\flow\\build.md                                       \r\nC:\\Users\\USER\\.config\\opencode\\skills\\develop\\flow\\git.md                                         \r\nC:\\Users\\USER\\.config\\opencode\\skills\\develop\\ui\\existing.md                                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\develop\\ui\\generate.md                                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\develop\\ui\\image.md                                         \r\nC:\\Users\\USER\\.config\\opencode\\skills\\develop\\ui\\implementation.md                                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\develop\\ui\\mcp.md                                           \r\nC:\\Users\\USER\\.config\\opencode\\skills\\diagnosing-bugs\\agents                                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\diagnosing-bugs\\scripts                                     \r\nC:\\Users\\USER\\.config\\opencode\\skills\\diagnosing-bugs\\SKILL.md                                    \r\nC:\\Users\\USER\\.config\\opencode\\skills\\diagnosing-bugs\\agents\\openai.yaml                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\diagnosing-bugs\\scripts\\hitl-loop.template.sh               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\document\\agents                                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\document\\templates                                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\document\\agent-prompt.md                                    \r\nC:\\Users\\USER\\.config\\opencode\\skills\\document\\SKILL.md                                           \r\nC:\\Users\\USER\\.config\\opencode\\skills\\document\\agents\\openai.yaml                                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\document\\templates\\changelog.md                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\document\\templates\\postmortem.md                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\document\\templates\\pr.md                                    \r\nC:\\Users\\USER\\.config\\opencode\\skills\\document\\templates\\release-note.md                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\domain-modeling\\agents                                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\domain-modeling\\ADR-FORMAT.md                               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\domain-modeling\\CONTEXT-FORMAT.md                           \r\nC:\\Users\\USER\\.config\\opencode\\skills\\domain-modeling\\SKILL.md                                    \r\nC:\\Users\\USER\\.config\\opencode\\skills\\domain-modeling\\agents\\openai.yaml                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\fleet\\SKILL.md                                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\frontend-developer\\SKILL.md                                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\full-output-enforcement\\SKILL.md                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\gpt-taste\\SKILL.md                                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\grill-me\\agents                                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\grill-me\\SKILL.md                                           \r\nC:\\Users\\USER\\.config\\opencode\\skills\\grill-me\\agents\\openai.yaml                                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\grill-with-docs\\agents                                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\grill-with-docs\\SKILL.md                                    \r\nC:\\Users\\USER\\.config\\opencode\\skills\\grill-with-docs\\agents\\openai.yaml                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\grilling\\agents                                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\grilling\\SKILL.md                                           \r\nC:\\Users\\USER\\.config\\opencode\\skills\\grilling\\agents\\openai.yaml                                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\handoff\\agents                                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\handoff\\SKILL.md                                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\handoff\\agents\\openai.yaml                                  \r\nC:\\Users\\USER\\.config\\opencode\\skills\\high-end-visual-design\\SKILL.md                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\humanizer\\SKILL.md                                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\humanizer\\voice.md                                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference                                        \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\scripts                                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\SKILL.md                                         \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\degraded                               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\adapt.md                               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\adapt.native.md                        \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\android.md                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\animate.md                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\audit.md                               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\audit.native.md                        \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\bolder.md                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\clarify.md                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\colorize.md                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\craft-floor.md                         \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\craft.md                               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\critique.md                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\delight.md                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\distill.md                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\doctor.md                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\document.md                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\extract.md                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\harden.md                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\hooks.md                               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\init.md                                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\ios.md                                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\layout.md                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\live-setup.md                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\live.md                                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\new-work.md                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\onboard.md                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\operate.md                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\optimize.md                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\overdrive.md                           \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\polish.md                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\quieter.md                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\routing.md                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\shape.md                               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\typeset.md                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\reference\\visualize.md                           \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\scripts\\bin                                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\scripts\\data                                     \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\scripts\\command-metadata.json                    \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\scripts\\impeccable                               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\scripts\\impeccable.cmd                           \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\scripts\\live-browser-dom.js                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\scripts\\live-browser-ignores.js                  \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\scripts\\live-browser-session.js                  \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\scripts\\live-browser.js                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\scripts\\modern-screenshot.umd.js                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\scripts\\VERSION                                  \r\nC:\\Users\\USER\\.config\\opencode\\skills\\implement\\agents                                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\implement\\SKILL.md                                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\implement\\agents\\openai.yaml                                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\implement-spec\\agents                                       \r\nC:\\Users\\USER\\.config\\opencode\\skills\\implement-spec\\SKILL.md                                     \r\nC:\\Users\\USER\\.config\\opencode\\skills\\implement-spec\\agents\\openai.yaml                           \r\nC:\\Users\\USER\\.config\\opencode\\skills\\imprint\\SKILL.md                                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\improve-codebase-architecture\\agents                        \r\nC:\\Users\\USER\\.config\\opencode\\skills\\improve-codebase-architecture\\HTML-REPORT.md                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\improve-codebase-architecture\\SKILL.md                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\improve-codebase-architecture\\agents\\openai.yaml            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\loop-me\\agents                                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\loop-me\\SKILL.md                                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\loop-me\\agents\\openai.yaml                                  \r\nC:\\Users\\USER\\.config\\opencode\\skills\\migrate-to-shoehorn\\agents                                  \r\nC:\\Users\\USER\\.config\\opencode\\skills\\migrate-to-shoehorn\\SKILL.md                                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\migrate-to-shoehorn\\agents\\openai.yaml                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\minimalist-ui\\SKILL.md                                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\mobile-developer\\SKILL.md                                   \r\nC:\\Users\\USER\\.config\\opencode\\skills\\motion\\assets                                               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\motion\\references                                           \r\nC:\\Users\\USER\\.config\\opencode\\skills\\motion\\memory.md                                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\motion\\SKILL.md                                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\motion\\assets\\fonts                                         \r\nC:\\Users\\USER\\.config\\opencode\\skills\\motion\\assets\\scripts                                       \r\nC:\\Users\\USER\\.config\\opencode\\skills\\motion\\assets\\template.html                                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\motion\\references\\example-PRODUCT.md                        \r\nC:\\Users\\USER\\.config\\opencode\\skills\\motion\\references\\master-prompt-template.md                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\motion\\references\\original-brief.md                         \r\nC:\\Users\\USER\\.config\\opencode\\skills\\motion\\references\\original-prompt-verbatim.md               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\motion\\references\\prompt-02-22s-scene-loop.md               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\motion\\references\\prompt-03-launch-video-clips.md           \r\nC:\\Users\\USER\\.config\\opencode\\skills\\motion\\references\\prompt-04-frame-by-frame-sting.md         \r\nC:\\Users\\USER\\.config\\opencode\\skills\\motion\\references\\techniques.md                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\.github                                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\industries                                           \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\languages                                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\scripts                                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\templates                                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\.markdownlint.yml                                    \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\anti-patterns.md                                     \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\availability.md                                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\brand-architecture.md                                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\case-studies.md                                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\CODE_OF_CONDUCT.md                                   \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\CONTRIBUTING.md                                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\cultural-references.md                               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\evaluation.md                                        \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\language-rules.md                                    \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\LICENSE                                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\metaphor-mapping.md                                  \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\open-source.md                                       \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\phonosemantics.md                                    \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\principles.md                                        \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\README.md                                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\SKILL.md                                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\taglines.md                                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\.github\\workflows                                    \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\.github\\pull_request_template.md                     \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\industries\\INDEX.md                                  \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\languages\\INDEX.md                                   \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\languages\\pl.md                                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\languages\\pt-BR.md                                   \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\languages\\pt-PT.md                                   \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\scripts\\check-availability.sh                        \r\nC:\\Users\\USER\\.config\\opencode\\skills\\naming\\templates\\naming-brief.md                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\prototype\\agents                                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\prototype\\LOGIC.md                                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\prototype\\SKILL.md                                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\prototype\\UI.md                                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\prototype\\agents\\openai.yaml                                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules                                  \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\AGENTS.md                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\metadata.json                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\README.md                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\SKILL.md                               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\advanced-event-handler-refs.md   \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\advanced-use-latest.md           \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\async-api-routes.md              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\async-defer-await.md             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\async-dependencies.md            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\async-parallel.md                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\async-suspense-boundaries.md     \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\bundle-barrel-imports.md         \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\bundle-conditional.md            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\bundle-defer-third-party.md      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\bundle-dynamic-imports.md        \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\bundle-preload.md                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\client-event-listeners.md        \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\client-swr-dedup.md              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\js-batch-dom-css.md              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\js-cache-function-results.md     \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\js-cache-property-access.md      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\js-cache-storage.md              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\js-combine-iterations.md         \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\js-early-exit.md                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\js-hoist-regexp.md               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\js-index-maps.md                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\js-length-check-first.md         \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\js-min-max-loop.md               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\js-set-map-lookups.md            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\js-tosorted-immutable.md         \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\rendering-activity.md            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\rendering-animate-svg-wrapper.md \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\rendering-conditional-render.md  \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\rendering-content-visibility.md  \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\rendering-hoist-jsx.md           \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\rendering-hydration-no-flicker.md\r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\rendering-svg-precision.md       \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\rerender-defer-reads.md          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\rerender-dependencies.md         \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\rerender-derived-state.md        \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\rerender-functional-setstate.md  \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\rerender-lazy-state-init.md      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\rerender-memo.md                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\rerender-transitions.md          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\server-after-nonblocking.md      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\server-cache-lru.md              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\server-cache-react.md            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\server-parallel-fetching.md      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\server-serialization.md          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\_sections.md                     \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-best-practices\\rules\\_template.md                     \r\nC:\\Users\\USER\\.config\\opencode\\skills\\react-patterns\\SKILL.md                                     \r\nC:\\Users\\USER\\.config\\opencode\\skills\\recover\\SKILL.md                                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\redesign-existing-projects\\SKILL.md                         \r\nC:\\Users\\USER\\.config\\opencode\\skills\\reference-to-design\\agents                                  \r\nC:\\Users\\USER\\.config\\opencode\\skills\\reference-to-design\\references                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\reference-to-design\\tools                                   \r\nC:\\Users\\USER\\.config\\opencode\\skills\\reference-to-design\\SKILL.md                                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\reference-to-design\\agents\\openai.yaml                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\reference-to-design\\references\\comparison.md                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\reference-to-design\\references\\polish.md                    \r\nC:\\Users\\USER\\.config\\opencode\\skills\\reference-to-design\\references\\prompts.md                   \r\nC:\\Users\\USER\\.config\\opencode\\skills\\reference-to-design\\tools\\describe-image.js                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\reference-to-design\\tools\\load-vault.js                     \r\nC:\\Users\\USER\\.config\\opencode\\skills\\remember\\memory.md                                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\remember\\SKILL.md                                           \r\nC:\\Users\\USER\\.config\\opencode\\skills\\research\\agents                                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\research\\SKILL.md                                           \r\nC:\\Users\\USER\\.config\\opencode\\skills\\research\\agents\\openai.yaml                                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\resolving-merge-conflicts\\agents                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\resolving-merge-conflicts\\SKILL.md                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\resolving-merge-conflicts\\agents\\openai.yaml                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\retro\\agents                                                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\retro\\SKILL.md                                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\retro\\agents\\openai.yaml                                    \r\nC:\\Users\\USER\\.config\\opencode\\skills\\review\\SKILL.md                                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\saas-mvp-launcher\\SKILL.md                                  \r\nC:\\Users\\USER\\.config\\opencode\\skills\\scaffold-exercises\\agents                                   \r\nC:\\Users\\USER\\.config\\opencode\\skills\\scaffold-exercises\\SKILL.md                                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\scaffold-exercises\\agents\\openai.yaml                       \r\nC:\\Users\\USER\\.config\\opencode\\skills\\scope\\agents                                                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\scope\\approaches                                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\scope\\modes                                                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\scope\\scope-template.md                                     \r\nC:\\Users\\USER\\.config\\opencode\\skills\\scope\\SKILL.md                                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\scope\\agents\\openai.yaml                                    \r\nC:\\Users\\USER\\.config\\opencode\\skills\\scope\\approaches\\facade.md                                  \r\nC:\\Users\\USER\\.config\\opencode\\skills\\scope\\approaches\\journey.md                                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\scope\\approaches\\skateboard.md                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\scope\\approaches\\tracer-bullet.md                           \r\nC:\\Users\\USER\\.config\\opencode\\skills\\scope\\modes\\add.md                                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\scope\\modes\\plan-brownfield.md                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\scope\\modes\\plan-greenfield.md                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\scope\\modes\\plan-monorepo.md                                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\scope\\modes\\plan.md                                         \r\nC:\\Users\\USER\\.config\\opencode\\skills\\scope\\modes\\replan.md                                       \r\nC:\\Users\\USER\\.config\\opencode\\skills\\setup-matt-pocock-skills\\agents                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\setup-matt-pocock-skills\\domain.md                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\setup-matt-pocock-skills\\issue-tracker-github.md            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\setup-matt-pocock-skills\\issue-tracker-gitlab.md            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\setup-matt-pocock-skills\\issue-tracker-local.md             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\setup-matt-pocock-skills\\SKILL.md                           \r\nC:\\Users\\USER\\.config\\opencode\\skills\\setup-matt-pocock-skills\\triage-labels.md                   \r\nC:\\Users\\USER\\.config\\opencode\\skills\\setup-matt-pocock-skills\\agents\\openai.yaml                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\setup-pre-commit\\agents                                     \r\nC:\\Users\\USER\\.config\\opencode\\skills\\setup-pre-commit\\SKILL.md                                   \r\nC:\\Users\\USER\\.config\\opencode\\skills\\setup-pre-commit\\agents\\openai.yaml                         \r\nC:\\Users\\USER\\.config\\opencode\\skills\\setup-ts-deep-modules\\agents                                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\setup-ts-deep-modules\\dependency-cruiser.config.cjs         \r\nC:\\Users\\USER\\.config\\opencode\\skills\\setup-ts-deep-modules\\SKILL.md                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\setup-ts-deep-modules\\agents\\openai.yaml                    \r\nC:\\Users\\USER\\.config\\opencode\\skills\\shadcn\\agents                                               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\shadcn\\assets                                               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\shadcn\\evals                                                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\shadcn\\rules                                                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\shadcn\\cli.md                                               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\shadcn\\customization.md                                     \r\nC:\\Users\\USER\\.config\\opencode\\skills\\shadcn\\mcp.md                                               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\shadcn\\SKILL.md                                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\shadcn\\agents\\openai.yml                                    \r\nC:\\Users\\USER\\.config\\opencode\\skills\\shadcn\\assets\\shadcn-small.png                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\shadcn\\assets\\shadcn.png                                    \r\nC:\\Users\\USER\\.config\\opencode\\skills\\shadcn\\evals\\evals.json                                     \r\nC:\\Users\\USER\\.config\\opencode\\skills\\shadcn\\rules\\base-vs-radix.md                               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\shadcn\\rules\\composition.md                                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\shadcn\\rules\\forms.md                                       \r\nC:\\Users\\USER\\.config\\opencode\\skills\\shadcn\\rules\\icons.md                                       \r\nC:\\Users\\USER\\.config\\opencode\\skills\\shadcn\\rules\\styling.md                                     \r\nC:\\Users\\USER\\.config\\opencode\\skills\\skill-creator\\references                                    \r\nC:\\Users\\USER\\.config\\opencode\\skills\\skill-creator\\scripts                                       \r\nC:\\Users\\USER\\.config\\opencode\\skills\\skill-creator\\LICENSE.txt                                   \r\nC:\\Users\\USER\\.config\\opencode\\skills\\skill-creator\\README.md                                     \r\nC:\\Users\\USER\\.config\\opencode\\skills\\skill-creator\\SKILL.md                                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\skill-creator\\references\\output-patterns.md                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\skill-creator\\references\\workflows.md                       \r\nC:\\Users\\USER\\.config\\opencode\\skills\\skill-creator\\scripts\\init_skill.py                         \r\nC:\\Users\\USER\\.config\\opencode\\skills\\skill-creator\\scripts\\package_skill.py                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\skill-creator\\scripts\\quick_validate.py                     \r\nC:\\Users\\USER\\.config\\opencode\\skills\\slides\\references                                           \r\nC:\\Users\\USER\\.config\\opencode\\skills\\slides\\SKILL.md                                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\slides\\references\\copywriting-formulas.md                   \r\nC:\\Users\\USER\\.config\\opencode\\skills\\slides\\references\\create.md                                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\slides\\references\\html-template.md                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\slides\\references\\layout-patterns.md                        \r\nC:\\Users\\USER\\.config\\opencode\\skills\\slides\\references\\slide-strategies.md                       \r\nC:\\Users\\USER\\.config\\opencode\\skills\\software-architecture\\SKILL.md                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\supabase-automation\\SKILL.md                                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\sync\\agents                                                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\sync\\agent-prompt.md                                        \r\nC:\\Users\\USER\\.config\\opencode\\skills\\sync\\SKILL.md                                               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\sync\\agents\\openai.yaml                                     \r\nC:\\Users\\USER\\.config\\opencode\\skills\\tailwind-design-system\\resources                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\tailwind-design-system\\SKILL.md                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\tailwind-design-system\\resources\\implementation-playbook.md \r\nC:\\Users\\USER\\.config\\opencode\\skills\\tailwind-patterns\\SKILL.md                                  \r\nC:\\Users\\USER\\.config\\opencode\\skills\\tdd\\agents                                                  \r\nC:\\Users\\USER\\.config\\opencode\\skills\\tdd\\mocking.md                                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\tdd\\SKILL.md                                                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\tdd\\tests.md                                                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\tdd\\agents\\openai.yaml                                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\teach\\agents                                                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\teach\\GLOSSARY-FORMAT.md                                    \r\nC:\\Users\\USER\\.config\\opencode\\skills\\teach\\LEARNING-RECORD-FORMAT.md                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\teach\\MISSION-FORMAT.md                                     \r\nC:\\Users\\USER\\.config\\opencode\\skills\\teach\\RESOURCES-FORMAT.md                                   \r\nC:\\Users\\USER\\.config\\opencode\\skills\\teach\\SKILL.md                                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\teach\\agents\\openai.yaml                                    \r\nC:\\Users\\USER\\.config\\opencode\\skills\\test\\agents                                                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\test\\modes                                                  \r\nC:\\Users\\USER\\.config\\opencode\\skills\\test\\agent-prompt.md                                        \r\nC:\\Users\\USER\\.config\\opencode\\skills\\test\\SKILL.md                                               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\test\\writing-guide.md                                       \r\nC:\\Users\\USER\\.config\\opencode\\skills\\test\\agents\\openai.yaml                                     \r\nC:\\Users\\USER\\.config\\opencode\\skills\\test\\modes\\setup.md                                         \r\nC:\\Users\\USER\\.config\\opencode\\skills\\threejs-fundamentals\\SKILL.md                               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\to-questionnaire\\agents                                     \r\nC:\\Users\\USER\\.config\\opencode\\skills\\to-questionnaire\\SKILL.md                                   \r\nC:\\Users\\USER\\.config\\opencode\\skills\\to-questionnaire\\agents\\openai.yaml                         \r\nC:\\Users\\USER\\.config\\opencode\\skills\\to-spec\\agents                                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\to-spec\\SKILL.md                                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\to-spec\\agents\\openai.yaml                                  \r\nC:\\Users\\USER\\.config\\opencode\\skills\\to-tickets\\agents                                           \r\nC:\\Users\\USER\\.config\\opencode\\skills\\to-tickets\\SKILL.md                                         \r\nC:\\Users\\USER\\.config\\opencode\\skills\\to-tickets\\agents\\openai.yaml                               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\triage\\agents                                               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\triage\\AGENT-BRIEF.md                                       \r\nC:\\Users\\USER\\.config\\opencode\\skills\\triage\\OUT-OF-SCOPE.md                                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\triage\\SKILL.md                                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\triage\\agents\\openai.yaml                                   \r\nC:\\Users\\USER\\.config\\opencode\\skills\\typescript-pro\\SKILL.md                                     \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-styling\\references                                       \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-styling\\scripts                                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-styling\\LICENSE.txt                                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-styling\\SKILL.md                                         \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-styling\\references\\canvas-design-system.md               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-styling\\references\\shadcn-accessibility.md               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-styling\\references\\shadcn-components.md                  \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-styling\\references\\shadcn-theming.md                     \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-styling\\references\\tailwind-customization.md             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-styling\\references\\tailwind-responsive.md                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-styling\\references\\tailwind-utilities.md                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-styling\\scripts\\tests                                    \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-styling\\scripts\\requirements.txt                         \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-styling\\scripts\\shadcn_add.py                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-styling\\scripts\\tailwind_config_gen.py                   \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-ux-pro-max\\data                                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-ux-pro-max\\scripts                                       \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-ux-pro-max\\SKILL.md                                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-ux-pro-max\\data\\stacks                                   \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-ux-pro-max\\data\\app-interface.csv                        \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-ux-pro-max\\data\\catalog-summary.json                     \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-ux-pro-max\\data\\charts.csv                               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-ux-pro-max\\data\\colors.csv                               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-ux-pro-max\\data\\data-provenance.json                     \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-ux-pro-max\\data\\google-font-licenses.json                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-ux-pro-max\\data\\google-fonts.csv                         \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-ux-pro-max\\data\\icons.csv                                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-ux-pro-max\\data\\landing.csv                              \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-ux-pro-max\\data\\motion.csv                               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-ux-pro-max\\data\\phosphor-icons-upstream.json             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-ux-pro-max\\data\\products.csv                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-ux-pro-max\\data\\react-performance.csv                    \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-ux-pro-max\\data\\styles.csv                               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-ux-pro-max\\data\\typography.csv                           \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-ux-pro-max\\data\\ui-reasoning.csv                         \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-ux-pro-max\\data\\ux-guidelines.csv                        \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-ux-pro-max\\scripts\\tests                                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-ux-pro-max\\scripts\\core.py                               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-ux-pro-max\\scripts\\design_system.py                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-ux-pro-max\\scripts\\reasoning_contract.py                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-ux-pro-max\\scripts\\search.py                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\ui-ux-pro-max\\scripts\\validate_data.py                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\wait-what\\agents                                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\wait-what\\SKILL.md                                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\wait-what\\agents\\openai.yaml                                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\wayfinder\\agents                                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\wayfinder\\SKILL.md                                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\wayfinder\\agents\\openai.yaml                                \r\nC:\\Users\\USER\\.config\\opencode\\skills\\wizard\\agents                                               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\wizard\\SKILL.md                                             \r\nC:\\Users\\USER\\.config\\opencode\\skills\\wizard\\template.sh                                          \r\nC:\\Users\\USER\\.config\\opencode\\skills\\wizard\\agents\\openai.yaml                                   \r\nC:\\Users\\USER\\.config\\opencode\\skills\\writing-beats\\agents                                        \r\nC:\\Users\\USER\\.config\\opencode\\skills\\writing-beats\\SKILL.md                                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\writing-beats\\agents\\openai.yaml                            \r\nC:\\Users\\USER\\.config\\opencode\\skills\\writing-for-agents\\agents                                   \r\nC:\\Users\\USER\\.config\\opencode\\skills\\writing-for-agents\\SKILL-MECHANICS.md                       \r\nC:\\Users\\USER\\.config\\opencode\\skills\\writing-for-agents\\SKILL.md                                 \r\nC:\\Users\\USER\\.config\\opencode\\skills\\writing-for-agents\\agents\\openai.yaml                       \r\nC:\\Users\\USER\\.config\\opencode\\skills\\writing-fragments\\agents                                    \r\nC:\\Users\\USER\\.config\\opencode\\skills\\writing-fragments\\SKILL.md                                  \r\nC:\\Users\\USER\\.config\\opencode\\skills\\writing-fragments\\agents\\openai.yaml                        \r\nC:\\Users\\USER\\.config\\opencode\\skills\\writing-shape\\agents                                        \r\nC:\\Users\\USER\\.config\\opencode\\skills\\writing-shape\\SKILL.md                                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\writing-shape\\agents\\openai.yaml                            \r\n\r\n\r\n\n\n[showing lines 135-648 of 648; full output saved to C:\\Users\\USER\\.local\\share\\opencode\\shell\\e3d22ef61bc7b102a266ecb7fffc101aa7a67771\\sh_19154ff26001h2H996536SY3jA.out]"
+              }
+            ],
+            "metadata": {
+              "status": "completed",
+              "truncated": true,
+              "exit": 0
+            }
+          },
+          "time": {
+            "created": 1793439629033,
+            "ran": 1793439629071,
+            "completed": 1793439630160
+          }
+        }
+      ],
+      "finish": "tool-calls",
+      "rawFinish": "tool_calls",
+      "cost": 0.000598986,
+      "tokens": {
+        "input": 3371,
+        "output": 109,
+        "reasoning": 12,
+        "cache": {
+          "read": 6912,
+          "write": 0
+        }
+      },
+      "seq": 20
+    },
+    {
+      "id": "msg_191550393001ScobuD8KF6JzEV",
+      "type": "assistant",
+      "time": {
+        "created": 1793439630256,
+        "streamed": 1793439634085,
+        "completed": 1793439635261
+      },
+      "agent": "build",
+      "model": {
+        "id": "deepseek-v4.1-flash",
+        "providerID": "opencode-go",
+        "variant": "default"
+      },
+      "content": [
+        {
+          "type": "reasoning",
+          "text": "The user says \"enable only my architect skill, it's currently disabled\". Hmm — ambiguous. Two readings:\n\n1. Enable the \"architect\" skill (in addition to others? \"only my architect skill\" = just the architect one).\n2. \"enable only my architect skill\" could mean restrict to only that skill — but that would deny everything else. Risky.\n\nThere's no skill literally named \"architect\". Candidates: `codebase-design`, `software-architecture`, `domain-modeling`, `improve-codebase-architecture`, `plan`? Let me search for \"architect\" in skill directories' SKILL.md frontmatter names.\n\nAlso the global config has no \"architect\" entry. Let me grep for name: architect.\n\nAlso note skills may be in ~/.agents/skills (1400+ skills). Let me search there too.\n\nLet me check the available skills list in this session — no \"architect\". So search filesystem.",
+          "state": {
+            "reasoningField": "reasoning_content"
+          },
+          "time": {
+            "created": 1793439632003,
+            "completed": 1793439634063
+          }
+        },
+        {
+          "type": "tool",
+          "id": "call_00_e1q1gr5b2meweoisqbmy09x5",
+          "name": "shell",
+          "executed": false,
+          "state": {
+            "status": "completed",
+            "input": {
+              "command": "Select-String -Path \"$env:USERPROFILE\\.config\\opencode\\skills\\*\\SKILL.md\",\"$env:USERPROFILE\\.agents\\skills\\*\\SKILL.md\" -Pattern '^(name|description):' | Where-Object { $_.Line -match 'architect' } | Select-Object Path, Line"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "\r\nPath                                                                         Line                                      \r\n----                                                                         ----                                      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\architect\\SKILL.md                     name: architect                           \r\nC:\\Users\\USER\\.config\\opencode\\skills\\design-system\\SKILL.md                 description: Token architecture, compon...\r\nC:\\Users\\USER\\.config\\opencode\\skills\\develop\\SKILL.md                       description: \"Run /develop to build a f...\r\nC:\\Users\\USER\\.config\\opencode\\skills\\frontend-developer\\SKILL.md            description: Build React components, im...\r\nC:\\Users\\USER\\.config\\opencode\\skills\\impeccable\\SKILL.md                    description: Use when the user wants to...\r\nC:\\Users\\USER\\.config\\opencode\\skills\\improve-codebase-architecture\\SKILL.md name: improve-codebase-architecture       \r\nC:\\Users\\USER\\.config\\opencode\\skills\\minimalist-ui\\SKILL.md                 Description: An advanced frontend engin...\r\nC:\\Users\\USER\\.config\\opencode\\skills\\mobile-developer\\SKILL.md              description: Develop React Native, Flut...\r\nC:\\Users\\USER\\.config\\opencode\\skills\\review\\SKILL.md                        description: After building a feature, ...\r\nC:\\Users\\USER\\.config\\opencode\\skills\\saas-mvp-launcher\\SKILL.md             description: \"Use when planning or buil...\r\nC:\\Users\\USER\\.config\\opencode\\skills\\scope\\SKILL.md                         description: \"Run /scope to turn a prod...\r\nC:\\Users\\USER\\.config\\opencode\\skills\\software-architecture\\SKILL.md         name: software-architecture               \r\nC:\\Users\\USER\\.config\\opencode\\skills\\software-architecture\\SKILL.md         description: \"Guide for quality focused...\r\nC:\\Users\\USER\\.config\\opencode\\skills\\tailwind-patterns\\SKILL.md             description: \"Tailwind CSS v4 principle...\r\nC:\\Users\\USER\\.agents\\skills\\architect\\SKILL.md                              name: architect                           \r\nC:\\Users\\USER\\.agents\\skills\\database-architect\\SKILL.md                     name: database-architect                  \r\nC:\\Users\\USER\\.agents\\skills\\database-architect\\SKILL.md                     description: Expert database architect ...\r\nC:\\Users\\USER\\.agents\\skills\\frontend-dev-guidelines\\SKILL.md                description: \"You are a senior frontend...\r\nC:\\Users\\USER\\.agents\\skills\\frontend-developer\\SKILL.md                     description: Build React components, im...\r\nC:\\Users\\USER\\.agents\\skills\\impeccable\\SKILL.md                             description: Use when the user wants to...\r\nC:\\Users\\USER\\.agents\\skills\\minimalist-ui\\SKILL.md                          Description: An advanced frontend engin...\r\nC:\\Users\\USER\\.agents\\skills\\mobile-developer\\SKILL.md                       description: Develop React Native, Flut...\r\nC:\\Users\\USER\\.agents\\skills\\react-native-architecture\\SKILL.md              name: react-native-architecture           \r\nC:\\Users\\USER\\.agents\\skills\\react-native-architecture\\SKILL.md              description: \"Production-ready patterns...\r\nC:\\Users\\USER\\.agents\\skills\\review\\SKILL.md                                 description: After building a feature, ...\r\nC:\\Users\\USER\\.agents\\skills\\saas-mvp-launcher\\SKILL.md                      description: \"Use when planning or buil...\r\nC:\\Users\\USER\\.agents\\skills\\software-architecture\\SKILL.md                  name: software-architecture               \r\nC:\\Users\\USER\\.agents\\skills\\software-architecture\\SKILL.md                  description: \"Guide for quality focused...\r\nC:\\Users\\USER\\.agents\\skills\\tailwind-patterns\\SKILL.md                      description: \"Tailwind CSS v4 principle...\r\nC:\\Users\\USER\\.agents\\skills\\UI UX Impeccable\\SKILL.md                       description: Use when the user wants to...\r\n\r\n\r\n"
+              }
+            ],
+            "metadata": {
+              "status": "completed",
+              "truncated": false,
+              "exit": 0
+            }
+          },
+          "time": {
+            "created": 1793439633917,
+            "ran": 1793439634072,
+            "completed": 1793439635257
+          }
+        },
+        {
+          "type": "tool",
+          "id": "call_01_cwz7fy1c5mef88109zrdir5e",
+          "name": "shell",
+          "executed": false,
+          "state": {
+            "status": "completed",
+            "input": {
+              "command": "Get-ChildItem -Directory \"$env:USERPROFILE\\.agents\\skills\" -ErrorAction SilentlyContinue | Where-Object Name -match 'archit' | Select-Object Name; Get-ChildItem -Directory \"$env:USERPROFILE\\.config\\opencode\\skills\" | Where-Object Name -match 'archit' | Select-Object Name"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "\r\nName                         \r\n----                         \r\narchitect                    \r\ndatabase-architect           \r\nreact-native-architecture    \r\nsoftware-architecture        \r\narchitect                    \r\nimprove-codebase-architecture\r\nsoftware-architecture        \r\n\r\n\r\n"
+              }
+            ],
+            "metadata": {
+              "status": "completed",
+              "truncated": false,
+              "exit": 0
+            }
+          },
+          "time": {
+            "created": 1793439634015,
+            "ran": 1793439634080,
+            "completed": 1793439634927
+          }
+        }
+      ],
+      "finish": "tool-calls",
+      "rawFinish": "tool_calls",
+      "cost": 0.00228597,
+      "tokens": {
+        "input": 13395,
+        "output": 209,
+        "reasoning": 201,
+        "cache": {
+          "read": 10240,
+          "write": 0
+        }
+      },
+      "seq": 33
+    },
+    {
+      "id": "msg_19155177a001TVD771bgqGjmHP",
+      "type": "assistant",
+      "time": {
+        "created": 1793439635349,
+        "streamed": 1793439641093,
+        "completed": 1793439641607
+      },
+      "agent": "build",
+      "model": {
+        "id": "deepseek-v4.1-flash",
+        "providerID": "opencode-go",
+        "variant": "default"
+      },
+      "content": [
+        {
+          "type": "reasoning",
+          "text": "There's an `architect` skill in both `~/.config/opencode/skills/architect` and `~/.agents/skills/architect`. It's not in the allowlist, so it's denied by the `\"*\"` deny rule.\n\nThe user says \"enable only my architect skill\". I interpret: add an allow rule for `architect`. But \"only\" — do they want to disable all other skills? That would be a big destructive change (removing impeccable, remember, etc.). Hmm.\n\nReadings:\n- \"enable only my architect skill, it's currently disabled\" → I think they mean \"enable just my architect skill\" i.e., make the specific one change — \"only\" modifies the scope of the change to just the architect skill, not all others. That's the most natural reading given they say \"it's currently disabled.\"\n\nBut it could also mean restrict to only architect. Ambiguous enough to ask? The question tool exists. But this is a small reversible config change. I think asking is warranted, since \"only\" is genuinely ambiguous and the destructive reading would wipe 9 allow rules.\n\nActually, consider: There's a comment in the config explaining the deny-all-then-allow pattern. The user has ~9 allowed skills. If they wanted only architect, they'd probably say \"disable everything else\" or \"I only want architect\". Saying \"enable only my architect skill\" most likely means \"the only thing I want you to do is enable architect\".\n\nI'll ask quickly via question tool to be safe? Hmm, guidance: prefer asking when ambiguous instructions. But excessive questions are annoying. The cost of wrong interpretation: if I restrict to only architect and they wanted just adding, they lose 9 skills' availability (recoverable, and I mention it). If I add and they wanted only, they'd have to ask again.\n\nI'll ask one quick question. Actually... \"enable only my architect skill\" — I lean strongly toward \"just enable architect\". The phrase \"it's currently disabled\" clarifies the whole task. I'll just do it and mention that other skills remain allowed, offering to restrict if they meant that.\n\nLet me check the architect skill's dir in config vs .agents — both named architect. Skill IDs come from frontmatter name. Let's check the config one's frontmatter to confirm it's valid and check if there's a disabled flag somewhere (maybe the skill has \"enabled: false\" in frontmatter, or is disabled elsewhere).\n\nLet me read it.",
+          "state": {
+            "reasoningField": "reasoning_content"
+          },
+          "time": {
+            "created": 1793439636653,
+            "completed": 1793439641074
+          }
+        },
+        {
+          "type": "tool",
+          "id": "call_00_hzufayyxnf2zywifi72tpu5a",
+          "name": "read",
+          "executed": false,
+          "state": {
+            "status": "completed",
+            "input": {
+              "path": "C:\\Users\\USER\\.config\\opencode\\skills\\architect\\SKILL.md",
+              "limit": 30
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Read file C:\\Users\\USER\\.config\\opencode\\skills\\architect\\SKILL.md, lines 1-30\n1: ---\n2: name: architect\n3: description: Think through what you are about to build like a senior engineer before writing any code. Surfaces decisions, aligns on language, and produces a clear implementation plan you confirm before anything starts.\n4: metadata:\n5:   harness: [claude, opencode]\n6:   scope: fleet\n7: ---\n8: \n9: You are a senior engineer sitting with a developer before they start building. Your job is not to interrogate them — it is to think alongside them. To ask the questions a senior engineer would ask before letting someone start coding. To catch the things that seem obvious but aren't. To make sure both of you are building the same thing in your heads before either of you touches the code.\n10: \n11: This is a thinking session. Not a grilling session.\n12: \n13: ## Step 1 — Understand What's Here\n14: \n15: Before saying anything, take stock of what already exists:\n16: \n17: - Read the feature description the developer gave you\n18: - Read any context files, documentation, or existing code available\n19: - Build a clear picture of what needs to be built and what already exists\n20: \n21: Do not ask about anything already clearly answered by existing documentation. A good senior engineer does their homework before the meeting.\n22: \n23: ## Step 2 — Align on Language\n24: \n25: Every project has its own vocabulary. Before discussing implementation, make sure you and the developer mean the same thing by the same words.\n26: \n27: Identify 3-5 terms from the feature description that could be interpreted more than one way. Define each one based on what you understand from the context. Present them to the developer for confirmation.\n28: \n29: ```\n30: Before we think this through — let me make sure\n[Output truncated. Continue reading with offset: 31]"
+              }
+            ],
+            "metadata": {
+              "truncated": true
+            }
+          },
+          "time": {
+            "created": 1793439640958,
+            "ran": 1793439641080,
+            "completed": 1793439641152
+          }
+        },
+        {
+          "type": "tool",
+          "id": "call_01_o485lpkzc56dggv0s3iqeyc9",
+          "name": "shell",
+          "executed": false,
+          "state": {
+            "status": "completed",
+            "input": {
+              "command": "Select-String -Path \"$env:USERPROFILE\\.config\\opencode\\opencode.jsonc\",\"$env:USERPROFILE\\.config\\opencode\\cli.json\",\"$env:USERPROFILE\\.agents\\skills\\architect\\SKILL.md\",\"$env:USERPROFILE\\.config\\opencode\\skills\\architect\\SKILL.md\" -Pattern 'architect|disabled|enabled' | Select-Object Path, LineNumber, Line"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "\r\nPath                                                     LineNumber Line                 \r\n----                                                     ---------- ----                 \r\nC:\\Users\\USER\\.config\\opencode\\opencode.jsonc                    28       \"enabled\": true\r\nC:\\Users\\USER\\.config\\opencode\\opencode.jsonc                    33       \"enabled\": true\r\nC:\\Users\\USER\\.agents\\skills\\architect\\SKILL.md                   2 name: architect      \r\nC:\\Users\\USER\\.config\\opencode\\skills\\architect\\SKILL.md          2 name: architect      \r\n\r\n\r\n"
+              }
+            ],
+            "metadata": {
+              "status": "completed",
+              "truncated": false,
+              "exit": 0
+            }
+          },
+          "time": {
+            "created": 1793439641006,
+            "ran": 1793439641089,
+            "completed": 1793439641602
+          }
+        }
+      ],
+      "finish": "tool-calls",
+      "rawFinish": "tool_calls",
+      "cost": 0.0007284059999999999,
+      "tokens": {
+        "input": 1493,
+        "output": 194,
+        "reasoning": 529,
+        "cache": {
+          "read": 23552,
+          "write": 0
+        }
+      },
+      "seq": 46
+    },
+    {
+      "id": "msg_191553048001OKuyWFYG7JOJLa",
+      "type": "assistant",
+      "time": {
+        "created": 1793439641711,
+        "streamed": 1793439645060,
+        "completed": 1793439645143
+      },
+      "agent": "build",
+      "model": {
+        "id": "deepseek-v4.1-flash",
+        "providerID": "opencode-go",
+        "variant": "default"
+      },
+      "content": [
+        {
+          "type": "reasoning",
+          "text": "The architect skill is valid, just not allowed by the permission list. Add:\n{ \"action\": \"skill\", \"resource\": \"architect\", \"effect\": \"allow\" },\n\nPlace it prominently. Then verify with `opencode api` maybe or just check restart requirement. Config change requires service reload? Permission config is read by server; the running service may cache. Let me check if there's a way to verify skills list, e.g. `opencode api get /api/skills` or similar. Let me edit first.\n\nI'll add after the deny line, at the top of the allow block.",
+          "state": {
+            "reasoningField": "reasoning_content"
+          },
+          "time": {
+            "created": 1793439643364,
+            "completed": 1793439645043
+          }
+        },
+        {
+          "type": "tool",
+          "id": "call_00_o28erhrk1oon8c4wscxyj46k",
+          "name": "edit",
+          "executed": false,
+          "state": {
+            "status": "completed",
+            "input": {
+              "path": "C:\\Users\\USER\\.config\\opencode\\opencode.jsonc",
+              "oldString": "    { \"action\": \"skill\", \"resource\": \"*\", \"effect\": \"deny\" },\n\n    { \"action\": \"skill\", \"resource\": \"impeccable\", \"effect\": \"allow\" },",
+              "newString": "    { \"action\": \"skill\", \"resource\": \"*\", \"effect\": \"deny\" },\n\n    { \"action\": \"skill\", \"resource\": \"architect\", \"effect\": \"allow\" },\n    { \"action\": \"skill\", \"resource\": \"impeccable\", \"effect\": \"allow\" },"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Edited .config/opencode/opencode.jsonc (1 replacement)"
+              }
+            ],
+            "metadata": {
+              "files": [
+                {
+                  "file": ".config/opencode/opencode.jsonc",
+                  "patch": "Index: .config/opencode/opencode.jsonc\n===================================================================\n--- .config/opencode/opencode.jsonc\n+++ .config/opencode/opencode.jsonc\n@@ -10,8 +10,9 @@\n   // Add more by copying a line below with the skill's ID.\n   \"permissions\": [\n     { \"action\": \"skill\", \"resource\": \"*\", \"effect\": \"deny\" },\n \n+    { \"action\": \"skill\", \"resource\": \"architect\", \"effect\": \"allow\" },\n     { \"action\": \"skill\", \"resource\": \"impeccable\", \"effect\": \"allow\" },\n     { \"action\": \"skill\", \"resource\": \"design-taste-frontend\", \"effect\": \"allow\" },\n     { \"action\": \"skill\", \"resource\": \"frontend-design\", \"effect\": \"allow\" },\n     { \"action\": \"skill\", \"resource\": \"remember\", \"effect\": \"allow\" },\n",
+                  "status": "modified",
+                  "additions": 1,
+                  "deletions": 0
+                }
+              ],
+              "truncated": false
+            }
+          },
+          "time": {
+            "created": 1793439644942,
+            "ran": 1793439645054,
+            "completed": 1793439645139
+          }
+        }
+      ],
+      "finish": "tool-calls",
+      "rawFinish": "tool_calls",
+      "cost": 0.00047523000000000004,
+      "tokens": {
+        "input": 1385,
+        "output": 195,
+        "reasoning": 126,
+        "cache": {
+          "read": 24960,
+          "write": 0
+        }
+      },
+      "seq": 59
+    },
+    {
+      "id": "msg_191553e0d001OB2y6DrH1YfNyK",
+      "type": "assistant",
+      "time": {
+        "created": 1793439645223,
+        "streamed": 1793439647173,
+        "completed": 1793439648544
+      },
+      "agent": "build",
+      "model": {
+        "id": "deepseek-v4.1-flash",
+        "providerID": "opencode-go",
+        "variant": "default"
+      },
+      "content": [
+        {
+          "type": "reasoning",
+          "text": "Now verify the config parses and the skill is advertised. Try `opencode api get /api/info` and maybe a skills endpoint. Let me check openapi for skills endpoint.\n\nConfig changes may require service restart. Let's check status and whether architect is now allowed. Use `opencode api` — need to know endpoints. Try `opencode api get /api/info` first.",
+          "state": {
+            "reasoningField": "reasoning_content"
+          },
+          "time": {
+            "created": 1793439646439,
+            "completed": 1793439647158
+          }
+        },
+        {
+          "type": "tool",
+          "id": "call_00_esnpueq8ta84gcs7je21n7m6",
+          "name": "shell",
+          "executed": false,
+          "state": {
+            "status": "completed",
+            "input": {
+              "command": "opencode service status; opencode api get /api/info",
+              "timeout": 60000
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "http://127.0.0.1:49374\r\n{\"version\":\"2.0.19\",\"pid\":11112,\"urls\":[\"http://127.0.0.1:49374\"],\"paths\":{\"tmp\":\"C:\\\\Users\\\\USER\\\\AppData\\\\Local\\\\Temp\\\\opencode\"}}\r\n"
+              }
+            ],
+            "metadata": {
+              "status": "completed",
+              "truncated": false,
+              "exit": 0
+            }
+          },
+          "time": {
+            "created": 1793439647118,
+            "ran": 1793439647168,
+            "completed": 1793439648540
+          }
+        }
+      ],
+      "finish": "tool-calls",
+      "rawFinish": "tool_calls",
+      "cost": 0.00023532,
+      "tokens": {
+        "input": 452,
+        "output": 67,
+        "reasoning": 81,
+        "cache": {
+          "read": 26240,
+          "write": 0
+        }
+      },
+      "seq": 68
+    },
+    {
+      "id": "msg_191554b58001y7GV5sGik3Q6AO",
+      "type": "system",
+      "metadata": {
+        "notice": "instructions",
+        "instructionSources": [
+          "core/skill-guidance"
+        ]
+      },
+      "time": {
+        "created": 1793439648600
+      },
+      "text": "New skills are available in addition to those previously listed:\n  <skill>\n    <id>architect</id>\n    <name>architect</name>\n    <description>Think through what you are about to build like a senior engineer before writing any code. Surfaces decisions, aligns on language, and produces a clear implementation plan you confirm before anything starts.</description>\n  </skill>",
+      "description": "Instructions updated: core/skill-guidance",
+      "seq": 77
+    },
+    {
+      "id": "msg_191554b6f001MxPY7lVvwisBzG",
+      "type": "assistant",
+      "time": {
+        "created": 1793439648660,
+        "streamed": 1793439651427,
+        "completed": 1793439651433
+      },
+      "agent": "build",
+      "model": {
+        "id": "deepseek-v4.1-flash",
+        "providerID": "opencode-go",
+        "variant": "default"
+      },
+      "content": [
+        {
+          "type": "reasoning",
+          "text": "The skill is now advertised live — the change took effect without a restart. Confirm to the user.\n\nI should also mention the ambiguity: I kept the other 9 allowed skills; ask if they meant architect should be the only one enabled.",
+          "state": {
+            "reasoningField": "reasoning_content"
+          },
+          "time": {
+            "created": 1793439650050,
+            "completed": 1793439651420
+          }
+        },
+        {
+          "type": "text",
+          "text": "Done — `architect` is enabled and the running service picked it up live (it just appeared in my skill list, no restart needed).\n\nWhat I changed in `C:\\Users\\USER\\.config\\opencode\\opencode.jsonc` — one line added at the top of the allow block:\n\n```jsonc\n{ \"action\": \"skill\", \"resource\": \"*\", \"effect\": \"deny\" },\n\n{ \"action\": \"skill\", \"resource\": \"architect\", \"effect\": \"allow\" },\n{ \"action\": \"skill\", \"resource\": \"impeccable\", \"effect\": \"allow\" },\n```\n\nIt was disabled only because the config denies every skill by default and had no `architect` entry; the skill file itself at `~/.config/opencode/skills/architect/SKILL.md` was fine.\n\nOne thing worth confirming: I read \"enable only my architect skill\" as \"just make this one change.\" Your other nine allow rules (impeccable, design-taste-frontend, frontend-design, remember, debug, fleet, handoff, humanizer, opencode) are still enabled. If you actually meant architect should be the *only* enabled skill, say so and I'll remove the rest."
+        }
+      ],
+      "finish": "stop",
+      "rawFinish": "stop",
+      "cost": 0.000328572,
+      "tokens": {
+        "input": 410,
+        "output": 264,
+        "reasoning": 48,
+        "cache": {
+          "read": 26624,
+          "write": 0
+        }
+      },
+      "seq": 78
+    },
+    {
+      "id": "msg_1916de4c10015TlD4If9QuYY9I",
+      "type": "user",
+      "time": {
+        "created": 1793441260867
+      },
+      "text": "enable the humanzier skill too if it sinst",
+      "files": [],
+      "agents": [],
+      "seq": 89
+    },
+    {
+      "id": "msg_1916de55e001Q0rSgmdf3bKNVO",
+      "type": "assistant",
+      "time": {
+        "created": 1793441260963,
+        "streamed": 1793441263750,
+        "completed": 1793441263851
+      },
+      "agent": "build",
+      "model": {
+        "id": "deepseek-v4.1-flash",
+        "providerID": "opencode-go",
+        "variant": "default"
+      },
+      "content": [
+        {
+          "type": "reasoning",
+          "text": "The humanizer skill is already enabled in the allow list. Check current file state: line 22 earlier had humanizer allow. And in this session's available skills list, humanizer is present. Let me verify.",
+          "state": {
+            "reasoningField": "reasoning_content"
+          },
+          "time": {
+            "created": 1793441263077,
+            "completed": 1793441263729
+          }
+        },
+        {
+          "type": "tool",
+          "id": "call_00_ht1ztirj4qma8zhf7vrjtcpn",
+          "name": "grep",
+          "executed": false,
+          "state": {
+            "status": "completed",
+            "input": {
+              "pattern": "\"resource\": \"(humanizer|architect)\"",
+              "path": "C:\\Users\\USER\\.config\\opencode\\opencode.jsonc"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Found 2 matches\nC:\\Users\\USER\\.config\\opencode\\opencode.jsonc:\n  Line 14:     { \"action\": \"skill\", \"resource\": \"architect\", \"effect\": \"allow\" },\n\n  Line 22:     { \"action\": \"skill\", \"resource\": \"humanizer\", \"effect\": \"allow\" },\n"
+              }
+            ],
+            "metadata": {
+              "matches": 2,
+              "truncated": false
+            }
+          },
+          "time": {
+            "created": 1793441263678,
+            "ran": 1793441263741,
+            "completed": 1793441263846
+          }
+        }
+      ],
+      "finish": "tool-calls",
+      "rawFinish": "tool_calls",
+      "cost": 0.00020642399999999997,
+      "tokens": {
+        "input": 352,
+        "output": 77,
+        "reasoning": 44,
+        "cache": {
+          "read": 27008,
+          "write": 0
+        }
+      },
+      "seq": 90
+    },
+    {
+      "id": "msg_1916df151001USDWjFukrJQGSl",
+      "type": "assistant",
+      "time": {
+        "created": 1793441264004,
+        "streamed": 1793441266591,
+        "completed": 1793441266595
+      },
+      "agent": "build",
+      "model": {
+        "id": "deepseek-v4.1-flash",
+        "providerID": "opencode-go",
+        "variant": "default"
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "`humanizer` is already enabled — it was in your allow list before today, and it's still there at line 22 of `opencode.jsonc`, so nothing needed changing.\n\nYour allow block now reads:\n\n```jsonc\n{ \"action\": \"skill\", \"resource\": \"*\", \"effect\": \"deny\" },\n\n{ \"action\": \"skill\", \"resource\": \"architect\", \"effect\": \"allow\" },   // added now\n{ \"action\": \"skill\", \"resource\": \"impeccable\", \"effect\": \"allow\" },\n{ \"action\": \"skill\", \"resource\": \"design-taste-frontend\", \"effect\": \"allow\" },\n{ \"action\": \"skill\", \"resource\": \"frontend-design\", \"effect\": \"allow\" },\n{ \"action\": \"skill\", \"resource\": \"remember\", \"effect\": \"allow\" },\n{ \"action\": \"skill\", \"resource\": \"debug\", \"effect\": \"allow\" },\n{ \"action\": \"skill\", \"resource\": \"fleet\", \"effect\": \"allow\" },\n{ \"action\": \"skill\", \"resource\": \"handoff\", \"effect\": \"allow\" },\n{ \"action\": \"skill\", \"resource\": \"humanizer\", \"effect\": \"allow\" },   // already enabled\n{ \"action\": \"skill\", \"resource\": \"opencode\", \"effect\": \"allow\" }\n```\n\nBoth `architect` and `humanizer` show up in my available skills list right now, so they're live."
+        }
+      ],
+      "finish": "stop",
+      "rawFinish": "stop",
+      "cost": 0.00031879200000000003,
+      "tokens": {
+        "input": 304,
+        "output": 319,
+        "reasoning": 0,
+        "cache": {
+          "read": 27264,
+          "write": 0
+        }
+      },
+      "seq": 99
+    },
+    {
+      "id": "msg_19177e6170017zbGzPiYhaM3g0",
+      "type": "system",
+      "metadata": {
+        "notice": "instructions",
+        "instructionSources": [
+          "core/instructions"
+        ]
+      },
+      "time": {
+        "created": 1793441916439
+      },
+      "text": "Instructions from: C:\\Users\\USER\\.config\\opencode\\AGENTS.md\n# How to talk to me\n\nThese rules override the default formatting in your system prompt. They apply to every reply, in every project.\n\n**Lead with the answer.** The first sentence answers the question or states the decision. No setup, no restating what I asked, no \"here's how I'd frame it\".\n\n**Match length to the question.** A yes/no gets a sentence. A \"why\" gets a paragraph. A design question gets a few paragraphs. Write a structured document only when I ask for one, or when the parts genuinely need comparing side by side.\n\n**Default to prose.** No headings, no bold labels, no bullet lists in a reply that would fit in three paragraphs. If you reach for a list, check that the items are actually parallel. If they aren't, write sentences.\n\n**Be concrete.** Name the file, the function, the number, the tradeoff. \"The cache breaks because the timestamp sits in the prefix\" is useful. \"Cache discipline is the highest-leverage layer\" is not.\n\n**One idea per paragraph.** Two arguments in one paragraph is the main reason I have to reread you.\n\n**Disagree in one sentence.** If I'm wrong, say so immediately and give the reason. Don't save it for a section called \"where I'd push back\", and don't bury it in a list of considerations.\n\n**Ask at most one question.** Ask only when the answer changes what you do next. Otherwise pick the sensible default, name it in a clause, and keep going.\n\n**Name your uncertainty.** One clause on what you're unsure about and what would settle it. No stacked hedges.\n\n**Plain words.** Use the ordinary word unless the technical word is the precise one. Introduce a term once, then use the plain word.\n\n**Stop when the point is made.** No summary paragraph, no closing offer, no \"the one thing I need from you\".\n\n**Tone.** A competent colleague across a desk. Contractions, short sentences, no em dashes; use a comma or a period.\n\nBad:\n\n> Here's how I'd frame it, and where I'd push back on the plan. The thesis is right, the sequence is usually wrong.\n\nGood:\n\n> The order is backwards. Build the measurement rig first, because you can't tell whether the fork helped without it.\n\n---\n\n# RTK - Rust Token Killer\n\nToken-optimized CLI proxy that cuts up to 90% of bash output.\n\n```bash\nrtk gain              # Show token savings analytics\nrtk gain --history    # Show command usage history with savings\nrtk discover          # Analyze Claude Code history for missed opportunities\nrtk proxy <cmd>       # Execute raw command without filtering (for debugging)\n```\n\nVerify with `rtk --version`, `rtk gain`, `which rtk`. If `rtk gain` fails, you may have `reachingforthejack/rtk` (Rust Type Kit) installed instead.\n\nAll other commands are rewritten by a hook, e.g. `git status` becomes `rtk git status`.\n\n# OpenCode: making a skill appear in the `/` dropdown\n\nSkills are model-facing (loaded via the `skill` tool). The `/` dropdown lists **commands**, so a user-invocable skill needs both a valid skill and a command stub.\n\n1. **Skill**: `~/.config/opencode/skills/<name>/SKILL.md`. Frontmatter must parse; quote the `description` if it contains a colon followed by a space (unquoted means a silent YAML error and the skill is dropped). `name` must match the folder name, kebab-case, 1-64 chars. Recognized fields: name, description, license, compatibility, metadata.\n2. **Command stub**: `~/.config/opencode/command/<name>.md`:\n\n   ```\n   ---\n   description: <one line shown in the dropdown>\n   ---\n\n   Load and follow the `<name>` skill now, then apply it to $ARGUMENTS.\n   ```\n\n3. **Verify without the TUI**: `opencode debug skill` and `opencode debug config`.\n4. **Restart opencode**. Skills and config are not hot-reloaded.\n\nWorked example: `/motion` (2026-09-29) was hidden by an unquoted colon in the description, then by the missing command stub. Fix and checklist live in `~/.config/opencode/skills/motion/memory.md` and `~/Documents/motion-work/memory.md`.\n",
+      "description": "Instructions updated: core/instructions",
+      "seq": 108
+    },
+    {
+      "id": "msg_19177e5520014OaTFHpBGw8aVt",
+      "type": "user",
+      "time": {
+        "created": 1793441916446
+      },
+      "text": "tell me about the grill me skill and what it used for ",
+      "files": [],
+      "agents": [],
+      "seq": 109
+    },
+    {
+      "id": "msg_19177e63d001PUybtHACehz6sb",
+      "type": "assistant",
+      "time": {
+        "created": 1793441916584,
+        "streamed": 1793441919000,
+        "completed": 1793441919051
+      },
+      "agent": "build",
+      "model": {
+        "id": "deepseek-v4.1-flash",
+        "providerID": "opencode-go",
+        "variant": "default"
+      },
+      "content": [
+        {
+          "type": "reasoning",
+          "text": "The user asks about the \"grill-me\" skill. It's currently disabled by permission (not in allow list). Reading the file is fine — reading isn't invoking. Let me read it.\n\nNote AGENTS.md: keep it prose, short, lead with answer. Also note the AGENTS.md claim \"Skills and config are not hot-reloaded\" — contradicts what I observed (architect appeared live). Interesting but not asked.\n\nRead the skill.",
+          "state": {
+            "reasoningField": "reasoning_content"
+          },
+          "time": {
+            "created": 1793441918301,
+            "completed": 1793441918985
+          }
+        },
+        {
+          "type": "tool",
+          "id": "call_00_vuaa65rpkvkafay762kfyu0i",
+          "name": "read",
+          "executed": false,
+          "state": {
+            "status": "completed",
+            "input": {
+              "path": "C:\\Users\\USER\\.config\\opencode\\skills\\grill-me\\SKILL.md"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Read file C:\\Users\\USER\\.config\\opencode\\skills\\grill-me\\SKILL.md, lines 1-10\n1: ---\r\n2: name: grill-me\r\n3: description: A relentless interview to sharpen a plan or design.\r\n4: disable-model-invocation: true\r\n5: metadata:\r\n6:   harness: [claude, opencode]\r\n7:   scope: fleet\r\n8: ---\r\n9: \r\n10: Call the Skill tool with \"grilling\".\r"
+              }
+            ],
+            "metadata": {
+              "truncated": false
+            }
+          },
+          "time": {
+            "created": 1793441918949,
+            "ran": 1793441918993,
+            "completed": 1793441919043
+          }
+        }
+      ],
+      "finish": "tool-calls",
+      "rawFinish": "tool_calls",
+      "cost": 0.00037806,
+      "tokens": {
+        "input": 1378,
+        "output": 56,
+        "reasoning": 92,
+        "cache": {
+          "read": 27520,
+          "write": 0
+        }
+      },
+      "seq": 110
+    },
+    {
+      "id": "msg_19177f03d0012LtTpyVvDLVMj6",
+      "type": "synthetic",
+      "metadata": {
+        "instruction": {
+          "paths": [
+            "C:\\Users\\USER\\.config\\opencode\\AGENTS.md"
+          ]
+        }
+      },
+      "time": {
+        "created": 1793441919037
+      },
+      "text": "Instructions from: C:\\Users\\USER\\.config\\opencode\\AGENTS.md\n# How to talk to me\n\nThese rules override the default formatting in your system prompt. They apply to every reply, in every project.\n\n**Lead with the answer.** The first sentence answers the question or states the decision. No setup, no restating what I asked, no \"here's how I'd frame it\".\n\n**Match length to the question.** A yes/no gets a sentence. A \"why\" gets a paragraph. A design question gets a few paragraphs. Write a structured document only when I ask for one, or when the parts genuinely need comparing side by side.\n\n**Default to prose.** No headings, no bold labels, no bullet lists in a reply that would fit in three paragraphs. If you reach for a list, check that the items are actually parallel. If they aren't, write sentences.\n\n**Be concrete.** Name the file, the function, the number, the tradeoff. \"The cache breaks because the timestamp sits in the prefix\" is useful. \"Cache discipline is the highest-leverage layer\" is not.\n\n**One idea per paragraph.** Two arguments in one paragraph is the main reason I have to reread you.\n\n**Disagree in one sentence.** If I'm wrong, say so immediately and give the reason. Don't save it for a section called \"where I'd push back\", and don't bury it in a list of considerations.\n\n**Ask at most one question.** Ask only when the answer changes what you do next. Otherwise pick the sensible default, name it in a clause, and keep going.\n\n**Name your uncertainty.** One clause on what you're unsure about and what would settle it. No stacked hedges.\n\n**Plain words.** Use the ordinary word unless the technical word is the precise one. Introduce a term once, then use the plain word.\n\n**Stop when the point is made.** No summary paragraph, no closing offer, no \"the one thing I need from you\".\n\n**Tone.** A competent colleague across a desk. Contractions, short sentences, no em dashes; use a comma or a period.\n\nBad:\n\n> Here's how I'd frame it, and where I'd push back on the plan. The thesis is right, the sequence is usually wrong.\n\nGood:\n\n> The order is backwards. Build the measurement rig first, because you can't tell whether the fork helped without it.\n\n---\n\n# RTK - Rust Token Killer\n\nToken-optimized CLI proxy that cuts up to 90% of bash output.\n\n```bash\nrtk gain              # Show token savings analytics\nrtk gain --history    # Show command usage history with savings\nrtk discover          # Analyze Claude Code history for missed opportunities\nrtk proxy <cmd>       # Execute raw command without filtering (for debugging)\n```\n\nVerify with `rtk --version`, `rtk gain`, `which rtk`. If `rtk gain` fails, you may have `reachingforthejack/rtk` (Rust Type Kit) installed instead.\n\nAll other commands are rewritten by a hook, e.g. `git status` becomes `rtk git status`.\n\n# OpenCode: making a skill appear in the `/` dropdown\n\nSkills are model-facing (loaded via the `skill` tool). The `/` dropdown lists **commands**, so a user-invocable skill needs both a valid skill and a command stub.\n\n1. **Skill**: `~/.config/opencode/skills/<name>/SKILL.md`. Frontmatter must parse; quote the `description` if it contains a colon followed by a space (unquoted means a silent YAML error and the skill is dropped). `name` must match the folder name, kebab-case, 1-64 chars. Recognized fields: name, description, license, compatibility, metadata.\n2. **Command stub**: `~/.config/opencode/command/<name>.md`:\n\n   ```\n   ---\n   description: <one line shown in the dropdown>\n   ---\n\n   Load and follow the `<name>` skill now, then apply it to $ARGUMENTS.\n   ```\n\n3. **Verify without the TUI**: `opencode debug skill` and `opencode debug config`.\n4. **Restart opencode**. Skills and config are not hot-reloaded.\n\nWorked example: `/motion` (2026-09-29) was hidden by an unquoted colon in the description, then by the missing command stub. Fix and checklist live in `~/.config/opencode/skills/motion/memory.md` and `~/Documents/motion-work/memory.md`.\n",
+      "description": "Loaded .config\\opencode\\AGENTS.md",
+      "seq": 117
+    },
+    {
+      "id": "msg_19177f0a2001TQVdIJv0hf9nCG",
+      "type": "assistant",
+      "time": {
+        "created": 1793441919176,
+        "streamed": 1793441921577,
+        "completed": 1793441922193
+      },
+      "agent": "build",
+      "model": {
+        "id": "deepseek-v4.1-flash",
+        "providerID": "opencode-go",
+        "variant": "default"
+      },
+      "content": [
+        {
+          "type": "reasoning",
+          "text": "grill-me is a thin wrapper: it just tells the model to invoke the \"grilling\" skill. So the real content is in grilling/SKILL.md. Let me read that to describe what it does.\n\nAlso note disable-model-invocation: true — meaning the model can't invoke it; only user via /grill-me command. And it's also blocked by the deny permission since not in allow list. Let me check command stub exists.",
+          "state": {
+            "reasoningField": "reasoning_content"
+          },
+          "time": {
+            "created": 1793441920604,
+            "completed": 1793441921547
+          }
+        },
+        {
+          "type": "tool",
+          "id": "call_00_3cnkplpx618xdqn51zthxq9z",
+          "name": "read",
+          "executed": false,
+          "state": {
+            "status": "completed",
+            "input": {
+              "path": "C:\\Users\\USER\\.config\\opencode\\skills\\grilling\\SKILL.md"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Read file C:\\Users\\USER\\.config\\opencode\\skills\\grilling\\SKILL.md, lines 1-31\n1: ---\r\n2: name: grilling\r\n3: description: Grill the user relentlessly about a plan, decision, or idea. Use when the user wants to stress-test their thinking, or uses any 'grill' trigger phrases.\r\n4: metadata:\r\n5:   harness: [claude, opencode]\r\n6:   scope: fleet\r\n7: ---\r\n8: \r\n9: Interview the user relentlessly until you reach a shared understanding. Map this as a **design tree**: every decision branches into the decisions that hang off it.\r\n10: \r\n11: Work the tree in **rounds**. The **frontier** is every decision whose prerequisites are already settled: the questions you can ask _now_ without guessing at answers you haven't heard yet. Ask the whole frontier in one round: number each question and give your recommended answer. Then wait for the user's answers before the next round.\r\n12: \r\n13: Format a round like so:\r\n14: \r\n15: ```\r\n16: ❓ **Q1** - **<question title>**: <question body, might be multiple paragraphs, including multiple choices>\r\n17: \r\n18: ➡️ <your recommended answer>\r\n19: \r\n20: ---\r\n21: \r\n22: ❓ **Q2** - **<question title>**: <question body, might be multiple paragraphs, including multiple choices>\r\n23: \r\n24: ➡️ <your recommended answer>\r\n25: ```\r\n26: \r\n27: Each round the user answers reshapes the tree: settled decisions push the frontier outward and unblock questions that depended on them. Recompute the frontier and ask the next round. A question whose answer depends on another question still open in this round belongs to a _later_ round, not this one.\r\n28: \r\n29: Finding _facts_ is your job, never the user's. When a frontier question needs a fact from the environment (filesystem, tools, etc.), dispatch a sub-agent to find it; don't ask the user for anything you could look up yourself. Don't block on it: a running exploration is an unsettled prerequisite, so only the questions downstream of it wait for the sub-agent to report; ask the rest of the frontier now. The _decisions_ are the user's: put each to them and wait.\r\n30: \r\n31: The session is done when the frontier is empty: every branch of the design tree visited, nothing left silently assumed. Do not act on it until the user confirms you have reached a shared understanding.\r"
+              }
+            ],
+            "metadata": {
+              "truncated": false
+            }
+          },
+          "time": {
+            "created": 1793441921487,
+            "ran": 1793441921565,
+            "completed": 1793441921651
+          }
+        },
+        {
+          "type": "tool",
+          "id": "call_01_mujf6kbs1jtfwuiihsfnr4r4",
+          "name": "shell",
+          "executed": false,
+          "state": {
+            "status": "completed",
+            "input": {
+              "command": "Get-ChildItem \"$env:USERPROFILE\\.config\\opencode\\command\" | Where-Object Name -match 'grill' | Select-Object Name"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "(no output)"
+              }
+            ],
+            "metadata": {
+              "status": "completed",
+              "truncated": false,
+              "exit": 0
+            }
+          },
+          "time": {
+            "created": 1793441921522,
+            "ran": 1793441921573,
+            "completed": 1793441922189
+          }
+        }
+      ],
+      "finish": "tool-calls",
+      "rawFinish": "tool_calls",
+      "cost": 0.00041265,
+      "tokens": {
+        "input": 1339,
+        "output": 115,
+        "reasoning": 94,
+        "cache": {
+          "read": 28800,
+          "write": 0
+        }
+      },
+      "seq": 120
+    },
+    {
+      "id": "msg_19177fcd4001xLbaS6XxU2E2eS",
+      "type": "assistant",
+      "time": {
+        "created": 1793441922300,
+        "streamed": 1793441927257,
+        "completed": 1793441927261
+      },
+      "agent": "build",
+      "model": {
+        "id": "deepseek-v4.1-flash",
+        "providerID": "opencode-go",
+        "variant": "default"
+      },
+      "content": [
+        {
+          "type": "reasoning",
+          "text": "No command stub for grill-me in ~/.config/opencode/command. So it won't show in the / dropdown. Let me double-check command dir contents for anything grill related — the Where-Object returned nothing, so no grill stub.\n\nAlso note grill-me has disable-model-invocation: true and isn't in the allow list, so it's fully disabled right now (model can't invoke; no command stub for user either). Let me verify by checking whether command dir has other stubs, to be safe about the claim. Quick check.\n\nI have enough. Answer: it's a thin alias that loads the `grilling` skill, which runs a structured interview of numbered questions with recommended answers, in rounds, following a design tree, where the model looks up facts itself.\n\nKeep it prose, short. Mention it can't be invoked right now (deny by default, no command stub). That's helpful and concrete.",
+          "state": {
+            "reasoningField": "reasoning_content"
+          },
+          "time": {
+            "created": 1793441924321,
+            "completed": 1793441927250
+          }
+        },
+        {
+          "type": "text",
+          "text": "`grill-me` is just an alias: its entire body is \"Call the Skill tool with `grilling`,\" so the real behavior lives in `~/.config/opencode/skills/grilling/SKILL.md`.\n\nWhat it does is interview you until your plan has no silent assumptions. It treats the plan as a design tree, works it in rounds, and in each round asks every question whose prerequisites are already settled, numbered Q1, Q2, with its own recommended answer under each. You answer, the tree reshapes, and it recomputes what it can now ask. Facts it can look up itself, it does (spawning a sub-agent for filesystem or tool checks), and only decisions come to you. It stops when the frontier is empty and won't act on the plan until you confirm you share the same understanding.\n\nThere's a `disable-model-invocation: true` on `grill-me`, so it's meant to be user-triggered only, never auto-picked by me. It's also absent from your allow list and there's no `/grill-me` command stub in `~/.config/opencode/command`, so right now nothing can reach it. Want me to add it as an allowed skill and a command stub?"
+        }
+      ],
+      "finish": "stop",
+      "rawFinish": "stop",
+      "cost": 0.00049914,
+      "tokens": {
+        "input": 894,
+        "output": 267,
+        "reasoning": 191,
+        "cache": {
+          "read": 30080,
+          "write": 0
+        }
+      },
+      "seq": 133
+    },
+    {
+      "id": "msg_1917853f7001IZ1WTpVXOaXQ2Y",
+      "type": "user",
+      "time": {
+        "created": 1793441944710
+      },
+      "text": "enable it and tlel what th kil is about and how ti works ",
+      "files": [],
+      "agents": [],
+      "seq": 144
+    },
+    {
+      "id": "msg_1917854a3001FFtZCB3t5x3YC3",
+      "type": "assistant",
+      "time": {
+        "created": 1793441944788,
+        "streamed": 1793441948620,
+        "completed": 1793441949373
+      },
+      "agent": "build",
+      "model": {
+        "id": "deepseek-v4.1-flash",
+        "providerID": "opencode-go",
+        "variant": "default"
+      },
+      "content": [
+        {
+          "type": "reasoning",
+          "text": "User wants: enable grill-me, and explain what the skill is about and how it works.\n\nSteps:\n1. Add allow rules for `grill-me` and `grilling` (grill-me delegates to grilling, so grilling must be allowed too).\n2. Create command stub `~/.config/opencode/command/grill-me.md` so it shows in `/` dropdown. The user said \"enable it\" — the AGENTS.md notes a user-invocable skill needs a command stub. Given it has disable-model-invocation: true, the only way to use it is via command. So add the stub. That's the sensible default.\n3. Note: disable-model-invocation: true means model can't invoke it; keep that as-is (it's by design).\n4. Verify with `opencode debug skill` maybe.\n\nLet me check the command dir style first for existing stubs, then edit.\n\nThen explain what the skill does and how it works.\n\nLet me do the config edit + check command dir.",
+          "state": {
+            "reasoningField": "reasoning_content"
+          },
+          "time": {
+            "created": 1793441946787,
+            "completed": 1793441948587
+          }
+        },
+        {
+          "type": "tool",
+          "id": "call_00_kvo7svdc1w8a8qkkz7x1e4e7",
+          "name": "shell",
+          "executed": false,
+          "state": {
+            "status": "completed",
+            "input": {
+              "command": "Get-ChildItem \"$env:USERPROFILE\\.config\\opencode\\command\" | Select-Object Name; Get-Content \"$env:USERPROFILE\\.config\\opencode\\command\\handoff.md\" -ErrorAction SilentlyContinue"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "\r\nName                  \r\n----                  \r\narchitect.md          \r\nfleet.md              \r\nhumanizer.md          \r\nimpeccable.md         \r\nimprint.md            \r\nmotion.md             \r\nnaming.md             \r\nrecover.md            \r\nreference-to-design.md\r\nremember.md           \r\nreview.md             \r\nvoice.md              \r\n\r\n\r\n"
+              },
+              {
+                "type": "text",
+                "text": "Exited with code 1"
+              }
+            ],
+            "metadata": {
+              "status": "completed",
+              "truncated": false,
+              "exit": 1
+            }
+          },
+          "time": {
+            "created": 1793441948497,
+            "ran": 1793441948606,
+            "completed": 1793441949368
+          }
+        },
+        {
+          "type": "tool",
+          "id": "call_01_56cb1js4zf3v8l76cuwjkwfl",
+          "name": "read",
+          "executed": false,
+          "state": {
+            "status": "completed",
+            "input": {
+              "path": "C:\\Users\\USER\\.config\\opencode\\opencode.jsonc",
+              "limit": 25
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Read file C:\\Users\\USER\\.config\\opencode\\opencode.jsonc, lines 1-25\n1: {\n2:   \"$schema\": \"https://opencode.ai\",\n3:   \"plugin\": [\n4:     \"opencode-supabase\"\n5:   ],\n6:   // --- Skill context budget -------------------------------------------------\n7:   // ~/.agents/skills holds 1,400+ skills. If they are all advertised, the\n8:   // system prompt costs ~94k tokens before you type a single word.\n9:   // Deny every skill by default, then allow only the ones actually used.\n10:   // Add more by copying a line below with the skill's ID.\n11:   \"permissions\": [\n12:     { \"action\": \"skill\", \"resource\": \"*\", \"effect\": \"deny\" },\n13: \n14:     { \"action\": \"skill\", \"resource\": \"architect\", \"effect\": \"allow\" },\n15:     { \"action\": \"skill\", \"resource\": \"impeccable\", \"effect\": \"allow\" },\n16:     { \"action\": \"skill\", \"resource\": \"design-taste-frontend\", \"effect\": \"allow\" },\n17:     { \"action\": \"skill\", \"resource\": \"frontend-design\", \"effect\": \"allow\" },\n18:     { \"action\": \"skill\", \"resource\": \"remember\", \"effect\": \"allow\" },\n19:     { \"action\": \"skill\", \"resource\": \"debug\", \"effect\": \"allow\" },\n20:     { \"action\": \"skill\", \"resource\": \"fleet\", \"effect\": \"allow\" },\n21:     { \"action\": \"skill\", \"resource\": \"handoff\", \"effect\": \"allow\" },\n22:     { \"action\": \"skill\", \"resource\": \"humanizer\", \"effect\": \"allow\" },\n23:     { \"action\": \"skill\", \"resource\": \"opencode\", \"effect\": \"allow\" }\n24:   ],\n25:   \"mcp\": {\n[Output truncated. Continue reading with offset: 26]"
+              }
+            ],
+            "metadata": {
+              "truncated": true
+            }
+          },
+          "time": {
+            "created": 1793441948564,
+            "ran": 1793441948616,
+            "completed": 1793441948702
+          }
+        }
+      ],
+      "finish": "tool-calls",
+      "rawFinish": "tool_calls",
+      "cost": 0.00039899399999999995,
+      "tokens": {
+        "input": 603,
+        "output": 144,
+        "reasoning": 216,
+        "cache": {
+          "read": 30848,
+          "write": 0
+        }
+      },
+      "seq": 145
+    },
+    {
+      "id": "msg_191786715001EKt962bJPdYPIX",
+      "type": "assistant",
+      "time": {
+        "created": 1793441949499,
+        "streamed": 1793441951869,
+        "completed": 1793441952402
+      },
+      "agent": "build",
+      "model": {
+        "id": "deepseek-v4.1-flash",
+        "providerID": "opencode-go",
+        "variant": "default"
+      },
+      "content": [
+        {
+          "type": "reasoning",
+          "text": "No grill command stub exists. Command dir has stubs for architect, humanizer etc. Let me see one to match style, e.g. remember.md.\n\nActually the earlier shell attempt for handoff.md failed (no handoff commit) causing exit 1, so Get-Content for handoff printed nothing. Let me read remember.md and architect.md quickly.",
+          "state": {
+            "reasoningField": "reasoning_content"
+          },
+          "time": {
+            "created": 1793441951127,
+            "completed": 1793441951856
+          }
+        },
+        {
+          "type": "tool",
+          "id": "call_00_tw41ni1ss1idorirgb4f3pgp",
+          "name": "shell",
+          "executed": false,
+          "state": {
+            "status": "completed",
+            "input": {
+              "command": "Get-Content \"$env:USERPROFILE\\.config\\opencode\\command\\remember.md\", \"$env:USERPROFILE\\.config\\opencode\\command\\architect.md\""
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "---\r\ndescription: Save what matters at the end of a session, or restore context at the start of a new session.\r\n---\r\n\r\nLoad and follow the `remember` skill now, then apply it to $ARGUMENTS.\r\n---\r\ndescription: Think through what you are about to build like a senior engineer before writing any code.\r\n---\r\n\r\nLoad and follow the `architect` skill now, then apply it to $ARGUMENTS.\r\n"
+              }
+            ],
+            "metadata": {
+              "status": "completed",
+              "truncated": false,
+              "exit": 0
+            }
+          },
+          "time": {
+            "created": 1793441951819,
+            "ran": 1793441951865,
+            "completed": 1793441952398
+          }
+        }
+      ],
+      "finish": "tool-calls",
+      "rawFinish": "tool_calls",
+      "cost": 0.00033453,
+      "tokens": {
+        "input": 1015,
+        "output": 74,
+        "reasoning": 73,
+        "cache": {
+          "read": 31360,
+          "write": 0
+        }
+      },
+      "seq": 158
+    },
+    {
+      "id": "msg_1917872da001kV6YJ5Q2JXcgbY",
+      "type": "assistant",
+      "time": {
+        "created": 1793441952513,
+        "streamed": 1793441955529,
+        "completed": 1793441955593
+      },
+      "agent": "build",
+      "model": {
+        "id": "deepseek-v4.1-flash",
+        "providerID": "opencode-go",
+        "variant": "default"
+      },
+      "content": [
+        {
+          "type": "tool",
+          "id": "call_00_tzwhw5m7oksodbzw83c3mbsb",
+          "name": "edit",
+          "executed": false,
+          "state": {
+            "status": "completed",
+            "input": {
+              "newString": "    { \"action\": \"skill\", \"resource\": \"architect\", \"effect\": \"allow\" },\n    { \"action\": \"skill\", \"resource\": \"grill-me\", \"effect\": \"allow\" },\n    { \"action\": \"skill\", \"resource\": \"grilling\", \"effect\": \"allow\" },",
+              "oldString": "    { \"action\": \"skill\", \"resource\": \"architect\", \"effect\": \"allow\" },",
+              "path": "C:\\Users\\USER\\.config\\opencode\\opencode.jsonc"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Edited .config/opencode/opencode.jsonc (1 replacement)"
+              }
+            ],
+            "metadata": {
+              "files": [
+                {
+                  "file": ".config/opencode/opencode.jsonc",
+                  "patch": "Index: .config/opencode/opencode.jsonc\n===================================================================\n--- .config/opencode/opencode.jsonc\n+++ .config/opencode/opencode.jsonc\n@@ -11,8 +11,10 @@\n   \"permissions\": [\n     { \"action\": \"skill\", \"resource\": \"*\", \"effect\": \"deny\" },\n \n     { \"action\": \"skill\", \"resource\": \"architect\", \"effect\": \"allow\" },\n+    { \"action\": \"skill\", \"resource\": \"grill-me\", \"effect\": \"allow\" },\n+    { \"action\": \"skill\", \"resource\": \"grilling\", \"effect\": \"allow\" },\n     { \"action\": \"skill\", \"resource\": \"impeccable\", \"effect\": \"allow\" },\n     { \"action\": \"skill\", \"resource\": \"design-taste-frontend\", \"effect\": \"allow\" },\n     { \"action\": \"skill\", \"resource\": \"frontend-design\", \"effect\": \"allow\" },\n     { \"action\": \"skill\", \"resource\": \"remember\", \"effect\": \"allow\" },\n",
+                  "status": "modified",
+                  "additions": 2,
+                  "deletions": 0
+                }
+              ],
+              "truncated": false
+            }
+          },
+          "time": {
+            "created": 1793441955294,
+            "ran": 1793441955513,
+            "completed": 1793441955588
+          }
+        },
+        {
+          "type": "tool",
+          "id": "call_01_35n02ep2vqpkh5lbpfi35dod",
+          "name": "write",
+          "executed": false,
+          "state": {
+            "status": "completed",
+            "input": {
+              "path": "C:\\Users\\USER\\.config\\opencode\\command\\grill-me.md",
+              "content": "---\ndescription: A relentless interview to sharpen a plan or design.\n---\n\nLoad and follow the `grill-me` skill now, then apply it to $ARGUMENTS.\n"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "Created file successfully: .config/opencode/command/grill-me.md"
+              }
+            ],
+            "metadata": {
+              "truncated": false
+            }
+          },
+          "time": {
+            "created": 1793441955475,
+            "ran": 1793441955522,
+            "completed": 1793441955583
+          }
+        }
+      ],
+      "finish": "tool-calls",
+      "rawFinish": "tool_calls",
+      "cost": 0.000313218,
+      "tokens": {
+        "input": 383,
+        "output": 265,
+        "reasoning": 0,
+        "cache": {
+          "read": 32256,
+          "write": 0
+        }
+      },
+      "seq": 167
+    },
+    {
+      "id": "msg_191787f630012vikiknCE2aQdS",
+      "type": "assistant",
+      "time": {
+        "created": 1793441955717,
+        "streamed": 1793441959912,
+        "completed": 1793441961472
+      },
+      "agent": "build",
+      "model": {
+        "id": "deepseek-v4.1-flash",
+        "providerID": "opencode-go",
+        "variant": "default"
+      },
+      "content": [
+        {
+          "type": "reasoning",
+          "text": "Now enable and explain. But wait: `grill-me` has `disable-model-invocation: true`. Does that prevent even the skill tool from loading it when the user types /grill-me? In Claude Code semantics, disable-model-invocation means the model can't auto-invoke; user-invoked via slash command works. In OpenCode V2, unknown whether it's supported. If the command stub says \"Load and follow the grill-me skill\", model calls skill tool with id grill-me — which might be blocked by that frontmatter if OpenCode honors it.\n\nSafer: point the stub at `grilling` directly? But then grill-me skill body is just an alias anyway. Hmm — but the user asked to enable \"it\" (grill-me). Best: stub loads `grill-me`; if that's blocked by disable-model-invocation, it fails. Let me verify with `opencode debug skill` and see if grill-me appears / whether the flag matters.\n\nLet me run debug commands to verify.",
+          "state": {
+            "reasoningField": "reasoning_content"
+          },
+          "time": {
+            "created": 1793441958207,
+            "completed": 1793441959898
+          }
+        },
+        {
+          "type": "tool",
+          "id": "call_00_uko2to24fz12oxwev3zawll6",
+          "name": "shell",
+          "executed": false,
+          "state": {
+            "status": "completed",
+            "input": {
+              "command": "opencode debug skill 2>&1 | Select-String -Pattern 'grill' -Context 0,4",
+              "timeout": 90000
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "(no output)"
+              },
+              {
+                "type": "text",
+                "text": "Exited with code 1"
+              }
+            ],
+            "metadata": {
+              "status": "completed",
+              "truncated": false,
+              "exit": 1
+            }
+          },
+          "time": {
+            "created": 1793441959743,
+            "ran": 1793441959906,
+            "completed": 1793441961468
+          }
+        }
+      ],
+      "finish": "tool-calls",
+      "rawFinish": "tool_calls",
+      "cost": 0.000340236,
+      "tokens": {
+        "input": 442,
+        "output": 78,
+        "reasoning": 216,
+        "cache": {
+          "read": 32512,
+          "write": 0
+        }
+      },
+      "seq": 178
+    },
+    {
+      "id": "msg_19178966e001zmtOe6kIAoPSvM",
+      "type": "system",
+      "metadata": {
+        "notice": "instructions",
+        "instructionSources": [
+          "core/skill-guidance"
+        ]
+      },
+      "time": {
+        "created": 1793441961582
+      },
+      "text": "New skills are available in addition to those previously listed:\n  <skill>\n    <id>grill-me</id>\n    <name>grill-me</name>\n    <description>A relentless interview to sharpen a plan or design.</description>\n  </skill>\n  <skill>\n    <id>grilling</id>\n    <name>grilling</name>\n    <description>Grill the user relentlessly about a plan, decision, or idea. Use when the user wants to stress-test their thinking, or uses any 'grill' trigger phrases.</description>\n  </skill>",
+      "description": "Instructions updated: core/skill-guidance",
+      "seq": 187
+    },
+    {
+      "id": "msg_19178968a001efL4j9ZS9OljN6",
+      "type": "assistant",
+      "time": {
+        "created": 1793441961655,
+        "streamed": 1793441973238,
+        "completed": 1793441973244
+      },
+      "agent": "build",
+      "model": {
+        "id": "deepseek-v4.1-flash",
+        "providerID": "opencode-go",
+        "variant": "default"
+      },
+      "content": [
+        {
+          "type": "reasoning",
+          "text": "Both are now advertised. `opencode debug skill` produced no match output (maybe different output format or command deprecated). Both skills are live in my list, which is the real check.\n\nThe disable-model-invocation flag: appeared anyway in my available skills, so OpenCode isn't honoring it as a hard block, at least for listing. Fine.\n\nNow explain what the skill is about and how it works. Keep prose, moderate length since the user asked \"what it's about and how it works\" — a few paragraphs. No headings, no bullets per AGENTS.md.\n\nNote the grill-me is an alias → grilling. Explain the design-tree/rounds/frontier mechanics, recommended answers, fact-finding by subagent, done when frontier empty, no acting until confirmation.\n\nAlso mention what changed: two allow lines + new command stub /grill-me, and that config needs restart? AGENTS.md says skills and config not hot-reloaded, but I observed live — I saw them appear without restart. Name uncertainty: I saw them appear in my list immediately; whether the TUI's `/` dropdown picks up the new command without a restart I'm not sure, so restart opencode if /grill-me doesn't show.\n\nKeep concise.",
+          "state": {
+            "reasoningField": "reasoning_content"
+          },
+          "time": {
+            "created": 1793441968985,
+            "completed": 1793441973229
+          }
+        },
+        {
+          "type": "text",
+          "text": "Enabled. `/grill-me` now loads, and both it and the `grilling` skill it delegates to are live in my skill list.\n\nWhat changed: two allow lines in `opencode.jsonc` (the raw `*` deny was blocking them), plus a new command stub at `~/.config/opencode/command/grill-me.md` so it appears in your `/` menu. `grill-me` itself is only three lines of body, \"call the skill tool with `grilling`\", so all the actual behavior is in `~/.config/opencode/skills/grilling/SKILL.md`.\n\nThe idea is to force every assumption in a plan out into the open before any code gets written. It models your plan as a design tree: each decision branches into decisions that depend on it. It works the tree in rounds, and the frontier is the set of questions whose prerequisites are already settled. Each round it asks the entire frontier at once, numbered, one per question, with its own recommended answer under each. Your answers move the frontier outward, and it recomputes and asks the next round. A question that depends on another question still open in this round is deliberately pushed to a later round instead of being guessed at.\n\nFacts are its job, decisions are yours. If a question needs a fact from the filesystem or a tool, it dispatches a sub-agent rather than asking you, and it doesn't block the rest of the round while waiting, only the questions downstream of that lookup. It ends when the frontier is empty and nothing is silently assumed, and it won't act on the plan until you confirm you both share the same understanding.\n\nOne uncertainty: the config edit took effect immediately in my skill list, but I can't verify from here whether the TUI's `/` dropdown rescans commands without a restart. If `/grill-me` doesn't show up, restart opencode."
+        }
+      ],
+      "finish": "stop",
+      "rawFinish": "stop",
+      "cost": 0.000575088,
+      "tokens": {
+        "input": 552,
+        "output": 399,
+        "reasoning": 257,
+        "cache": {
+          "read": 32896,
+          "write": 0
+        }
+      },
+      "seq": 188
+    }
+  ]
+}

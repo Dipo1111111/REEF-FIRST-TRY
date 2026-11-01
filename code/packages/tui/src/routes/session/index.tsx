@@ -1507,6 +1507,11 @@ export function Session(props: {
           paddingRight={dimensions().width < 44 ? 1 : 2}
         >
           <Show when={session()}>
+            <box flexShrink={0} paddingBottom={1} flexDirection="row" gap={2}>
+              <text fg={theme.text.muted} wrapMode="none" truncate flexGrow={1}>
+                {session()!.title}
+              </text>
+            </box>
             <box flexGrow={1} minHeight={0} position="relative">
               <scrollbox
                 ref={(r) => {
