@@ -50,6 +50,14 @@ const Root = Spec.make(typeof OPENCODE_CLI_NAME === "string" ? OPENCODE_CLI_NAME
   description: "Reef command line interface",
   params: {
     ...ServerParams,
+    steps: Flag.Int("steps").pipe(
+      Flag.withDescription("Model calls allowed in one turn before the wrap-up nudge (default 12)"),
+      Flag.optional,
+    ),
+    ceiling: Flag.Int("ceiling").pipe(
+      Flag.withDescription("Hard model-call ceiling before tools are disabled (default 24)"),
+      Flag.optional,
+    ),
     ...PermissionParams,
     directory: Argument.String("directory").pipe(
       Argument.withDescription("Directory to start Reef in"),

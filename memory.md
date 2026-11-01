@@ -77,8 +77,9 @@ opencode-go/deepseek-v4.1-flash --format json $prompt`.
 
 - `reef run --steps 40 --ceiling 80` sets the turn budget and the hard ceiling. The handler
   writes `REEF_STEP_BUDGET` / `REEF_STEP_CEILING` before the server child is spawned, so the
-  flag works in standalone and stdio mode. A managed background service keeps its own boot
-  environment, so the flag does not reach it.
+  flag works in standalone and stdio mode. The bare `reef` command (TUI) takes the same two
+  flags. A managed background service keeps its own boot environment, so the flag does not
+  reach it.
 - The step-12 nudge now says: apply what you already learned, make the change, verify once,
   then report. It used to read like "wrap up", and the model reported with nothing changed.
 - Defaults stay at 12 / 24. The flag is the escape hatch, not a new default.

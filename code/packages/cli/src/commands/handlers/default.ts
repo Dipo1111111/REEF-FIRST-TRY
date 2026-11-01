@@ -18,6 +18,12 @@ import { errorMessage } from "../../util/error"
 
 export default Runtime.handler(Commands, (input) =>
   Effect.gen(function* () {
+    // A long task needs more than the default turn budget. The server reads these at boot,
+    // so set them before the connection is resolved and the child process is spawned.
+    const steps = Option.getOrUndefined(input.steps)
+    const ceiling = Option.getOrUndefined(input.ceiling)
+    if (steps !== undefined) process.env.REEF_STEP_BUDGET = String(steps)
+    if (ceiling !== undefined) process.env.REEF_STEP_CEILING = String(ceiling)
     const requestedDirectory = Option.getOrUndefined(input.directory)
     const requestedServer = Option.getOrUndefined(input.server)
     if (requestedDirectory !== undefined) process.chdir(requestedDirectory)
