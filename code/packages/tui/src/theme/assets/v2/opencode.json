@@ -380,7 +380,7 @@
         "900": "#17072b"
       },
       "accent": "$hue.red",
-      "interactive": "$hue.orange",
+      "interactive": "$hue.red",
       "neutral": "$hue.gray"
     }
   }

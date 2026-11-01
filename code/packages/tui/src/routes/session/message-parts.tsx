@@ -129,15 +129,12 @@ function ReasoningHeader(props: {
   duration?: string
 }) {
   const theme = useTheme()
+  // Thinking is secondary chrome, not a warning. Keep it in the muted text
+  // family so it never competes with the answer or borrows an alert colour.
   const fg = () =>
     props.open
-      ? RGBA.fromValues(
-          theme.text.feedback.warning.base.r,
-          theme.text.feedback.warning.base.g,
-          theme.text.feedback.warning.base.b,
-          0.6,
-        )
-      : theme.text.feedback.warning.base
+      ? RGBA.fromValues(theme.text.muted.r, theme.text.muted.g, theme.text.muted.b, 0.6)
+      : theme.text.muted
 
   return (
     <Switch>
