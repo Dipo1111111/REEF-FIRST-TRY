@@ -53,13 +53,13 @@ export interface Interface {
  * Recovery is at-least-once: local coordination prevents concurrent drains,
  * not repeated external side effects after a crash.
  *
- * The sweep assumes every orphaned claim's owner is dead. The managed-server
- * protocol guarantees this: a successor is only spawned after the previous
- * process is confirmed dead (client service `kill`/`evict` poll the PID), the
- * registration lock admits one managed server at a time, and unregistered
- * servers sharing the database never sweep. The service is inert until called
- * — the managed server invokes it at boot; embedders may call it from their
- * own start-up.
+ * The sweep assumes every orphaned claim's owner is dead. For managed servers
+ * the protocol guarantees this: a successor is only spawned after the previous
+ * process is confirmed dead (client service `kill`/`evict` poll the PID) and
+ * the registration lock admits one at a time. Foreground and stdio servers
+ * sweep too, because a killed `reef run` leaves the only copy of its claim.
+ * The service is inert until called; every server boot and the embedded fetch
+ * handler call it at start-up.
  */
 export class Service extends Context.Service<Service, Interface>()("@opencode/SessionRestart") {}
 
