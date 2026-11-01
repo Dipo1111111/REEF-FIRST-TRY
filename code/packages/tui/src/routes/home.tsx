@@ -14,6 +14,7 @@ import { useTerminalDimensions } from "@opentui/solid"
 import { useTheme } from "../context/theme"
 import { useUpdateNotification } from "../context/update-notification"
 import { useExit } from "../context/exit"
+import { useTuiApp } from "../context/runtime"
 import { FadeInText } from "../component/fade-in-text"
 
 let once = false
@@ -36,6 +37,8 @@ export function Home() {
   const data = useData()
   const location = useLocation()
   const dimensions = useTerminalDimensions()
+  const app = useTuiApp()
+  const modelID = createMemo(() => local.model.current()?.modelID)
   const theme = useTheme()
   // Global MCP elicitations can arrive without a session route, so keep them reachable from Home.
   const currentLocation = () => route.location ?? data.location.default()
@@ -104,6 +107,10 @@ export function Home() {
                 paddingBottom={1}
               >
                 <Logo />
+                <box height={1} flexShrink={0} />
+                <text fg={theme.text.muted} wrapMode="none" truncate>
+                  {`Reef ${app.version}${modelID() ? ` · ${modelID()}` : ""}`}
+                </text>
                 <box height={1} flexShrink={0} />
                 <text fg={theme.text.base} wrapMode="word">
                   Welcome. Describe the change and Reef takes it from there.
