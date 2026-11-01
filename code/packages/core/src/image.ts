@@ -62,9 +62,12 @@ const layer = Layer.effect(
       name: "image",
       initial: () => ({
         autoResize: true,
-        maxWidth: 2_000,
-        maxHeight: 2_000,
-        maxBase64Bytes: 5 * 1024 * 1024,
+        // Screenshots are the common image input. At 2000px they land near 160 KB,
+        // which is expensive to replay and perturbs provider caching. 1280 is
+        // enough to judge layout.
+        maxWidth: 1_280,
+        maxHeight: 1_280,
+        maxBase64Bytes: 256 * 1024,
       }),
       editor: (editor) => ({
         configure: (limits) => {
