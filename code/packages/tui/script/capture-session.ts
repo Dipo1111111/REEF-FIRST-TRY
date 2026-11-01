@@ -67,14 +67,20 @@ void Effect.runPromise(
   }).pipe(Effect.provide(Global.layerWith({ state: state.path })), Effect.provide(FileSystem.layerNoop({}))),
 )
 
+console.log("server up: " + server.url)
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+setTimeout(() => {
+  console.log("watchdog: capture did not finish")
+  process.exit(3)
+}, 90_000)
 let frame = ""
 for (let attempt = 0; attempt < 40; attempt++) {
   await sleep(250)
   frame = setup.captureCharFrame()
   if (frame.includes("architect")) break
 }
-await setup.renderOnce()
+console.log("frame wait done: " + frame.length)
+await Promise.race([setup.renderOnce(), sleep(4000)])
 
 frame = setup.captureCharFrame()
 const captured = setup.captureSpans()

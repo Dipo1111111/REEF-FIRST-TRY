@@ -1,4 +1,4 @@
-import {
+﻿import {
   batch,
   createEffect,
   createMemo,
@@ -2236,12 +2236,12 @@ function CompactionQueued() {
   const theme = useTheme()
   return (
     <box flexDirection="row" alignItems="center">
-      <box border={["top"]} borderColor={theme.border.base} flexGrow={1} />
+      <box border={["top"]} borderColor={theme.background.base} flexGrow={1} />
       <box flexDirection="row" gap={1} paddingLeft={1} paddingRight={1}>
         <text fg={theme.text.muted}>◇</text>
         <text fg={theme.text.muted}>Compaction queued</text>
       </box>
-      <box border={["top"]} borderColor={theme.border.base} flexGrow={1} />
+      <box border={["top"]} borderColor={theme.background.base} flexGrow={1} />
     </box>
   )
 }
@@ -2483,7 +2483,7 @@ function QueuedPromptDock(props: { prompts: { id: string; text: string }[]; onOp
     <box
       marginBottom={1}
       border={["left"]}
-      borderColor={theme.border.base}
+      borderColor={theme.background.base}
       customBorderChars={SplitBorder.customBorderChars}
       onMouseOver={() => setHover(true)}
       onMouseOut={() => setHover(false)}
@@ -2891,7 +2891,7 @@ type BlockToolProps = {
 
 function BlockTool(props: BlockToolProps) {
   const theme = useTheme()
-  const background = () => theme.background.raised.base
+  const background = () => theme.background.base
   const ctx = use()
   const renderer = useRenderer()
   const [hover, setHover] = createSignal(false)
@@ -3085,7 +3085,7 @@ function ShellDisplay(props: {
     }
     return stripAnsi(props.output?.trim() ?? "")
   })
-  const maxLines = 10
+  const maxLines = 4
   const maxChars = createMemo(() => maxLines * Math.max(20, ctx.width - 6 - (isRunning() ? 2 : 0)))
   const prefix = createMemo(() => (workdir() && workdir() !== "." ? `cd ${workdir()} && ` : ""))
   const input = createMemo(() => (props.command ? `${isRunning() ? "" : "$ "}${prefix()}${props.command}` : ""))
@@ -3823,3 +3823,4 @@ export function parseDiagnostics(value: unknown, filePath: string) {
     })
     .slice(0, 3)
 }
+
