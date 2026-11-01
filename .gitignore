@@ -16,3 +16,5 @@ Thumbs.db
 design/frames/
 code/design/
 
+code/packages/cli/.bun-cache/
+
