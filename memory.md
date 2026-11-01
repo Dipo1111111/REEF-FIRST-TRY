@@ -1,116 +1,139 @@
-# Memory — Reef (Droid-style harness built on OpenCode)
+# Memory — Reef
 
-Last updated: 2026-10-31 20:30
+Last updated: 2026-11-01
 
 ## Recurring context
 
 **Project root:** `C:\Users\USER\Documents\reef` (git repo, branch `main`).
-**Fork:** `C:\Users\USER\Documents\reef\code` — the OpenCode monorepo, 1,777 packages.
-Read only `packages/cli`, `packages/core`, `packages/ai`, `packages/codemode`. Ignore
-desktop/web/tui/app/console/website.
+**Fork:** `C:\Users\USER\Documents\reef\code` — the OpenCode monorepo.
+Read mainly `packages/cli`, `packages/core`, `packages/codemode`, `packages/ai`.
 
 **Name:** Reef. Binary `reef`, npm package `reefcode`, platform packages
-`reefcode-<os>-<arch>`, repo `reefcode/reef`. Internal `@opencode/*` names stay (ADR 0010).
+`reefcode-<os>-<arch>`. Internal `@opencode/*` names stay.
 
-**How the user wants to be spoken to:** plain words, short sentences, lead with the answer,
-no em dashes. Long replies use headers and short sections. They skim, and they ask for
-"simpler terms" when the reply gets technical, so keep the default version plain.
+**How the user talks:** plain words, short sentences, lead with the answer, no em dashes.
+They skim. Long replies get headers and short sections. They get impatient with process
+talk, so state the number or the decision first.
 
-**How the user wants work done:** no hand-holding, no subagents, do the research yourself.
+**How the user wants work done:** no subagents, do the research directly. Test only with
+`opencode-go/deepseek-v4.1-flash`. Keep paid runs minimal and say the cost when it matters.
 
-**Standing constraint:** test only with `opencode-go/deepseek-v4.1-flash`. No paid runs
-without approval. Free packaging, docs and design work may proceed.
+**Build** (from `code/packages/cli`):
 
-**Agreed order (do not reorder):** packaging → 3 engine fixes → UI polish → task work last.
+```
+OPENCODE_VERSION=0.1.0 OPENCODE_CHANNEL=latest bun run build --single --skip-web-ui --skip-install
+bun run pack
+npm install -g code/dist/npm/reefcode-windows-x64-0.1.0.tgz code/dist/npm/reefcode-0.1.0.tgz
+```
 
-**Build:** bun 1.4.4, always `--skip-install` (the registry hangs). Release build needs
-`OPENCODE_VERSION=0.1.0 OPENCODE_CHANNEL=latest`. Then `bun run pack`, then
-`npm install -g` both tarballs from `code/dist/npm`.
+**Windows trap:** kill running `reef` processes before building or installing, or you get
+EPERM/EBUSY. A failed build still lets `pack` ship the previous binary.
 
-**Windows trap:** a running `reef.exe` blocks the build (EPERM on `dist`) and the global
-install (EBUSY). Kill stray `reef` processes first. A failed build silently lets `pack`
-ship the previous binary.
+**Paths:** config `C:\Users\USER\.config\reef\reef.jsonc`, skills `~\..config\reef\skills`,
+data `C:\Users\USER\.local\share\reef`. SQLite tables: `session_v2`, `session_message`,
+`session_part`. Credential: `auth.json` key `opencode-go.key`.
 
-## What was built
+**Benchmark rig:** `C:\Users\USER\AppData\Local\Temp\duel\`. Prompt `prompt.txt`, stripped
+config `reef\config`, scripts `steps.ts` (per-step tokens), `imagesize.ts`, `resumecheck.ts`.
+Run: `XDG_CONFIG_HOME=...\duel\reef\config; reef run --standalone --auto -m
+opencode-go/deepseek-v4.1-flash --format json $prompt`.
 
-Packaging (commit `97108d2`): binary `reef`, dist `dist/reef-<os>-<arch>`, published names
-`reefcode` plus `reefcode-<os>-<arch>`, postinstall and help text say Reef, `docs/install.md`,
-README status board corrected. Tarballs install clean into a temp project and run a real
-model call.
+## What was built this session
 
-Engine fixes (commits `b7f3b21`, `639fedb`):
+**Context diet** (commits `6ba3c51`, `19da507`):
 
-- `session/system-prompt.ts` — two lines when `execute` is resident: put many tool calls in
-  one script; do not write helper scripts to disk; verify once.
-- `session/runner/step-budget.ts` — soft nudge at step 12, once per turn, never on the hard
-  limit step, `REEF_STEP_BUDGET` overrides.
-- `codemode/catalog.ts` + `instructions.ts` — `LAZY_BUDGET` renders namespaces only;
-  `read`, `write`, `edit`, `shell`, `grep`, `glob` are pinned and always listed.
-- `rig/runner.ts` — a pass needs acceptance exit 0 **and** a tree change outside `test/`;
-  `requires_change: false` opts out. Row gains `changed`.
+- Replayed tool arguments over 4 KB are replaced with a note and `omittedBytes`
+  (`session/runner/to-llm-message.ts`).
+- Read dedupe: hash of the returned body keyed by session, absolute path, offset, limit.
+  256-entry map, 20 minute TTL so compaction cannot leave a stale note
+  (`tool/plugin/read.ts`). Returns "unchanged since the earlier read".
+- `execute` return cap at 16 KB, head 2 KB plus tail 6 KB, marker with omitted byte count
+  (`codemode/tool.ts`). Prompt section "What comes back" plus one line in the tool
+  description reinforcing sandbox filtering.
 
-`reef` 0.1.0 rebuilt and installed globally with all of the above. The user's opencode-go
-credential was copied into the release database so no env var is needed.
+**Skills parity with OpenCode:**
+
+- `C:\Users\USER\.config\reef\reef.jsonc` mounts `~/.config/opencode/skills` and uses
+  deny-all plus 12 allows. Ten are advertised (grill-me and handoff are user-invoked only).
+- `frontend-design` copied into `~/.config/reef/skills` because it lives in `~/.agents`.
+- Prompt now says load a matching skill without asking (`skill/instructions.ts`).
+
+**Time sense** (commit `07373ce`):
+
+- New `time` tool, resident, returns now, session start, elapsed.
+- Prompt rule when the tool is present: call `time` before any duration answer, estimate in
+  edits and minutes, days only for multi-session work.
+- Step-12 nudge also injects `Elapsed: Nm` as a second synthetic line.
+
+**Tests and images:**
+
+- New registry test: a denied tool is absent from definitions and the sandbox catalog and
+  cannot execute.
+- Image defaults dropped from 2000px / 5 MB to 1280px / 256 KB (`image.ts`). Screenshots
+  fell from 215 KB to under 145 KB.
+
+**Docs:** `docs/reef.md` — 12 sections covering thesis, architecture, context economy,
+UI/UX, measured results, reliability, score, gaps.
+
+## Measured
+
+| Metric | Before today | After |
+|---|---|---|
+| Context per step | 34k | **22k** |
+| Cache share | 80.2% | **89.0%** |
+| Landing-page run | 24 steps, 5m12s | 34 steps, 7m03s |
+| Cost per run | ~2.6 cents | ~3.0 cents |
+
+Cache resets still follow large screenshots (144 KB and 92 KB). A 135 KB screenshot did not
+reset, so size is not the only trigger. Remaining cause is provider behaviour on image
+requests, not Reef trimming.
 
 ## Verified
 
 - `packages/core` typecheck clean (1,872 files).
-- New `session-guards.test.ts`, updated system-prompt, codemode instruction and catalog
-  tests pass.
-- Runner suite: 220 pass, 23 fail; the identical 23 fail on a stashed clean tree, all
-  compaction tests, two timing out at 120 s. Pre-existing, recorded in `docs/debt.md`.
-- Measured 2026-10-31 on the packaged 0.1.0 build, `opencode-go/deepseek-v4.1-flash`:
-  12/12 real tasks passed, 0/2 controls, 28,780 tokens per pass, 5.75 model calls per task.
-- Paired against the same six tasks and two runs from `ab-current.json`: 11/12 to 12/12,
-  464,537 to 353,023 tokens (−24.0%), mean 38,711 to 29,419, median 31,668 to 29,652 (−6.4%),
-  model calls 6.50 to 5.92. The whole win is `rename-refactor` (81,234 to 28,598 tokens,
-  10.5 to 6 calls). Four tasks are flat, `token-usage-total` got 12.5% worse.
-- The rig still records about one `execute` call per model call, so the script-first
-  instruction has not produced many-call scripts on these tasks.
+- Runner suite: **239 pass, 4 fail** (same 4 as before: compaction trim, decline interrupt,
+  two output-limit continuation counts).
+- Compaction suites: **45/45**. Session execution/resume: **36/36**. Execute and codemode:
+  **15/15**. Tool registry: 42 pass, 1 pre-existing fail.
+- Read tool suite: **28 fail** because it asserts the pre-Code-Mode tool list. Stale tests,
+  not a runtime failure. Needs a helper that invokes catalog tools through `execute`.
+- Live kill test: claim survives (`time_suspended` set, messages intact) but the next
+  `reef run --standalone` boot never swept it (`resume_attempts` stayed 0). Resume works at
+  the service layer, not in the mode we benchmark.
 
+## Decisions
 
-## Decisions made
-
-- The verified-done check is a rig rule, not a loop behaviour. With a two-tool surface an
-  edit and its verification share one `execute` call, so "changed files then stopped" fires
-  on nearly every coding turn. The in-loop version added a step to most turns and failed 15
-  runner tests before it was reverted.
-- The catalog is lazy by default, with a per-call budget so tests can ask for the full list.
-
-## Current state
-
-Packaging and the three engine fixes are done, committed, installed and running. Nothing is
-published to npm and no archive is hosted. Measurement is back on with the owner's approval,
-free builds only.
-
-First measured result after the fixes (2026-10-31, packaged 0.1.0, DeepSeek V4.1 Flash,
-`rig/results/reef-v0.1.0-fixes.json` and `ab-after-fixes.json`): 12/12 real tasks, 0/2
-controls, 28,780 tokens per pass, 5.75 model calls. Against the old build on the same six
-tasks: −24% tokens overall but only −6.4% on the median, driven by one task that used to
-spiral. Ordinary tasks did not get cheaper or shorter in calls.
-
-Reef still has no Terminal-Bench number, so it cannot be placed beside Droid, OpenCode or
-Claude Code. Those published numbers, and the disagreement between boards, are in
-`docs/research-droid.md` section 7.
-
+- Self-score **81/100**: capability 76, efficiency 90, speed 85, reliability 73, product 87.
+- Two tasks at a time, in this order: resume + green suite, then `/review` + checkpoint
+  picker, then benchmark script + long-session gate.
+- Do not chase 98% cache. 89% is enough to quote; the remaining gap is provider-side.
+- Do not rewrite the read suite half-way. Fix it properly or leave it documented.
 
 ## Next session starts with
 
-1. Publish `reefcode` 0.1.0 and `reefcode-windows-x64` 0.1.0, then rewrite `docs/install.md`
-   from intended to real.
-2. UI polish: TUI readability and the remaining OpenCode strings (`system.txt` still opens
-   with "You are an AI agent running in OpenCode"; updater and uninstall text still say
-   OpenCode; environment variables are still `OPENCODE_*`).
-3. Then the task work, when measurement is approved: one many-call task (100+ tool calls),
-   one long-session task.
-4. Then find the cause of the 23 compaction failures, because a rig run that involves
-   compaction cannot be trusted until they pass.
+**The work for the next run is written down in `docs/handoff-pair-1-2.md`.** Hand that file to
+Reef in a new terminal with this instruction:
+
+```
+Read AGENTS.md, memory.md, and docs/handoff-pair-1-2.md. Execute Pair 1 and Pair 2 in
+that order. Stop and report after each pair with what changed, commands run, pass/fail
+counts, and wall-clock time. Do not start anything outside those two pairs.
+```
+
+Pair 1: restart recovery in `reef run --standalone`, then the green suite. Pair 2:
+`/review`, then the checkpoint picker. Expected agent time is 2 to 4 hours per pair. If a
+pair passes 6 hours, stop it and inspect the diff before letting it continue.
+
+After both pairs and a fresh benchmark row, the order is: benchmark script plus
+long-session gate, then sub-agent offload plus output elision, then prefix instrumentation
+plus image control, then release plumbing and Agent Factory.
 
 ## Open questions
 
-- Does the lazy catalog pay for itself, or does the search round trip cost more than the
-  tokens it saves?
-- Is the 14-18 call tail a prompt problem or a model-confidence problem? The live run
-  suggests confidence: the model re-checked the same count three ways.
-- Does the user want the channel-scoped credential database fixed before publishing? A
-  `latest` build looks unauthenticated to anyone coming from a preview install.
+- What exactly makes an image-bearing request miss the provider cache when the neighbouring
+  one hits? Needs prefix hashing at request build.
+- Is the 2-call programmatic claim real at 300 tool calls? The small task did 2; the scale
+  case has never been run.
+- Should `--standalone` own restart continuity, or is that reserved for the managed server?
+  The current answer is the latter, and it costs us crash survival.
+- npm publish remains blocked by a suspended account; macOS binaries need CI.
