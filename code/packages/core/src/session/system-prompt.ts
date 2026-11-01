@@ -31,5 +31,10 @@ export function render(prompt: string, tools: string[]) {
       "- Use the edit tool for targeted changes to existing text files. It replaces the exact text in `oldString` with `newString`, and the values must differ. By default, `oldString` must occur exactly once. If it occurs multiple times, include more surrounding context to make it unique or set `replaceAll` to true to replace every occurrence.",
     )
   }
+  if (tools.includes("time")) {
+    instructions.push(
+      "- Call the time tool before any answer about duration or how long work will take. You cannot feel elapsed time, so measure it. Estimate in edits and minutes, never in days unless the work genuinely cannot finish in one session, and then say how many sessions.",
+    )
+  }
   return prompt.replace("${OPENCODE_TOOL_GUIDANCE}", instructions.join("\n"))
 }
