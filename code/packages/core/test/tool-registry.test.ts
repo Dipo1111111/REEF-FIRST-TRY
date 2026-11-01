@@ -146,6 +146,24 @@ describe("Tool", () => {
     }),
   )
 
+  it.effect("a denied tool never reaches the model or the sandbox catalog", () =>
+    Effect.gen(function* () {
+      const service = yield* Tool.Service
+      const scope = yield* Scope.make()
+      yield* service
+        .transform((editor) => {
+          editor.add({ ...make(), name: "allowed" })
+          editor.add({ ...make(), name: "denied" })
+        })
+        .pipe(Scope.provide(scope))
+      const snapshot = yield* service.snapshot([{ action: "denied", resource: "*", effect: "deny" }])
+      expect(snapshot.definitions.map((tool) => tool.name)).toEqual(["execute"])
+      expect(codeModeListings(snapshot.codeModeCatalog!).map((tool) => tool.path)).toEqual(["allowed"])
+      expect((yield* executeTool(service, call("denied"))).status).toBe("error")
+      yield* Scope.close(scope, Exit.void)
+    }),
+  )
+
   it.effect("updates schemas and executors without renaming tools and applies removal in order", () =>
     Effect.gen(function* () {
       const service = yield* Tool.Service
