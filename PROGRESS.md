@@ -17,9 +17,9 @@ Started: 2026-11-01. Owner: overnight agent. User asleep; no blocking on questio
 | 4 | REEF wordmark | DONE | 5-row pixel letters, doubled strokes, coral gradient per letter, rendered at 120x40 and 80x24 |
 | 5 | Home screen | DONE | rounded welcome panel, 80% width, centred, welcome line and slash hints |
 | 6 | Composer | DONE | rounded frame, transparent body, path + shortcut row inside, context/cost row outside and right-aligned |
-| 7 | Session view | PARTIAL | right sidebar removed, prompt narrowed to the same 80% measure; transcript chrome still upstream |
+| 7 | Session view | PARTIAL | sidebar removed, prompt at the same 80% measure, session title row added, tool blocks flattened, shell output collapses to 4 lines; transcript typography still upstream |
 | 8 | UX copy | PARTIAL | home, composer placeholder, dev bar, shortcuts and branding rewritten; slash descriptions untouched |
-| 9 | Packaging | DONE to publish | build, pack, clean-project install, `reef v0.1.0`, packaged TUI renders the new home (pty check) |
+| 9 | Packaging | WINDOWS DONE, MAC BLOCKED | 0.1.0 rebuilt 06:22 and reinstalled clean; mac cross-build needs darwin native packages that the registry install here hangs on; CI workflow prepared |
 | 10 | Feature research | PARTIAL | prior research in `docs/research-droid.md`; no new tools shipped this pass |
 | 11 | Final visual verification | DONE | 120x40, 80x24 captures; packaged binary in a real pty |
 | 12 | Final report | DONE | delivered in chat |
@@ -31,9 +31,9 @@ Started: 2026-11-01. Owner: overnight agent. User asleep; no blocking on questio
 - The wordmark drops a cast shadow: at terminal cell density any offset shadow floods the letter counters and destroys legibility. A per-letter coral gradient carries depth instead.
 
 ## Blocked / needs the user
-- npm publish for `reefcode` and `reefcode-windows-x64` (account credentials).
-- Session transcript chrome (message roles, tool rows, headers) still carries upstream structure; a redesign needs a session fixture to iterate against without paid runs.
-- Feature work: chat features Droid and Claude Code have that Reef does not.
+- npm publish: the registry returns 403 without a 2FA proof. Need either a granular token with Bypass 2FA in `%USERPROFILE%\.npmrc`, or `bin\publish.cmd <otp>` with a live code.
+- macOS binaries: need a macOS runner. Cross-compiling on Windows is blocked by darwin native packages (registry install hangs). `.github/workflows/release.yml` builds all three targets.
+- Session transcript typography (assistant spacing and measure) still needs a visual pass.
 
 ## Log
 - Config repaired after a bad bulk edit; JSON re-validated.
