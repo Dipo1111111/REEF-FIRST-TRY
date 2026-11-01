@@ -33,8 +33,9 @@ test("execute describes invariant Code Mode behavior", () => {
       "Within `{ code }`, the only callable tools are those explicitly listed in the Code Mode catalog instructions or returned by the `search` function. Inside `{ code }`, ignore tools shown outside the Code Mode catalog. They are not available in the Code Mode runtime.",
       'Call tools through `tools` using only exact paths and signatures from the catalog. Do not infer or normalize tool names; preserve bracket notation such as `tools.<namespace>["tool-name"](input)`.',
       "Prefer an explicit `return`; if omitted, the final top-level expression becomes the result.",
-      "Await every call whose completion matters; pending calls are interrupted when execution ends. Run independent calls concurrently with `Promise.allSettled`.",
-      "Only the returned value reaches the conversation, so return the smallest answer the job needs: ids, paths, counts, or the lines that matched, never raw tool output or a whole file.",
+      "One program should do the whole related batch of work. Each program costs one model request, so a program that makes one call is the most expensive way to work. Run independent calls concurrently with `Promise.allSettled`.",
+      "Await every call whose completion matters; pending calls are interrupted when execution ends.",
+      "Only the returned value reaches the conversation, so return the smallest answer the job needs: ids, paths, counts, or the lines that matched, never raw tool output or a whole file. Large output is saved to a file you can read or grep inside a later program.",
     ].join("\n"),
   )
 })
@@ -56,11 +57,11 @@ test("execute caps the value returned to the model", async () => {
     ),
   )
 
-  expect(result.output.output.length).toBeLessThan(17 * 1024)
+  // The tool keeps the whole value so the harness can save it to a file; the runner bounds what
+  // the model sees. The tool's own cap is far above the runner's limit.
+  expect(result.output.output.length).toBeLessThan(65 * 1024)
   expect(result.output.output.startsWith("A")).toBe(true)
   expect(result.output.output).toContain("TAILMARK")
-  expect(result.output.output).toContain("bytes omitted")
-  expect(result.output.output).toContain("Return truncated at 16 KB")
 })
 
 describe("fetch permissions", () => {

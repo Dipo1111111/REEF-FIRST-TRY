@@ -106,6 +106,7 @@ export const baseTranscript = (input: {
   readonly initial: ReadonlyArray<Instructions.Rendered>
   readonly messages: ReadonlyArray<SessionMessage.Info>
   readonly workspace?: string
+  readonly workspaceMap?: string
 }) => {
   const providerMetadataKey = input.model.model.route.providerMetadataKey ?? input.model.model.provider
   return {
@@ -117,6 +118,7 @@ export const baseTranscript = (input: {
           : SessionSystemPrompt.make(
               input.tools.definitions.map((tool) => tool.name),
               input.workspace,
+              input.workspaceMap,
             ),
       ),
       {

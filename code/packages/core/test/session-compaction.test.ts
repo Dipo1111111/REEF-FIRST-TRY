@@ -1069,6 +1069,8 @@ for (const background of [false, true]) {
           ...fixture.context,
           agent: fixture.context.agent.info,
           messages: background ? messages.slice(0, -1) : messages,
+          workspace: "/project",
+          workspaceMap: "Working directory: /project",
         }),
       })
       if (background) yield* fixture.compaction.precompute(Effect.succeed(fixture.context))

@@ -36,6 +36,7 @@ import { Plugin } from "../../plugin.js"
 import { PluginHooks } from "../../plugin/hooks.js"
 import { MAX_STEPS_PROMPT } from "./max-steps.js"
 import { SessionStepBudget } from "./step-budget.js"
+import { SessionWorkspaceMap } from "../workspace-map.js"
 
 const CONTINUE_AFTER_INCOMPLETE_STREAM =
   "The previous response was interrupted. Continue from where you left off without repeating completed content."
@@ -298,6 +299,7 @@ const layer = Layer.effect(
           initial: loaded.initial,
           messages: loaded.messages,
           workspace: loaded.session.location.directory,
+          workspaceMap: yield* SessionWorkspaceMap.make(loaded.session.location.directory),
         })
         const prepared = yield* context.request
           .primary({

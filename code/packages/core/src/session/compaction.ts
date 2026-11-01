@@ -40,6 +40,7 @@ import { toLLMMessages } from "./runner/to-llm-message.js"
 import { SessionRecentText } from "./recent-text.js"
 import { contentFilterError, toSessionError } from "./to-session-error.js"
 import { SessionUsage } from "./usage.js"
+import { SessionWorkspaceMap } from "./workspace-map.js"
 
 export type Settings = {
   auto: boolean
@@ -137,6 +138,12 @@ const RESERVE_MIN = 16_000
 const RESERVE_SHARE = 0.15
 /** A common window size, assumed for the compaction request when the model's window is unknown. */
 const UNKNOWN_WINDOW = 200_000
+/**
+ * A ceiling that ignores the model's advertised window. A model that advertises a million tokens
+ * lets the conversation grow until every request pays for the whole thing, and the prefill time
+ * grows with it. The ceiling is what keeps a long session fast, not the price of the window.
+ */
+const PRACTICAL_CEILING = 250_000
 /** A summary gets at least this much output, or the room left if less, even when the estimate margin leaves less. */
 const SUMMARY_OUTPUT_FLOOR = 32_000
 /**
@@ -838,19 +845,23 @@ export const layer = Layer.effect(
       messages: ReadonlyArray<SessionMessage.Info>,
       budget: number,
       webSocket?: "session",
-    ) => {
-      const base = transcript(context, messages)
-      return requests.compaction({
-        session: context.session,
-        agent: context.agent.id,
-        model: context.model,
-        tools: context.tools,
-        system: base.system,
-        messages: base.messages,
-        webSocket,
-        inputTokens: { measured: budget, estimated: 0 },
+    ) =>
+      Effect.gen(function* () {
+        // The summary request has to start with the same prefix the session used, or the cache
+        // misses and the whole conversation is paid for twice.
+        const workspaceMap = yield* SessionWorkspaceMap.make(context.session.location.directory)
+        const base = transcript(context, messages, workspaceMap)
+        return yield* requests.compaction({
+          session: context.session,
+          agent: context.agent.id,
+          model: context.model,
+          tools: context.tools,
+          system: base.system,
+          messages: base.messages,
+          webSocket,
+          inputTokens: { measured: budget, estimated: 0 },
+        })
       })
-    }
 
     /** A request hook supplied the summary itself, so no model call happens. */
     const fromHook = (context: SessionContext.Loaded, supplied: SessionCompactionResult, background?: Background) => {
@@ -989,7 +1000,11 @@ const previousCompaction = (messages: ReadonlyArray<SessionMessage.Info>) => {
   return first?.type === "compaction" && first.status === "completed" ? first : undefined
 }
 
-const transcript = (context: SessionContext.Loaded, messages: ReadonlyArray<SessionMessage.Info>) =>
+const transcript = (
+  context: SessionContext.Loaded,
+  messages: ReadonlyArray<SessionMessage.Info>,
+  workspaceMap?: string,
+) =>
   SessionModelRequest.baseTranscript({
     agent: context.agent.info,
     model: context.model,
@@ -997,6 +1012,7 @@ const transcript = (context: SessionContext.Loaded, messages: ReadonlyArray<Sess
     initial: context.initial,
     messages,
     workspace: context.session.location.directory,
+    workspaceMap,
   })
 
 /**
@@ -1158,8 +1174,11 @@ const calculateCeiling = (limit: SessionContext.Loaded["model"]["limit"], buffer
   if (window <= 0) return Number.POSITIVE_INFINITY
   const tokens = typeof buffer === "string" ? Math.round((window * Number.parseFloat(buffer)) / 100) : buffer
   // A buffer that leaves no room, such as one set for a larger model, is ignored.
-  if (tokens !== undefined && tokens < window) return window - tokens
-  return window - Math.max(Math.floor(window * RESERVE_SHARE), window >= 2 * RESERVE_MIN ? RESERVE_MIN : 0)
+  if (tokens !== undefined && tokens < window) return Math.min(window - tokens, PRACTICAL_CEILING)
+  return Math.min(
+    window - Math.max(Math.floor(window * RESERVE_SHARE), window >= 2 * RESERVE_MIN ? RESERVE_MIN : 0),
+    PRACTICAL_CEILING,
+  )
 }
 
 /**

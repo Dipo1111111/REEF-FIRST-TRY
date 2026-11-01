@@ -78,8 +78,9 @@ const description = [
   "Within `{ code }`, the only callable tools are those explicitly listed in the Code Mode catalog instructions or returned by the `search` function. Inside `{ code }`, ignore tools shown outside the Code Mode catalog. They are not available in the Code Mode runtime.",
   'Call tools through `tools` using only exact paths and signatures from the catalog. Do not infer or normalize tool names; preserve bracket notation such as `tools.<namespace>["tool-name"](input)`.',
   "Prefer an explicit `return`; if omitted, the final top-level expression becomes the result.",
-  "Await every call whose completion matters; pending calls are interrupted when execution ends. Run independent calls concurrently with `Promise.allSettled`.",
-  "Only the returned value reaches the conversation, so return the smallest answer the job needs: ids, paths, counts, or the lines that matched, never raw tool output or a whole file.",
+  "One program should do the whole related batch of work. Each program costs one model request, so a program that makes one call is the most expensive way to work. Run independent calls concurrently with `Promise.allSettled`.",
+  "Await every call whose completion matters; pending calls are interrupted when execution ends.",
+  "Only the returned value reaches the conversation, so return the smallest answer the job needs: ids, paths, counts, or the lines that matched, never raw tool output or a whole file. Large output is saved to a file you can read or grep inside a later program.",
 ].join("\n")
 
 export const create = (
@@ -417,15 +418,15 @@ function formatResult(result: CodeMode.Result) {
 }
 
 /** The return value is the only thing that reaches the model, so a dump costs every later step. */
-export const OUTPUT_LIMIT = 16 * 1024
+export const OUTPUT_LIMIT = 64 * 1024
 
 const cap = (text: string) =>
   text.length <= OUTPUT_LIMIT
     ? text
     : [
-        text.slice(0, 2 * 1024),
-        `[... ${text.length - 8 * 1024} bytes omitted ...]`,
-        text.slice(-6 * 1024),
+        text.slice(0, 16 * 1024),
+        `[... ${text.length - 32 * 1024} bytes omitted ...]`,
+        text.slice(-16 * 1024),
         `[Return truncated at ${OUTPUT_LIMIT / 1024} KB by the harness. Keep the value small next time: ids, paths, counts, or the matching lines.]`,
       ].join("\n\n")
 

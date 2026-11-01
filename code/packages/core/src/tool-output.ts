@@ -10,8 +10,8 @@ import { Identifier } from "@opencode/schema/identifier"
 import { FileRetention } from "./file-retention.js"
 import { State } from "./state.js"
 
-export const MAX_LINES = 2_000
-export const MAX_BYTES = 50 * 1024 // 50 KiB
+export const MAX_LINES = 800
+export const MAX_BYTES = 8 * 1024 // 8 KiB
 export const RETENTION = Duration.days(7)
 export const DIRECTORY = "tool-output"
 
@@ -77,41 +77,37 @@ const layer = Layer.effect(
       if (lines.length <= limits.maxLines && totalBytes <= limits.maxBytes)
         return { ...result, metadata: { ...result.metadata, truncated: false } }
 
-      const kept: string[] = []
-      let bytes = 0
+      // Keep the head and the tail. The head holds the context, the tail holds the error and
+      // the summary, and the middle is the part a model almost never needs verbatim.
+      const headBudget = Math.floor(limits.maxBytes * 0.6)
+      const tailBudget = limits.maxBytes - headBudget
+      const head: string[] = []
+      let headBytes = 0
       for (const line of lines.slice(0, limits.maxLines)) {
-        const size = Buffer.byteLength(line, "utf-8") + (kept.length > 0 ? 1 : 0)
-        if (bytes + size > limits.maxBytes) break
-        kept.push(line)
-        bytes += size
+        const size = Buffer.byteLength(line, "utf-8") + (head.length > 0 ? 1 : 0)
+        if (headBytes + size > headBudget) break
+        head.push(line)
+        headBytes += size
+      }
+      const tail: string[] = []
+      let tailBytes = 0
+      for (let index = lines.length - 1; index >= head.length; index--) {
+        const line = lines[index]!
+        const size = Buffer.byteLength(line, "utf-8") + (tail.length > 0 ? 1 : 0)
+        if (tailBytes + size > tailBudget) break
+        tail.unshift(line)
+        tailBytes += size
       }
       const file = path.join(directory, fileName())
       yield* fs.ensureDir(directory).pipe(Effect.orDie)
       yield* fs.writeFileString(file, text).pipe(Effect.orDie)
-      const shown = kept.length > 0 ? `lines 1-${kept.length}` : "0 lines"
-      const marker = `[showing ${shown} of ${lines.length}; full output saved to ${file}]`
-      const bounded: Tool.Content[] = []
-      let remaining = kept.join("\n").length
-      let seenText = false
-      let marked = false
-      for (const item of content) {
-        if (item.type === "file") {
-          bounded.push(item)
-          continue
-        }
-        if (seenText && remaining > 0) remaining--
-        seenText = true
-        if (remaining >= item.text.length) {
-          bounded.push(item)
-          remaining -= item.text.length
-          continue
-        }
-        if (remaining > 0) bounded.push({ ...item, text: item.text.slice(0, remaining) })
-        if (!marked) bounded.push({ type: "text", text: marker })
-        remaining = 0
-        marked = true
-      }
-      if (!marked) bounded.push({ type: "text", text: marker })
+      const marker = `[showing the first ${head.length} and last ${tail.length} of ${lines.length} lines; full output saved to ${file}]`
+      const bounded: Tool.Content[] = [
+        ...head.map((line) => ({ type: "text" as const, text: line })),
+        { type: "text", text: marker },
+        ...tail.map((line) => ({ type: "text" as const, text: line })),
+        ...content.filter((item) => item.type === "file"),
+      ]
       return {
         ...result,
         content: bounded,

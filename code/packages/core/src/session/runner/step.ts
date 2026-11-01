@@ -129,7 +129,16 @@ export const make = Effect.gen(function* () {
           toolRuns.push({
             call: event,
             fiber: yield* Effect.uninterruptibleMask((restore) =>
-              restore(executeTool(event)).pipe(
+              restore(
+              Effect.gen(function* () {
+                const started = yield* Clock.currentTimeMillis
+                const result = yield* executeTool(event)
+                const elapsed = (yield* Clock.currentTimeMillis) - started
+                // A model cannot feel how long a tool took, so it repeats slow calls. One line
+                // of measured runtime stops that.
+                return elapsed >= 1_000 ? withDuration(result, elapsed) : result
+              }),
+            ).pipe(
                 Effect.flatMap(toolOutput.truncate),
                 Effect.flatMap((outcome) => publisher.toolExecution(event.id, event.name, outcome)),
                 Effect.catchTag("Tool.Error", (error) =>
@@ -339,4 +348,14 @@ const classifyToolExits = (
     })
     .at(0)
   return { interrupted: causes.some(Cause.hasInterrupts), declines, failure }
+}
+
+/** Appends the measured runtime so the model learns which calls are slow and stops repeating them. */
+function withDuration(result: Tool.NormalizedResult, elapsed: number) {
+  const seconds = (elapsed / 1000).toFixed(1)
+  return {
+    ...result,
+    content: [...result.content, { type: "text" as const, text: `(took ${seconds}s)` }],
+    metadata: { ...result.metadata, durationMs: elapsed },
+  }
 }

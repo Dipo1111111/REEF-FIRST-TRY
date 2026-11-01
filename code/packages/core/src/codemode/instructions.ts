@@ -16,7 +16,11 @@ ${hasMoreTools ? `The catalog is partial. Before calling a tool that is not list
 
 ## What comes back
 
-Raw tool results stay inside the sandbox. Only the value you return reaches the conversation, so return the smallest answer that does the job: counts, ids, paths, or the matching lines. Never return a whole file, a full log, or the same data twice. Anything over 16 KB is truncated.
+Raw tool results stay inside the sandbox. Only the value you return reaches the conversation, so return the smallest answer that does the job: counts, ids, paths, or the matching lines. Never return a whole file, a full log, or the same data twice. Output over 64 KB is truncated, and anything the harness cuts is also written to a file you can read or grep later.
+
+## One program per turn
+
+A program costs one model request, and the model request is the expensive part. Do the whole related batch inside one program: several searches, several reads, several edits. Run the independent ones concurrently with \`Promise.allSettled\`. A program that makes a single call is the most expensive way to work.
 
 ## Code Mode tools (call only inside \`execute\`)`
 

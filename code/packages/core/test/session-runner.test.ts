@@ -124,7 +124,7 @@ const testModel = (id: string, limit: ModelLimit = defaultModelLimit) => {
   return LanguageModel.make({ id, provider: "fake", route: OpenAIChat.route })
 }
 const model = testModel("fake-model")
-const defaultSystem = SessionSystemPrompt.make(["execute", "question"], "/project")
+const defaultSystem = SessionSystemPrompt.make(["execute", "question"], "/project", "Working directory: /project")
 const identity = (providerID: string, id: string) =>
   ["# Your Model", `- Name: ${id}`, `- Provider ID: ${providerID}`, `- Model ID: ${id}`].join("\n")
 const fakeIdentity = identity("fake", "fake-model")
