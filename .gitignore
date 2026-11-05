@@ -18,3 +18,7 @@ code/design/
 
 code/packages/cli/.bun-cache/
 
+
+# Large build artifacts and media
+release/*.tgz
+*.mp4
